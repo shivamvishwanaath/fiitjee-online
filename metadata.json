@@ -1,0 +1,6 @@
+{
+  "name": "fiitjee.online - FIITJEE Official Portal",
+  "description": "Official digital portal fiitjee.online for FIITJEE - India's premier institute for IIT-JEE (Advanced & Main), Olympiads, NTSE, and Foundation programs. Features FTRE 2026-27 registration, CBT mock tests, scholarship calculator, and center locator.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

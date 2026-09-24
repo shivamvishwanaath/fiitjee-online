@@ -1,0 +1,2353 @@
+{
+  "programs": [
+    {
+      "id": "pinnacle-two-year",
+      "name": "PINNACLE - Two Year Integrated School Program",
+      "targetClasses": "Class XI",
+      "duration": "2 Years",
+      "badge": "Flagship Integrated",
+      "category": "integrated",
+      "targetExams": [
+        "JEE Advanced",
+        "JEE Main",
+        "XII Boards",
+        "Olympiads"
+      ],
+      "summary": "The ultimate synchronized program integrating senior secondary school syllabus with JEE Advanced coaching within school hours, eliminating extra commute.",
+      "keyFeatures": [
+        "Zero collision between School & JEE study schedules",
+        "Comprehensive coverage of Physics, Chemistry & Mathematics",
+        "Simultaneous preparation for Board Exams (100% focused) & JEE Advanced",
+        "Regular Chapter Practice Problems (CPP) & All India Internal Test Series (AI²TS)",
+        "Dedicated doubt clearing sessions & personalized performance mentoring"
+      ],
+      "eligibility": "Admission through FTRE / FIITJEE Admission Test / Big Bang Edge Test",
+      "commencement": "April / June 2026",
+      "mode": "Integrated School",
+      "recommendedFor": "Students entering Class XI aiming for Top 500 AIR in JEE Advanced without dual-stress of school and coaching.",
+      "feeRange": "₹2,40,000 - ₹3,10,000 / yr (Scholarships up to 100% via FTRE)"
+    },
+    {
+      "id": "two-year-classroom",
+      "name": "Two Year Classroom Program for JEE (Advanced)",
+      "targetClasses": "Class XI",
+      "duration": "2 Years",
+      "badge": "Most Popular",
+      "category": "classroom",
+      "targetExams": [
+        "JEE Advanced",
+        "JEE Main",
+        "Olympiads"
+      ],
+      "summary": "FIITJEE’s legendary classroom program designed to build deep conceptual clarity, analytical thinking, and exam temperament from fundamentals to IIT-JEE level.",
+      "keyFeatures": [
+        "Over 850+ hours of intense, pattern-proof classroom teaching",
+        "Standardized FIITJEE Study Package + Grand Master Package (GMP)",
+        "Computer-Based All India Test Series (AITS) with national percentile benchmarking",
+        "Pattern-Proof testing to excel regardless of changing JEE paper patterns",
+        "Rankers Study Material & Compendium with solution archive"
+      ],
+      "eligibility": "Selection via FTRE or General Admission Test",
+      "commencement": "April / July 2026",
+      "mode": "Offline Classroom",
+      "recommendedFor": "Serious aspirants starting Class XI dedicated to securing Top IIT branches (CSE, MnC, Electrical).",
+      "feeRange": "₹1,95,000 - ₹2,60,000 / yr (Scholarships available)"
+    },
+    {
+      "id": "supreme-four-year",
+      "name": "SUPREME - Four Year Integrated School Program",
+      "targetClasses": "Class IX",
+      "duration": "4 Years",
+      "badge": "Early Mover Advantage",
+      "category": "integrated",
+      "targetExams": [
+        "JEE Advanced",
+        "JEE Main",
+        "X & XII Boards",
+        "NSEJS",
+        "IJSO",
+        "RMO"
+      ],
+      "summary": "Starts right after Class VIII. Develops profound mathematical rigor and scientific temperament while smoothly covering 9th-12th school curricula.",
+      "keyFeatures": [
+        "Comprehensive 4-Year roadmap spanning Class IX to XII",
+        "Mastery over Olympiads (Physics, Astronomy, Math, Chemistry) & Junior Science",
+        "Seamless transition from Foundation concepts to advanced JEE calculus and mechanics",
+        "Exclusive batch mentoring by Senior FIITJEE HODs"
+      ],
+      "eligibility": "FTRE / Big Bang Edge Test",
+      "commencement": "April 2026",
+      "mode": "Integrated School",
+      "recommendedFor": "Motivated students moving from Class VIII to IX targeting Top 100 AIR in JEE Advanced.",
+      "feeRange": "₹2,20,000 / yr"
+    },
+    {
+      "id": "ascent-two-year",
+      "name": "ASCENT - Two Year Classroom Program",
+      "targetClasses": "Class IX & X",
+      "duration": "2 Years",
+      "badge": "Foundation Leader",
+      "category": "classroom",
+      "targetExams": [
+        "IOQJS",
+        "NSEJS",
+        "PRMO / RMO",
+        "NTSE",
+        "Class X Boards",
+        "JEE Foundation"
+      ],
+      "summary": "Cultivates sharp logical deduction, raises IQ, and strengthens Physics, Chemistry, Biology, Mathematics & Mental Ability for national olympiads.",
+      "keyFeatures": [
+        "Mental Ability & Analytical Reasoning training",
+        "Advance coverage of Class IX & X Science & Math for Olympiad podiums",
+        "Foundation for early JEE Advanced preparation",
+        "Quarterly National level benchmarking and diagnostic reports"
+      ],
+      "eligibility": "FIITJEE Admission Test / FTRE",
+      "commencement": "April / May 2026",
+      "mode": "Offline Classroom",
+      "recommendedFor": "Class 9 students aiming for Olympiads and creating an unbeatable base for 11th/12th JEE prep.",
+      "feeRange": "₹1,10,000 - ₹1,45,000 / yr"
+    },
+    {
+      "id": "udaya-two-year",
+      "name": "UDAYA - Two Year Foundation Program",
+      "targetClasses": "Class VII & VIII",
+      "duration": "2 Years",
+      "badge": "Junior Genius",
+      "category": "classroom",
+      "targetExams": [
+        "Junior Olympiads",
+        "NSTSE",
+        "Green Olympiad",
+        "School Math & Science"
+      ],
+      "summary": "Ignites curiosity, transforms how young minds think, and builds rock-solid basics in Science and Mathematics through discovery-based learning.",
+      "keyFeatures": [
+        "Focus on \"Thinking Skills\" rather than rote memorization",
+        "Conceptual experiment demonstrations and speed math shortcuts",
+        "School syllabus enhancement with high-order thinking problems (HOTS)",
+        "Regular interactive quizzes and parent-teacher counseling"
+      ],
+      "eligibility": "FTRE or Junior Admission Test",
+      "commencement": "April 2026",
+      "mode": "Offline Classroom",
+      "recommendedFor": "Class 7 students seeking strong scientific aptitude and school exam excellence.",
+      "feeRange": "₹85,000 - ₹1,10,000 / yr"
+    },
+    {
+      "id": "little-genie",
+      "name": "LITTLE GENIE - One Year Foundation Program",
+      "targetClasses": "Class VI",
+      "duration": "1 Year",
+      "badge": "Early Start",
+      "category": "classroom",
+      "targetExams": [
+        "School Exams",
+        "Math Olympiads",
+        "NSTSE"
+      ],
+      "summary": "Specially crafted for 6th graders to eliminate fear of math & science, boost IQ, and build structured study habits early.",
+      "keyFeatures": [
+        "Fun-filled logical puzzles, spatial reasoning, and science games",
+        "Strengthening elementary algebra, arithmetic, and basic physics",
+        "Personal attention with small batch sizes"
+      ],
+      "eligibility": "Direct Admission / Aptitude Test",
+      "commencement": "April 2026",
+      "mode": "Offline Classroom",
+      "recommendedFor": "Class 6 students to develop a passion for problem solving.",
+      "feeRange": "₹65,000 / yr"
+    },
+    {
+      "id": "special-one-year-passout",
+      "name": "Special One Year Classroom Program for XII Pass / Dropper",
+      "targetClasses": "Class XII Pass",
+      "duration": "1 Year (Fast-Track)",
+      "badge": "High Impact",
+      "category": "crash",
+      "targetExams": [
+        "JEE Advanced",
+        "JEE Main"
+      ],
+      "summary": "A rigorously calibrated intensive program for 12th pass students to eliminate weaknesses, perfect problem-solving speed, and jump 5,000+ ranks.",
+      "keyFeatures": [
+        "6 days/week high-intensity problem solving and concept revision",
+        "Full Computer-Based All India Test Series (CBT-AITS) included",
+        "Grand Master Package (GMP) with 1500+ handpicked challenging problems",
+        "Rigorous error analysis and rank booster modules"
+      ],
+      "eligibility": "JEE Main Percentile / Board Marks / Direct Test",
+      "commencement": "June / July 2026",
+      "mode": "Offline Classroom",
+      "recommendedFor": "Passout students determined to achieve a top rank in their next attempt.",
+      "feeRange": "₹1,50,000 - ₹1,95,000"
+    },
+    {
+      "id": "eschool-live-online",
+      "name": "FIITJEE eSchool - Live 2-Way Interactive Online",
+      "targetClasses": "Class VI to XII & XII Pass",
+      "duration": "1 to 4 Years",
+      "badge": "Learn From Anywhere",
+      "category": "eschool",
+      "targetExams": [
+        "JEE Advanced",
+        "JEE Main",
+        "Olympiads",
+        "Boards"
+      ],
+      "summary": "Brings the legendary FIITJEE classroom pedagogy to your home. Live audio-video interaction with premier faculty, digital whiteboard, and instant doubt resolution.",
+      "keyFeatures": [
+        "Live 2-Way Interactive Classes (Not pre-recorded videos)",
+        "Digital Study Material + Hard Copy dispatched to your doorstep",
+        "Online Computer-Based Tests with AI-powered performance analytics",
+        "Live online doubt clearing rooms 6 days a week"
+      ],
+      "eligibility": "eFTRE / Online Admission Test",
+      "commencement": "Rolling Batches",
+      "mode": "Live Online",
+      "recommendedFor": "Students in cities without a physical FIITJEE center or seeking flexible home-based learning.",
+      "feeRange": "₹75,000 - ₹1,65,000 / yr"
+    },
+    {
+      "id": "aits-cbt-series",
+      "name": "Computer Based All India Test Series (AITS)",
+      "targetClasses": "Class XI, XII & XII Pass",
+      "duration": "1 Year",
+      "badge": "National Benchmark",
+      "category": "non-classroom",
+      "targetExams": [
+        "JEE Advanced",
+        "JEE Main"
+      ],
+      "summary": "The gold standard test series taken by 90%+ of top 1000 IIT rankers across India. Replicates actual JEE CBT interface with intricate national rank predictor.",
+      "keyFeatures": [
+        "24+ Part & Full Syllabus CBT Tests on exact NTA / IIT-JEE interface",
+        "Video solutions and detailed step-by-step diagnostic analysis",
+        "Real-time All India Rank, Percentile, and Topic-wise accuracy metrics",
+        "Concept strengthening RTPF (Rankers Test Paper File)"
+      ],
+      "eligibility": "Open Registration",
+      "commencement": "September 2026",
+      "mode": "Distance / Test Series",
+      "recommendedFor": "Students needing real exam simulation and all-India ranking before the main exams.",
+      "feeRange": "₹14,500 - ₹24,000"
+    }
+  ],
+  "toppers": [
+    {
+      "id": "topper-0",
+      "name": "Ujjwal Kesari",
+      "rank": "5",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "Rankers Study Material (RSM) (XI-XII)",
+      "image": "/student_photos/jee-advanced-2025_Ujjwal_Kesari_rank_5.webp"
+    },
+    {
+      "id": "topper-1",
+      "name": "Arnav Singh",
+      "rank": "9",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "FIITJEE World School (VIII-X) + PINNACLE : Two Year Integrated Program (XI-XII)",
+      "image": "/student_photos/jee-advanced-2025_Arnav_Singh_rank_9.webp"
+    },
+    {
+      "id": "topper-2",
+      "name": "Devdutta Majhi",
+      "rank": "16",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "Two Year Live Interactive Online Classroom Program under eSchool (XI-XII)",
+      "image": "/student_photos/jee-advanced-2025_Devdutta_Majhi_rank_16.webp"
+    },
+    {
+      "id": "topper-3",
+      "name": "Sanidhya Saraf",
+      "rank": "31",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "PINNACLE: Two Year Integrated School Program (XI-XII)",
+      "image": "/student_photos/jee-advanced-2025_Sanidhya_Saraf_rank_31.webp"
+    },
+    {
+      "id": "topper-4",
+      "name": "Advay Mayank",
+      "rank": "36",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "Three Year Classroom Program (X-XII)",
+      "image": "/student_photos/jee-advanced-2025_Advay_Mayank_rank_36.webp"
+    },
+    {
+      "id": "topper-5",
+      "name": "Karmanya Gupta",
+      "rank": "37",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "Rankers Study Material (RSM) (XI-XII)",
+      "image": "/student_photos/jee-advanced-2025_Karmanya_Gupta_rank_37.webp"
+    },
+    {
+      "id": "topper-6",
+      "name": "Ramit Goyal",
+      "rank": "45",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "Two Year Live Interactive Online Classroom Program under eSchool (XI-XII)",
+      "image": "/student_photos/jee-advanced-2025_Ramit_Goyal_rank_45.webp"
+    },
+    {
+      "id": "topper-7",
+      "name": "Aritro Ray",
+      "rank": "50",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "Four Year Classroom Program (IX-XII)",
+      "image": "/student_photos/jee-advanced-2025_Aritro_Ray_rank_50.webp"
+    },
+    {
+      "id": "topper-8",
+      "name": "Devdutta Majhi",
+      "rank": "1",
+      "exam": "JEE Main 2025",
+      "year": "2025",
+      "program": "Two Year Live Interactive Online Classroom Program (XI-XII)",
+      "image": "/student_photos/jee-main-2025_Devdutta_Majhi_rank_1.webp"
+    },
+    {
+      "id": "topper-9",
+      "name": "Shreyas Lohiya",
+      "rank": "6",
+      "exam": "JEE Main 2025",
+      "year": "2025",
+      "program": "PANINI: Two Year Integrated Program (XI-XII)",
+      "image": "/student_photos/jee-main-2025_Shreyas_Lohiya_rank_6.webp"
+    },
+    {
+      "id": "topper-10",
+      "name": "Archisman Nandy",
+      "rank": "13",
+      "exam": "JEE Main 2025",
+      "year": "2025",
+      "program": "Two Year Classroom Program (XI-XII)",
+      "image": "/student_photos/jee-main-2025_Archisman_Nandy_rank_13.webp"
+    },
+    {
+      "id": "topper-11",
+      "name": "Aadit P. Bhagade",
+      "rank": "14",
+      "exam": "JEE Main 2025",
+      "year": "2025",
+      "program": "PINNACLE: Two Year Integrated School Program (XI-XII)",
+      "image": "/student_photos/jee-main-2025_Aadit_P__Bhagade_rank_14.webp"
+    },
+    {
+      "id": "topper-12",
+      "name": "Harssh A Gupta",
+      "rank": "15",
+      "exam": "JEE Main 2025",
+      "year": "2025",
+      "program": "PINNACLE: Two Year Integrated Program (XI-XII)",
+      "image": "/student_photos/jee-main-2025_Harssh_A_Gupta_rank_15.webp"
+    },
+    {
+      "id": "topper-13",
+      "name": "Sanidhya Saraf",
+      "rank": "19",
+      "exam": "JEE Main 2025",
+      "year": "2025",
+      "program": "PINNACLE: Two Year Integrated Program (XI-XII)",
+      "image": "/student_photos/jee-main-2025_Sanidhya_Saraf_rank_19.webp"
+    },
+    {
+      "id": "topper-14",
+      "name": "Ved Lahoti",
+      "rank": "1",
+      "exam": "JEE Advanced 2024",
+      "year": "2024",
+      "program": "Two Year Live Interactive Online Classroom Program (XI - XII)",
+      "image": "/student_photos/jee-advanced-2024_Ved_Lahoti_rank_1.webp"
+    },
+    {
+      "id": "topper-15",
+      "name": "Aditya",
+      "rank": "2",
+      "exam": "JEE Advanced 2024",
+      "year": "2024",
+      "program": "Four Year Classroom Program (IX - XII)",
+      "image": "/student_photos/jee-advanced-2024_Aditya_rank_2.webp"
+    },
+    {
+      "id": "topper-16",
+      "name": "Rajdeep Mishra",
+      "rank": "6",
+      "exam": "JEE Advanced 2024",
+      "year": "2024",
+      "program": "Two Year Live Interactive Online Classroom Program (XI - XII)",
+      "image": "/student_photos/jee-advanced-2024_Rajdeep_Mishra_rank_6.webp"
+    },
+    {
+      "id": "topper-17",
+      "name": "K Tejeswar",
+      "rank": "8",
+      "exam": "JEE Advanced 2024",
+      "year": "2024",
+      "program": "UDAYA: One Year (VIII) + SUPREME: Four Year Integrated Program (IX-XII)",
+      "image": "/student_photos/jee-advanced-2024_K_Tejeswar_rank_8.webp"
+    },
+    {
+      "id": "topper-18",
+      "name": "Gajare Nilkrishna Nirmalkumar",
+      "rank": "1",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "All India Test Series",
+      "image": "/student_photos/jee-main-2024_Gajare_Nilkrishna_Nirmalkumar_rank_1.webp"
+    },
+    {
+      "id": "topper-19",
+      "name": "Aarav Bhatt",
+      "rank": "3",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "Three Year Classroom Program",
+      "image": "/student_photos/jee-main-2024_Aarav_Bhatt_rank_3.webp"
+    },
+    {
+      "id": "topper-20",
+      "name": "Sriyashas Mohan Kalluri",
+      "rank": "13",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "Four Year Classroom Program, upgraded to PINNACLE - Two Year Integrated Program",
+      "image": "/student_photos/jee-main-2024_Sriyashas_Mohan_Kalluri_rank_13.webp"
+    },
+    {
+      "id": "topper-21",
+      "name": "BHAVYA TIWARI",
+      "rank": "",
+      "exam": "Olympiads 2024",
+      "year": "2024",
+      "program": "Two Year Classroom Program | International Physics Olympiad (IPhO)",
+      "image": "/student_photos/olympiads-2024_BHAVYA_TIWARI.webp"
+    },
+    {
+      "id": "topper-22",
+      "name": "HARSHIN POSINA",
+      "rank": "",
+      "exam": "Olympiads 2024",
+      "year": "2024",
+      "program": "FIITJEE World School (Class VII To X) Then Upgraded To Pinnacle-Two Year Integrated Program (Jr College) | International Chemistry Olympiad (IChO)",
+      "image": "/student_photos/olympiads-2024_HARSHIN_POSINA.webp"
+    },
+    {
+      "id": "topper-23",
+      "name": "Mridul Agarwal",
+      "rank": "1",
+      "exam": "JEE Advanced 2021",
+      "year": "2021",
+      "program": "Intensive Contact Program (XII)",
+      "image": "/student_photos/JEE_Advanced_2021_Mridul_Agarwal_rank_1.webp"
+    },
+    {
+      "id": "topper-24",
+      "name": "Dhananjay Raman",
+      "rank": "2",
+      "exam": "JEE Advanced 2021",
+      "year": "2021",
+      "program": "Four Year Classroom Program (IX – XII) + UDAYA - One Year Classroom Program (VIII)",
+      "image": "/student_photos/JEE_Advanced_2021_Dhananjay_Raman_rank_2.webp"
+    },
+    {
+      "id": "topper-25",
+      "name": "Anant Lunia",
+      "rank": "3",
+      "exam": "JEE Advanced 2021",
+      "year": "2021",
+      "program": "Three Year Classroom Program (X - XII)",
+      "image": "/student_photos/JEE_Advanced_2021_Anant_Lunia_rank_3.webp"
+    },
+    {
+      "id": "topper-26",
+      "name": "Arpit Agarwal",
+      "rank": "1",
+      "exam": "IIT-JEE 2012",
+      "year": "2012",
+      "program": "Two Year Classroom Program (XI - XII) + ASCENT - One Year Classroom Program (X)",
+      "image": "/student_photos/IIT-JEE_2012_Arpit_Agarwal_rank_1.webp"
+    },
+    {
+      "id": "topper-27",
+      "name": "Bijoy Singh Kochar",
+      "rank": "2",
+      "exam": "IIT-JEE 2012",
+      "year": "2012",
+      "program": "PINNACLE - Two Year Integrated School Program (XI-XII) + ASCENT - Two Year Classroom Program (IX - X)",
+      "image": "/student_photos/IIT-JEE_2012_Bijoy_Singh_Kochar_rank_2.webp"
+    },
+    {
+      "id": "topper-28",
+      "name": "Nishanth N Koushik",
+      "rank": "3",
+      "exam": "IIT-JEE 2012",
+      "year": "2012",
+      "program": "PINNACLE - Two Year Integrated School Program (XI - XII)",
+      "image": "/student_photos/IIT-JEE_2012_Nishanth_N_Koushik_rank_3.webp"
+    },
+    {
+      "id": "topper-29",
+      "name": "Ujjwal Kesari",
+      "rank": "5",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "Rankers Study Material (RSM) (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_2025_Ujjwal_Kesari_rank_5.webp"
+    },
+    {
+      "id": "topper-30",
+      "name": "Arnav Singh",
+      "rank": "9",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "FIITJEE World School (VIII-X) + PINNACLE :Two Year Integrated Program (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_2025_Arnav_Singh_rank_9.webp"
+    },
+    {
+      "id": "topper-31",
+      "name": "Devdutta Majhi",
+      "rank": "16",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "Two Year Live Interactive Online ClassroomProgram under eSchool (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_2025_Devdutta_Majhi_rank_16.webp"
+    },
+    {
+      "id": "topper-32",
+      "name": "Sanidhya Saraf",
+      "rank": "31",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "PINNACLE: Two Year Integrated School Program (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_2025_Sanidhya_Saraf_rank_31.webp"
+    },
+    {
+      "id": "topper-33",
+      "name": "Advay Mayank",
+      "rank": "36",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "Three Year Classroom Program (X-XII)",
+      "image": "/student_photos/JEE_Advanced_2025_Advay_Mayank_rank_36.webp"
+    },
+    {
+      "id": "topper-34",
+      "name": "Karmanya Gupta",
+      "rank": "37",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "Rankers Study Material (RSM) (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_2025_Karmanya_Gupta_rank_37.webp"
+    },
+    {
+      "id": "topper-35",
+      "name": "Ramit Goyal",
+      "rank": "45",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "Two Year Live Interactive Online Classroom Program under eSchool (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_2025_Ramit_Goyal_rank_45.webp"
+    },
+    {
+      "id": "topper-36",
+      "name": "Aritro Ray",
+      "rank": "50",
+      "exam": "JEE Advanced 2025",
+      "year": "2025",
+      "program": "Four Year Classroom Program (IX-XII)",
+      "image": "/student_photos/JEE_Advanced_2025_Aritro_Ray_rank_50.webp"
+    },
+    {
+      "id": "topper-37",
+      "name": "Muhammed Sufiyan",
+      "rank": "16",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "Two Year Live Online Classroom Program",
+      "image": "/student_photos/jee-main-2024_Muhammed_Sufiyan_rank_16.webp"
+    },
+    {
+      "id": "topper-38",
+      "name": "Himanshu Thalor",
+      "rank": "22",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "Rankers Study Materia",
+      "image": "/student_photos/jee-main-2024_Himanshu_Thalor_rank_22.webp"
+    },
+    {
+      "id": "topper-39",
+      "name": "Thota Sai Karthik",
+      "rank": "23",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "SUPREME - Four Year Integrated Program",
+      "image": "/student_photos/jee-main-2024_Thota_Sai_Karthik_rank_23.webp"
+    },
+    {
+      "id": "topper-40",
+      "name": "Pranavanand Saji",
+      "rank": "31",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "All India Test Series",
+      "image": "/student_photos/jee-main-2024_Pranavanand_Saji_rank_31.webp"
+    },
+    {
+      "id": "topper-41",
+      "name": "Pratham Kumar",
+      "rank": "33",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "Rankers Study Material",
+      "image": "/student_photos/jee-main-2024_Pratham_Kumar_rank_33.webp"
+    },
+    {
+      "id": "topper-42",
+      "name": "Ganga Shreyas",
+      "rank": "35",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "FIITJEE World School + PINNACLE : Two Year Integrated Program",
+      "image": "/student_photos/jee-main-2024_Ganga_Shreyas_rank_35.webp"
+    },
+    {
+      "id": "topper-43",
+      "name": "Madhav Bansal",
+      "rank": "38",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "Four Year Classroom Program + UDAYA : Two Year Classroom Program",
+      "image": "/student_photos/jee-main-2024_Madhav_Bansal_rank_38.webp"
+    },
+    {
+      "id": "topper-44",
+      "name": "Visharad Srivastava",
+      "rank": "40",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "All India Test Series",
+      "image": "/student_photos/jee-main-2024_Visharad_Srivastava_rank_40.webp"
+    },
+    {
+      "id": "topper-45",
+      "name": "Tanay Jha",
+      "rank": "42",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "PANINI - Two Year Integrated Program",
+      "image": "/student_photos/jee-main-2024_Tanay_Jha_rank_42.webp"
+    },
+    {
+      "id": "topper-46",
+      "name": "Ishaan Gupta",
+      "rank": "46",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "Rankers Study Material",
+      "image": "/student_photos/jee-main-2024_Ishaan_Gupta_rank_46.webp"
+    },
+    {
+      "id": "topper-47",
+      "name": "Ipsit Mittal",
+      "rank": "48",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "Three Year Classroom Program",
+      "image": "/student_photos/jee-main-2024_Ipsit_Mittal_rank_48.webp"
+    },
+    {
+      "id": "topper-48",
+      "name": "Bhavesh R Karthik",
+      "rank": "50",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "Three Year Classroom Program",
+      "image": "/student_photos/jee-main-2024_Bhavesh_R_Karthik_rank_50.webp"
+    },
+    {
+      "id": "topper-49",
+      "name": "Patil Pranav Pramod",
+      "rank": "51",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "All India Test Series",
+      "image": "/student_photos/jee-main-2024_Patil_Pranav_Pramod_rank_51.webp"
+    },
+    {
+      "id": "topper-50",
+      "name": "Arsh Gupta",
+      "rank": "54",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "Two Year Classroom Program",
+      "image": "/student_photos/jee-main-2024_Arsh_Gupta_rank_54.webp"
+    },
+    {
+      "id": "topper-51",
+      "name": "N Shriram",
+      "rank": "55",
+      "exam": "JEE Main 2024",
+      "year": "2024",
+      "program": "LITTLE Genie + UDAYA : Two Year + Four Year Classroom Program, upgraded to PINNACLE - Two Year Integrated Program",
+      "image": "/student_photos/jee-main-2024_N_Shriram_rank_55.webp"
+    },
+    {
+      "id": "topper-52",
+      "name": "Nithin Babu",
+      "rank": "",
+      "exam": "Transformative Results / Alumni",
+      "year": "2025",
+      "program": "Meet Nithin Babu- Who Went from scoring a mere 33% in our Admission Test to securing AIR 216 in JEE Advanced with the help of FIITJEE. “To be an IITian is one dream I always wanted to fulfil, but being an average performer, I was never encouraged until I approached FIITJEE. Convinced with proven results of FIITJEE for decades, I decided to appear for its Admission Test on 6th April 2014, in which I scored only 33% with no scholarship. I then joined the FIITJEE Four Year Classroom Program, wherein I witnessed many other Students like me already gaining benefits from the guidance of its expert faculty. The teachers worked 360 degrees to plug in my academic loopholes. FIITJEE’s support and my determination together have made me a proud IITian in Madras, with an All India Rank 216 in JEE Advanced 2018.",
+      "image": "/student_photos/Transformative_Results___Alumni_Nithin_Babu.webp"
+    },
+    {
+      "id": "topper-53",
+      "name": "Kartikay Goel",
+      "rank": "",
+      "exam": "Transformative Results / Alumni",
+      "year": "2025",
+      "program": "Meet Kartikay Goel, a Student with 30% in the admission test but AIR 518 in JEE Advanced. “I thank the day when I decided to join FIITJEE. Even after being an average academic performer, I planned to appear for the FIITJEE Admission Test on 27th April 2014 but scored only 30% with no scholarship. I joined its Four-Year Classroom Program. Since I joined it in Class IX only, I could take maximum benefits from the provided study materials and systematic test schedules. Joining early made my foundation concrete when I reached Class X, ultimately boosting my secondary Class performance. Only by following FIITJEE, my dream of becoming an IITian was accomplished, and I’m now studying at IIT Guwahati after clearing JEE Advanced with an All India Rank 518. Hearty thanks to FIITJEE.”",
+      "image": "/student_photos/Transformative_Results___Alumni_Kartikay_Goel.webp"
+    },
+    {
+      "id": "topper-54",
+      "name": "Ira Pachori",
+      "rank": "",
+      "exam": "Transformative Results / Alumni",
+      "year": "2025",
+      "program": "Meet Ira Pachori, a doctor who benefitted from FIITJEE’s coaching during her Class IX and X. “I am a doctor, and I did my MBBS from AIIMS, New Delhi. I studied at FIITJEE in Class IX and X, which gave me an advantage of enhanced analytical and improved decision-making skills. This gave me enough confidence to pursue the Medical stream later in Class XI and XII. The principles learnt at FIITJEE are benefiting me even now. Indeed, joining FIITJEE till Class X was the apt decision for me.”",
+      "image": "/student_photos/Transformative_Results___Alumni_Ira_Pachori.webp"
+    },
+    {
+      "id": "topper-55",
+      "name": "Barkha Singh",
+      "rank": "",
+      "exam": "Transformative Results / Alumni",
+      "year": "2025",
+      "program": "Meet Barkha Singh, a lawyer grateful to FIITJEE for her analytical skills and her ability to clear CLAT. “To achieve my aim of building a career in law, I took Humanities in Class XI and XII. To develop my analytical and reasoning skills and logical thinking, I chose to study at FIITJEE from Class VIII to X. Only because FIITJEE taught me to solve analytical reasoning questions integral to competitive exams, I could clear CLAT. Today, I am enrolled in BA LLB at Nalsar, Hyderabad.”",
+      "image": "/student_photos/Transformative_Results___Alumni_Barkha_Singh.webp"
+    },
+    {
+      "id": "topper-56",
+      "name": "Srishti Chopra",
+      "rank": "",
+      "exam": "Transformative Results / Alumni",
+      "year": "2025",
+      "program": "Meet Srishti Chopra, an economics honours Student with exceptional critical-thinking skills. “It was my pre-set goal to choose Commerce after Class X and make a career in Economics. And to strengthen my mathematics and critical-thinking skills, I joined FIITJEE from Class VII to X. Those 4 years of beneficial learning made me academically sound to pursue Economics Honours from Indraprastha University, New Delhi.”",
+      "image": "/student_photos/Transformative_Results___Alumni_Srishti_Chopra.webp"
+    },
+    {
+      "id": "topper-57",
+      "name": "Abhishek Sharma",
+      "rank": "",
+      "exam": "Transformative Results / Alumni",
+      "year": "2025",
+      "program": "Meet Abhishek Sharma, a management professional who appreciates FIITJEE’s contribution to his success. “I wanted to become a management professional and, thus, took Arts in Class XI and XII to cement my academic foundation. I studied at FIITJEE in Class IX and X. FIITJEE developed my IQ and strategic thinking skills and infused me with enough confidence to pursue my BBE. Today, I am doing an MBA in Marketing, and the learnings of FIITJEE still remain the biggest support in my life and career.”",
+      "image": "/student_photos/Transformative_Results___Alumni_Abhishek_Sharma.webp"
+    },
+    {
+      "id": "topper-58",
+      "name": "Keerthi Vasan",
+      "rank": "",
+      "exam": "Transformative Results / Alumni",
+      "year": "2025",
+      "program": "Meet Keerthi Vasan, an IAS officer who was able to crack UPSC exams with FIITJEE’s learning formula. “I am an IAS officer and always wanted to be one. Since I wanted to opt for the Science stream in Class XI and XII, I joined FIITJEE right in Class IX and continued studying till Class XII. This enhanced my IQ and developed rational thinking and problem-solving tactics prerequisites to crack the UPSC exam. The learning at FIITJEE helps me to date in real-life applications.”",
+      "image": "/student_photos/Transformative_Results___Alumni_Keerthi_Vasan.webp"
+    },
+    {
+      "id": "topper-59",
+      "name": "Nithin Babu",
+      "rank": "216",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 6th April 2014 | Marks/Scholarship: 33% & No Scholarship | Program: Four Year Classroom Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Nithin Babu"
+    },
+    {
+      "id": "topper-60",
+      "name": "Kartikay Goel",
+      "rank": "518",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 27th April 2014 | Marks/Scholarship: 30% & No Scholarship | Program: Four Year Classroom Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Kartikay Goel"
+    },
+    {
+      "id": "topper-61",
+      "name": "Manav Pillai",
+      "rank": "671",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 28th December 2014 | Marks/Scholarship: 35% & No Scholarship | Program: Three Year Classroom Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Manav Pillai"
+    },
+    {
+      "id": "topper-62",
+      "name": "J Snehan",
+      "rank": "678",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 28th December 2014 | Marks/Scholarship: 27% & No Scholarship | Program: SUPREME - Four Year Integrated School Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=J Snehan"
+    },
+    {
+      "id": "topper-63",
+      "name": "Harman Singh",
+      "rank": "751",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 28th December 2014 | Marks/Scholarship: 31% & No Scholarship | Program: Three Year Classroom Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Harman Singh"
+    },
+    {
+      "id": "topper-64",
+      "name": "Chaksur Tyagi",
+      "rank": "849",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 8th February 2015 | Marks/Scholarship: 36% & No Scholarship | Program: Three Year Classroom Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Chaksur Tyagi"
+    },
+    {
+      "id": "topper-65",
+      "name": "Dhruv Bansal",
+      "rank": "1173",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 27th April 2014 | Marks/Scholarship: 34% & No Scholarship | Program: Four Year Classroom Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Dhruv Bansal"
+    },
+    {
+      "id": "topper-66",
+      "name": "Srivatsan R",
+      "rank": "1204",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 28th December 2014 | Marks/Scholarship: 33% & No Scholarship | Program: Three Year Classroom Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Srivatsan R"
+    },
+    {
+      "id": "topper-67",
+      "name": "Girish Madhavan V",
+      "rank": "1954",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 27th December 2015 | Marks/Scholarship: 31% & No Scholarship | Program: SUPREME – Four Year Integrated School Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Girish Madhavan V"
+    },
+    {
+      "id": "topper-68",
+      "name": "Prashant Verma",
+      "rank": "2011",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 27th April 2014 | Marks/Scholarship: 32% & No Scholarship | Program: Four Year Classroom Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Prashant Verma"
+    },
+    {
+      "id": "topper-69",
+      "name": "Tanya Goyal",
+      "rank": "2066",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 20th October 2013 | Marks/Scholarship: 35% & No Scholarship | Program: Four Year Classroom Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Tanya Goyal"
+    },
+    {
+      "id": "topper-70",
+      "name": "Pulkit Arya",
+      "rank": "2092",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 28th December 2014 | Marks/Scholarship: 29% & No Scholarship | Program: Three Year Classroom Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Pulkit Arya"
+    },
+    {
+      "id": "topper-71",
+      "name": "Akshdeep",
+      "rank": "2136",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 27th April 2014 | Marks/Scholarship: 25% & No Scholarship | Program: Four Year Classroom Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Akshdeep"
+    },
+    {
+      "id": "topper-72",
+      "name": "Kaousheik JJ",
+      "rank": "2171",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 9th February 2014 | Marks/Scholarship: 35% & No Scholarship | Program: SUPREME – Four Year Integrated School Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Kaousheik JJ"
+    },
+    {
+      "id": "topper-73",
+      "name": "Nishant Reddy S",
+      "rank": "2389",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 27th April 2014 | Marks/Scholarship: 31% & No Scholarship | Program: Four Year Classroom Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Nishant Reddy S"
+    },
+    {
+      "id": "topper-74",
+      "name": "Rishi Sethia",
+      "rank": "2469",
+      "exam": "Transformative Results / Table",
+      "year": "2025",
+      "program": "Admission Test: 28th December 2014 | Marks/Scholarship: 39% & No Scholarship | Program: Four Year Classroom Program",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Rishi Sethia"
+    },
+    {
+      "id": "topper-75",
+      "name": "Ujjwal Kesari",
+      "rank": "5",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Rankers Study Material (RSM)",
+      "image": "/student_photos/JEE_Advanced_Ujjwal_Kesari_rank_5.jpg"
+    },
+    {
+      "id": "topper-76",
+      "name": "Arnav Singh",
+      "rank": "9",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "FIITJEE World School (VIII-X) + PINNACLE :",
+      "image": "/student_photos/JEE_Advanced_Arnav_Singh_rank_9.jpg"
+    },
+    {
+      "id": "topper-77",
+      "name": "Devdutta Majhi",
+      "rank": "16",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Two Year Live Interactive Online Classroom",
+      "image": "/student_photos/JEE_Advanced_Devdutta_Majhi_rank_16.jpg"
+    },
+    {
+      "id": "topper-78",
+      "name": "Sanidhya Saraf",
+      "rank": "31",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "PINNACLE: Two Year Integrated School Program (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_Sanidhya_Saraf_rank_31.jpg"
+    },
+    {
+      "id": "topper-79",
+      "name": "Advay Mayank",
+      "rank": "36",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Three Year Classroom Program (X-XII)",
+      "image": "/student_photos/JEE_Advanced_Advay_Mayank_rank_36.jpg"
+    },
+    {
+      "id": "topper-80",
+      "name": "Karmanya Gupta",
+      "rank": "37",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Rankers Study Material (RSM) (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_Karmanya_Gupta_rank_37.png"
+    },
+    {
+      "id": "topper-81",
+      "name": "Ramit Goyal",
+      "rank": "45",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Two Year Live Interactive Online Classroom Program under eSchool (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_Ramit_Goyal_rank_45.jpg"
+    },
+    {
+      "id": "topper-82",
+      "name": "Aritro Ray",
+      "rank": "50",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Four Year Classroom Program (IX-XII)",
+      "image": "/student_photos/JEE_Advanced_Aritro_Ray_rank_50.jpg"
+    },
+    {
+      "id": "topper-83",
+      "name": "Shiven Vikas Toshniwal",
+      "rank": "58",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "All India Test Series (AITS)",
+      "image": "/student_photos/JEE_Advanced_Shiven_Vikas_Toshniwal_rank_58.png"
+    },
+    {
+      "id": "topper-84",
+      "name": "Rajit Singh Gaur",
+      "rank": "61",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Four Year Combined Program (Classroom + Integrated School) (IX-XII)",
+      "image": "/student_photos/JEE_Advanced_Rajit_Singh_Gaur_rank_61.jpg"
+    },
+    {
+      "id": "topper-85",
+      "name": "Kesav Bansal",
+      "rank": "62",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "All India Test Series (AITS)",
+      "image": "/student_photos/JEE_Advanced_Kesav_Bansal_rank_62.png"
+    },
+    {
+      "id": "topper-86",
+      "name": "Samyajyoti Biswas",
+      "rank": "63",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Two Year Classroom Program (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_Samyajyoti_Biswas_rank_63.jpg"
+    },
+    {
+      "id": "topper-87",
+      "name": "Venkatesh Thallapally",
+      "rank": "65",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Three Year Combined Program (Classroom + Integrated School) (X-XII)",
+      "image": "/student_photos/JEE_Advanced_Venkatesh_Thallapally_rank_65.jpg"
+    },
+    {
+      "id": "topper-88",
+      "name": "Pranav Chourasiya",
+      "rank": "67",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Four Year Combined Program (Classroom + Integrated School) (IX-XII)",
+      "image": "/student_photos/JEE_Advanced_Pranav_Chourasiya_rank_67.jpg"
+    },
+    {
+      "id": "topper-89",
+      "name": "Shreyas Lohiya",
+      "rank": "68",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "PANINI: Two Year Integrated Program (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_Shreyas_Lohiya_rank_68.jpg"
+    },
+    {
+      "id": "topper-90",
+      "name": "Divyant Jayakumar",
+      "rank": "80",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "SUPREME - Four Year Integrated School Program (IX-XII)",
+      "image": "/student_photos/JEE_Advanced_Divyant_Jayakumar_rank_80.jpg"
+    },
+    {
+      "id": "topper-91",
+      "name": "Vedanth Shri Govind",
+      "rank": "81",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Rankers Study Material (RSM) (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_Vedanth_Shri_Govind_rank_81.jpg"
+    },
+    {
+      "id": "topper-92",
+      "name": "Prakhar Singh",
+      "rank": "92",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "ASCENT - One Year Classroom Program (Class X) + Two Year Integrated School Program (Class XI & XII)",
+      "image": "/student_photos/JEE_Advanced_Prakhar_Singh_rank_92.jpg"
+    },
+    {
+      "id": "topper-93",
+      "name": "Aadit P. Bhagade",
+      "rank": "94",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "PINNACLE: Two Year Integrated School Program (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_Aadit_P__Bhagade_rank_94.jpg"
+    },
+    {
+      "id": "topper-94",
+      "name": "Mridul Agarwal",
+      "rank": "1",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Mridul_Agarwal_rank_1.png"
+    },
+    {
+      "id": "topper-95",
+      "name": "Dhananjay Raman",
+      "rank": "2",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Dhananjay_Raman_rank_2.png"
+    },
+    {
+      "id": "topper-96",
+      "name": "Anant Lunia",
+      "rank": "3",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Anant_Lunia_rank_3.png"
+    },
+    {
+      "id": "topper-97",
+      "name": "Arpit Agrawal",
+      "rank": "1",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Arpit_Agrawal_rank_1.png"
+    },
+    {
+      "id": "topper-98",
+      "name": "Bijoy Singh Kochar",
+      "rank": "2",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Bijoy_Singh_Kochar_rank_2.png"
+    },
+    {
+      "id": "topper-99",
+      "name": "Nishanth N Koushik",
+      "rank": "3",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Nishanth_N_Koushik_rank_3.png"
+    },
+    {
+      "id": "topper-100",
+      "name": "Ved Lahoti",
+      "rank": "1",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Student of Two Year Live Interactive",
+      "image": "/student_photos/JEE_Advanced_Ved_Lahoti_rank_1.jpg"
+    },
+    {
+      "id": "topper-101",
+      "name": "Aditya",
+      "rank": "2",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Student of Four Year",
+      "image": "/student_photos/JEE_Advanced_Aditya_rank_2.jpg"
+    },
+    {
+      "id": "topper-102",
+      "name": "Rajdeep Mishra",
+      "rank": "6",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Student of Two Year Live Interactive",
+      "image": "/student_photos/JEE_Advanced_Rajdeep_Mishra_rank_6.jpg"
+    },
+    {
+      "id": "topper-103",
+      "name": "K Tejeswar",
+      "rank": "8",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Student of Udaya: One Year (VIII) +",
+      "image": "/student_photos/JEE_Advanced_K_Tejeswar_rank_8.jpg"
+    },
+    {
+      "id": "topper-104",
+      "name": "Ganga Shreyas",
+      "rank": "13",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "FIITJEE World School (VIII-X) + PINNACLE - Two Year Integrated Program (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_Ganga_Shreyas_rank_13.jpg"
+    },
+    {
+      "id": "topper-105",
+      "name": "Bhavya Tiwari",
+      "rank": "19",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Two Year Classroom Program (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_Bhavya_Tiwari_rank_19.jpg"
+    },
+    {
+      "id": "topper-106",
+      "name": "Pulkit Gupta",
+      "rank": "24",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Four Year Classroom Program, upgraded to PINNACLE - Two Year Integrated School Program (IX-XII)",
+      "image": "/student_photos/JEE_Advanced_Pulkit_Gupta_rank_24.jpg"
+    },
+    {
+      "id": "topper-107",
+      "name": "Arjav Jain",
+      "rank": "27",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Three Year Classroom Program (X-XII)",
+      "image": "/student_photos/JEE_Advanced_Arjav_Jain_rank_27.jpg"
+    },
+    {
+      "id": "topper-108",
+      "name": "Shekhar Jha",
+      "rank": "28",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Four Year Classroom Program (Two Year Live Interactive Online Classrom Program (XI-XII) + Two Year Classroom Program (IX-X))",
+      "image": "/student_photos/JEE_Advanced_Shekhar_Jha_rank_28.jpg"
+    },
+    {
+      "id": "topper-109",
+      "name": "Muhammed Sufiyan",
+      "rank": "29",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Two Year Live Interactive Online* Classroom Program (XI-XII)",
+      "image": "/student_photos/JEE_Advanced_Muhammed_Sufiyan_rank_29.jpg"
+    },
+    {
+      "id": "topper-110",
+      "name": "*FIITJEE Online Classes while endeavouring to simulate offline experience have some unique advantages. All Live Interactive Online Classes are recorded for ease of reference and review. These provide students flexibility to learn at their own pace, accessibility for catching up on missed classes and act as a valuable tool for revision.",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "images/other_toppers2024.jpg"
+    },
+    {
+      "id": "topper-111",
+      "name": "Ved Lahoti",
+      "rank": "2024",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Student of Two Year Live Interactive Online Classroom Program (XI - XII)",
+      "image": "/student_photos/JEE_Advanced_Ved_Lahoti_rank_2024.png"
+    },
+    {
+      "id": "topper-112",
+      "name": "Aditya",
+      "rank": "2024",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Student of Four Year Classroom Program (IX - XII)",
+      "image": "/student_photos/JEE_Advanced_Aditya_rank_2024.png"
+    },
+    {
+      "id": "topper-113",
+      "name": "Rajdeep Mishra",
+      "rank": "2024",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Student of Two Year Live Interactive Online Classroom Program (XI - XII)",
+      "image": "/student_photos/JEE_Advanced_Rajdeep_Mishra_rank_2024.png"
+    },
+    {
+      "id": "topper-114",
+      "name": "Bhavya Tiwari",
+      "rank": "2024",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Student of Two Year Classroom Program (XI - XII)",
+      "image": "/student_photos/JEE_Advanced_Bhavya_Tiwari_rank_2024.png"
+    },
+    {
+      "id": "topper-115",
+      "name": "Pulkit Gupta",
+      "rank": "2024",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Student of Four Year Classroom Program (IX - XII) at FIITJEE Dwarka Centre -->",
+      "image": "/student_photos/JEE_Advanced_Pulkit_Gupta_rank_2024.png"
+    },
+    {
+      "id": "topper-116",
+      "name": "Arjav Jain",
+      "rank": "2024",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Three Year Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Arjav_Jain_rank_2024.png"
+    },
+    {
+      "id": "topper-117",
+      "name": "Shekhar Jha",
+      "rank": "2024",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Four Year Classroom Program (Two Year Live Interactive Online Classrom Program (XI-XII) + Two Year Classroom Program (IX-X))",
+      "image": "/student_photos/JEE_Advanced_Shekhar_Jha_rank_2024.png"
+    },
+    {
+      "id": "topper-118",
+      "name": "Muhammed Sufiyan",
+      "rank": "2024",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Two Year Live Interactive Online Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Muhammed_Sufiyan_rank_2024.png"
+    },
+    {
+      "id": "topper-119",
+      "name": "Rishi Kalra - Four Year Classroom Program",
+      "rank": "3",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "(Class IX - XII)",
+      "image": "/student_photos/JEE_Advanced_Rishi_Kalra_-_Four_Year_Classroom_Program_rank_3.png"
+    },
+    {
+      "id": "topper-120",
+      "name": "Prabhav Khandelwal - One Year Live",
+      "rank": "6",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Online Classroom Program (XII)",
+      "image": "/student_photos/JEE_Advanced_Prabhav_Khandelwal_-_One_Year_Live_rank_6.png"
+    },
+    {
+      "id": "topper-121",
+      "name": "Malay Kedia - Four Year Classroom Program",
+      "rank": "8",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "(IX - XII), upgraded to PINNACLE - Two Year Integrated School Program (XI - XII)",
+      "image": "/student_photos/JEE_Advanced_Malay_Kedia_-_Four_Year_Classroom_Program_rank_8.png"
+    },
+    {
+      "id": "topper-122",
+      "name": "From All Programs, 37 in Top 100 All India Ranks in JEE Advanced 2023",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "images/Delhi-NCR-Toppers2023.jpg"
+    },
+    {
+      "id": "topper-123",
+      "name": "Result Highlights",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "images/Delhi-NCR-Toppers-100-2023.jpg"
+    },
+    {
+      "id": "topper-124",
+      "name": "Our Honesty, Sincerity, Dedication & Hardwork produces winning results from Classroom Programs",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "consistently for the 26th year in JEE Advanced",
+      "image": "/student_photos/JEE_Advanced_Our_Honesty__Sincerity__Dedication___Hardwork_produces_winning_results_from_Classroom_Programs.png"
+    },
+    {
+      "id": "topper-125",
+      "name": "Deevyanshu Malu",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Deevyanshu_Malu.png"
+    },
+    {
+      "id": "topper-126",
+      "name": "Abhijeet Anand",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Abhijeet_Anand.png"
+    },
+    {
+      "id": "topper-127",
+      "name": "Harsh Kumar",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Harsh_Kumar.png"
+    },
+    {
+      "id": "topper-128",
+      "name": "Kavya Gupta",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Kavya_Gupta.png"
+    },
+    {
+      "id": "topper-129",
+      "name": "Saumitra Garg",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Saumitra_Garg.png"
+    },
+    {
+      "id": "topper-130",
+      "name": "Mridul Aggarwal",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Mridul_Aggarwal.png"
+    },
+    {
+      "id": "topper-131",
+      "name": "Dhananjay Raman",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Dhananjay_Raman.png"
+    },
+    {
+      "id": "topper-132",
+      "name": "Anant Lunia",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Anant_Lunia.png"
+    },
+    {
+      "id": "topper-133",
+      "name": "Soni Naman Nirmal",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Soni_Naman_Nirmal.png"
+    },
+    {
+      "id": "topper-134",
+      "name": "Kartik Sreekumar Nair",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Kartik_Sreekumar_Nair.png"
+    },
+    {
+      "id": "topper-135",
+      "name": "Chaitanya Aggarwal",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Chaitanya_Aggarwal.png"
+    },
+    {
+      "id": "topper-136",
+      "name": "Overall Performance *",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Overall_Performance__.png"
+    },
+    {
+      "id": "topper-137",
+      "name": "Kalash Gupta",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_Kalash_Gupta.png"
+    },
+    {
+      "id": "topper-138",
+      "name": "Mavuri Siva",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Krishna Manohar",
+      "image": "/student_photos/JEE_Advanced_Mavuri_Siva.png"
+    },
+    {
+      "id": "topper-139",
+      "name": "AIR - 3",
+      "rank": "3",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_AIR_-_3_rank_3.png"
+    },
+    {
+      "id": "topper-140",
+      "name": "AIR - 11",
+      "rank": "11",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_AIR_-_11_rank_11.png"
+    },
+    {
+      "id": "topper-141",
+      "name": "AIR - 13",
+      "rank": "13",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_AIR_-_13_rank_13.png"
+    },
+    {
+      "id": "topper-142",
+      "name": "In Top 50 AIR",
+      "rank": "",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Advanced_In_Top_50_AIR.png"
+    },
+    {
+      "id": "topper-143",
+      "name": "AIR - 46 Aditya Sahdev UDAYA- One Year Classroom Program + Four Year Classroom Program Delhi (South) Centre",
+      "rank": "AIR - 61 B Akhil PINNACLE- Two Year Integrated Program Hyderabad Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Amritsar City Topper AIR - 53 Saket Dingliwal UDAYA Two Year Classroom Program + Four Year Classroom Program Amritsar Centre | IIT Kharagpur Zone & Odisha State Topper AIR - 57 Rohit Kumar Jena Two Year Classroom Program Bhubaneswar Centre | AIR - 61 B Akhil PINNACLE- Two Year Integrated Program Hyderabad Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 46 Aditya Sahdev UDAYA- One Year Classroom Program + Four Year Classroom Program Delhi (South) Centre"
+    },
+    {
+      "id": "topper-144",
+      "name": "AIR - 68 Divgian Singh Sidhu 3 Year Classroom Program then switched to PINNACLE- Two Year Integrated School Program Chandigarh Centre",
+      "rank": "AIR - 77 Ronak Agarwal Two Year Classroom Program Jaipur Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 69 Suyash Agrawal Two Year Classroom Program Delhi (South) Centre | AIR - 75 Srijit Dutta Four Year Classroom Program Kolkata Centre | AIR - 77 Ronak Agarwal Two Year Classroom Program Jaipur Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 68 Divgian Singh Sidhu 3 Year Classroom Program then switched to PINNACLE- Two Year Integrated School Program Chandigarh Centre"
+    },
+    {
+      "id": "topper-145",
+      "name": "Tamil Nadu State Topper AIR - 80 Raghavan S Four Year Classroom Program Chennai Centre",
+      "rank": "AIR - 88 Sarthak Nijhawan Four Year Classroom Program Indore Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 83 Aman Agrawal Four Year Classroom Program Delhi (East) Centre | AIR - 85 Madhur Singhal PINNACLE- Two Year Integrated School Program Gwalior Centre | AIR - 88 Sarthak Nijhawan Four Year Classroom Program Indore Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Tamil Nadu State Topper AIR - 80 Raghavan S Four Year Classroom Program Chennai Centre"
+    },
+    {
+      "id": "topper-146",
+      "name": "AIR - 91 Mukund Mundhra Four Year Classroom Program Delhi (Punjabi Bagh) Centre",
+      "rank": "AIR - 101 Aakash Sinha Two Year Classroom Program Patna Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "IIT Guwahati Zone & Bihar State Topper AIR - 94 Ayush Ranjan Three Year Classroom Program Patna Centre | AIR - 100 Kartikeya Sharma 4 Year Classroom Program then switched to PINNACLE- Two Year Integrated School Program Hyderabad Centre | AIR - 101 Aakash Sinha Two Year Classroom Program Patna Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 91 Mukund Mundhra Four Year Classroom Program Delhi (Punjabi Bagh) Centre"
+    },
+    {
+      "id": "topper-147",
+      "name": "AIR - 105 Yash Srivastav Four Year Classroom Program Kolkata Centre",
+      "rank": "AIR - 114 Sangnie Bhardwaj PINNACLE- Two Year Integrated School Program Chandigarh Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 110 Shubhojyoti Nath Four Year Classroom Program Delhi (South) Centre | AIR - 111 Dhruv Ilesh Shah PINNACLE- Two Year Integrated School Program Pune Centre | AIR - 114 Sangnie Bhardwaj PINNACLE- Two Year Integrated School Program Chandigarh Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 105 Yash Srivastav Four Year Classroom Program Kolkata Centre"
+    },
+    {
+      "id": "topper-148",
+      "name": "AIR - 118 Devashish N Mehta 3 Year Classroom Program then switched to PINNACLE- Two Year Integrated School Program Hyderabad Centre",
+      "rank": "AIR - 128 Aviraj Mishra Intensive Contact Program +PINNACLE- Two Year Integrated School Program Indore Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Karnataka State Topper AIR - 122 Ameet S Deshpande UDAYA- One Year CRP + 4 Year CRP then switched to PINNACLE- Two Year Integrated School Program Bangalore Centre | AIR - 123 D Tejavardhan Reddy PINNACLE- Two Year Integrated Program Hyderabad Centre | AIR - 128 Aviraj Mishra Intensive Contact Program +PINNACLE- Two Year Integrated School Program Indore Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 118 Devashish N Mehta 3 Year Classroom Program then switched to PINNACLE- Two Year Integrated School Program Hyderabad Centre"
+    },
+    {
+      "id": "topper-149",
+      "name": "AIR - 132 Saransh Goyal PINNACLE- Two Year Integrated School Program Chandigarh Centre",
+      "rank": "AIR - 140 Umesh Kumar Two Year Classroom Program Delhi (South) Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Vadodara City Topper AIR - 134 Anant Chhajwani 4 Year Classroom Program then switched to PINNACLE- Two Year Integrated School Program Vadodara Centre | AIR - 136 Ankur Sharma 3 Year Classroom Program then switched to PINNACLE- Two Year Integrated School Program Delhi NCR (Ghaziabad) Centre | AIR - 140 Umesh Kumar Two Year Classroom Program Delhi (South) Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 132 Saransh Goyal PINNACLE- Two Year Integrated School Program Chandigarh Centre"
+    },
+    {
+      "id": "topper-150",
+      "name": "Jharkhand State Topper AIR - 40 Ayush Mukherjee Two Year Classroom Program Student of FIITJEE Dhanbad Centre",
+      "rank": "AIR - 52 Pulkit Goyal Two Year Classroom Program Student of FIITJEE Bhilai/Raipur Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 42 Raviteja A V Four Year Classroom Program Student of FIITJEE Chennai Centre | Chhattisgarh State Topper AIR - 50 C.Vishwesh Two Year Classroom Program Student of FIITJEE Bhilai/Raipur Centre | AIR - 52 Pulkit Goyal Two Year Classroom Program Student of FIITJEE Bhilai/Raipur Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Jharkhand State Topper AIR - 40 Ayush Mukherjee Two Year Classroom Program Student of FIITJEE Dhanbad Centre"
+    },
+    {
+      "id": "topper-151",
+      "name": "Gurgaon City Topper AIR - 59 Karan Dwivedi Two Year Classroom Program Student of FIITJEE Delhi NCR (Gurgaon) Centre",
+      "rank": "Lucknow City Topper AIR - 72 Pankaj Kumar Yadav PINNACLE- Two Year Integrated School Program Student of FIITJEE Lucknow Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 62 Suhas Chintala PINNACLE- Two Year Integrated School Program Student of FIITJEE Vizag Centre | AIR - 71 Aryan Garg Two Year Classroom Program Student of FIITJEE Chandigarh Centre | Lucknow City Topper AIR - 72 Pankaj Kumar Yadav PINNACLE- Two Year Integrated School Program Student of FIITJEE Lucknow Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Gurgaon City Topper AIR - 59 Karan Dwivedi Two Year Classroom Program Student of FIITJEE Delhi NCR (Gurgaon) Centre"
+    },
+    {
+      "id": "topper-152",
+      "name": "AIR - 75 Aayan Kumar Intensive Contact Program Student of FIITJEE Delhi (South) Centre",
+      "rank": "AIR - 90 Ayushya Raj Two Year Classroom Program Student of FIITJEE Delhi (South) Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Karnataka State Topper AIR - 78 Saurabh Pinjani PINNACLE- Two Year Integrated School Program Student of FIITJEE Bangalore Centre | Ranchi City Topper AIR - 84 Aditya Kumar Two Year Classroom Program Student of FIITJEE Ranchi Centre | AIR - 90 Ayushya Raj Two Year Classroom Program Student of FIITJEE Delhi (South) Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 75 Aayan Kumar Intensive Contact Program Student of FIITJEE Delhi (South) Centre"
+    },
+    {
+      "id": "topper-153",
+      "name": "West Bengal State Topper AIR - 98 Arkaprava Saha Four Year Classroom Program Student of FIITJEE Durgapur Centre",
+      "rank": "AIR - 117 Srishti Jain Three Year Classroom Program Student of FIITJEE Delhi (Punjabi Bagh) Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 102 Vishad Goyal Two Year Classroom Program Student of FIITJEE Chandigarh Centre | AIR - 105 Vaibhav Bhagee Four Year Classroom Program Student of FIITJEE Delhi (South) Centre | AIR - 117 Srishti Jain Three Year Classroom Program Student of FIITJEE Delhi (Punjabi Bagh) Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=West Bengal State Topper AIR - 98 Arkaprava Saha Four Year Classroom Program Student of FIITJEE Durgapur Centre"
+    },
+    {
+      "id": "topper-154",
+      "name": "AIR - 129 Potluri Vachan Deep Pinnacle - Two Year Integrated Program Student of FIITJEE Hyderabad Centre",
+      "rank": "AIR - 141 Sujay Agrawal Four Year Classroom Program Student of FIITJEE Lucknow Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "Kolkata City Topper AIR - 136 Sagnik Saha Two Year Classroom Program Student of FIITJEE Kolkata Centre | Amritsar City Topper AIR - 138 Saksham Sharma Four Year Classroom Program Student of FIITJEE Amritsar Centre | AIR - 141 Sujay Agrawal Four Year Classroom Program Student of FIITJEE Lucknow Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 129 Potluri Vachan Deep Pinnacle - Two Year Integrated Program Student of FIITJEE Hyderabad Centre"
+    },
+    {
+      "id": "topper-155",
+      "name": "AIR - 143 Gyanesh Gupta Two Year Classroom Program Student of FIITJEE Durgapur Centre",
+      "rank": "AIR - 156 Ankush Phulia Three Year Classroom Program Student of FIITJEE Delhi (South) Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 149 Kunal Chaturvedi PINNACLE- Two Year Integrated Program Student of FIITJEE Hyderabad Centre | AIR - 152 Aviral Kumar PINNACLE- Two Year Integrated School Program Student of FIITJEE Bhilai/Raipur Centre | AIR - 156 Ankush Phulia Three Year Classroom Program Student of FIITJEE Delhi (South) Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 143 Gyanesh Gupta Two Year Classroom Program Student of FIITJEE Durgapur Centre"
+    },
+    {
+      "id": "topper-156",
+      "name": "AIR - 158 Ayan Mandal PINNACLE- Two Year Integrated School Program Student of FIITJEE Bhilai/Raipur Centre",
+      "rank": "AIR - 166 Rishubh Singh Two Year Classroom Program Student of FIITJEE Lucknow Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 161 Nishit Asnani Four Year Classroom Program Student of FIITJEE Bhopal Centre | AIR - 162 Anant Kumar Singh Two Year Classroom Program Student of FIITJEE Lucknow Centre | AIR - 166 Rishubh Singh Two Year Classroom Program Student of FIITJEE Lucknow Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 158 Ayan Mandal PINNACLE- Two Year Integrated School Program Student of FIITJEE Bhilai/Raipur Centre"
+    },
+    {
+      "id": "topper-157",
+      "name": "Vadodara City Topper AIR - 167 Varunesh Goyal Two Year Classroom Program Student of FIITJEE Vadodara Centre",
+      "rank": "AIR - 179 M Afroz Alam Two Year Classroom Program Student of FIITJEE Delhi (South) Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 169 Rachit Arora Two Year CRP+ ASCENT- 2 Yrs CRP + TARGET NTSE-1 Yrs CRP Student of FIITJEE Delhi (Punjabi Bagh) Centre | AIR - 177 Deepak Bansal Two Year Classroom Program Student of FIITJEE Delhi (South) & then Faridabad Centre | AIR - 179 M Afroz Alam Two Year Classroom Program Student of FIITJEE Delhi (South) Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Vadodara City Topper AIR - 167 Varunesh Goyal Two Year Classroom Program Student of FIITJEE Vadodara Centre"
+    },
+    {
+      "id": "topper-158",
+      "name": "AIR - 23 Rakshak Satsangi One Year Classroom Program Student of FIITJEE Delhi NCR (Faridabad) Centre",
+      "rank": "AIR - 33 Aman Goel Two Year Classroom Program Student of FIITJEE Kanpur Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 25 K Krishna Harsha Reddy NTSE-1 Yr + ASCENT-2 Yr + PINNACLE-2 Yr Integrated Student of FIITJEE Hyderabad Centre | AIR - 32 Ritesh Theranikal Pinnacle - Two Year Integrated Program Student of FIITJEE Hyderabad Centre | AIR - 33 Aman Goel Two Year Classroom Program Student of FIITJEE Kanpur Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 23 Rakshak Satsangi One Year Classroom Program Student of FIITJEE Delhi NCR (Faridabad) Centre"
+    },
+    {
+      "id": "topper-159",
+      "name": "AIR - 34 Faran Ahmad Four Year Classroom Program Student of FIITJEE Delhi (South) Centre",
+      "rank": "AIR - 56 Aniket Khandelwal Two Year Classroom Program Student of FIITJEE Ranchi Centre (Aniket Khandelwal studied with FIITJEE only till almost Class XI end quite regularly. Thereafter upto the IIT-JEE Exam, he appeared in and benefited from all other services of FIITJEE like Study Packages, Internal Phase Tests, Doubt Removal Classes, All India Test Series, Grand Masters Package, Rankers Test Papers File etc. almost regularly.)",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 46 Harman Kumar Two Year Classroom Program Student of FIITJEE Delhi (South) Centre | AIR - 54 Sooraj Narayan ASCENT - 2 Year + PINNACLE - 2 Year Integrated School Program Student of FIITJEE Chennai Centre | AIR - 56 Aniket Khandelwal Two Year Classroom Program Student of FIITJEE Ranchi Centre (Aniket Khandelwal studied with FIITJEE only till almost Class XI end quite regularly. Thereafter upto the IIT-JEE Exam, he appeared in and benefited from all other services of FIITJEE like Study Packages, Internal Phase Tests, Doubt Removal Classes, All India Test Series, Grand Masters Package, Rankers Test Papers File etc. almost regularly.)",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 34 Faran Ahmad Four Year Classroom Program Student of FIITJEE Delhi (South) Centre"
+    },
+    {
+      "id": "topper-160",
+      "name": "AIR - 58 Shouvanik Chakrabarti Pinnacle - Two Year Integrated Program Student of FIITJEE Hyderabad Centre",
+      "rank": "AIR - 71 Suryakant Pandey Two Year Classroom Program Student of FIITJEE Ranchi Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 61 Haroun Habeeb NTSE-1 Yr + ASCENT-2 Yr + PINNACLE-2 Yr Integrated Student of FIITJEE Hyderabad Centre | AIR - 66 Anagh Prasad Two Year Classroom Program Student of FIITJEE Ranchi Centre | AIR - 71 Suryakant Pandey Two Year Classroom Program Student of FIITJEE Ranchi Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 58 Shouvanik Chakrabarti Pinnacle - Two Year Integrated Program Student of FIITJEE Hyderabad Centre"
+    },
+    {
+      "id": "topper-161",
+      "name": "AIR - 84 Shubham Rawat Two Year Classroom Program Student of FIITJEE Delhi (Punjabi Bagh) Centre",
+      "rank": "AIR - 100 G. Koushik Two Year Classroom Program Student of FIITJEE Chennai Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 91 S Aravindakshan Pinnacle - Two Year Integrated School Program Student of FIITJEE Chennai Centre | AIR - 99 Ananth Kamath Two Year Classroom Program Student of FIITJEE Bangalore Centre | AIR - 100 G. Koushik Two Year Classroom Program Student of FIITJEE Chennai Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 84 Shubham Rawat Two Year Classroom Program Student of FIITJEE Delhi (Punjabi Bagh) Centre"
+    },
+    {
+      "id": "topper-162",
+      "name": "AIR - 104 Ankush Singhal Two Year Classroom Program Student of FIITJEE Delhi NCR (Faridabad) Centre",
+      "rank": "AIR - 126 Vishrant Tripathy Two Year Classroom Program Student of FIITJEE Bhilai/Raipur Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 106 Sarthak Daga Two Year Classroom Program Student of FIITJEE Jaipur Centre | AIR - 125 Piyush Mohapatra Pinnacle - Two Year Integrated School Program Student of FIITJEE Delhi (South) Centre | AIR - 126 Vishrant Tripathy Two Year Classroom Program Student of FIITJEE Bhilai/Raipur Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 104 Ankush Singhal Two Year Classroom Program Student of FIITJEE Delhi NCR (Faridabad) Centre"
+    },
+    {
+      "id": "topper-163",
+      "name": "AIR - 144 Kabir Chhabra Two Year Classroom Program Student of FIITJEE Delhi (South) Centre",
+      "rank": "AIR - 167 Abhishek Anand Two Year Classroom Program Student of FIITJEE Bhilai/Raipur Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 157 Ashwin Bhat Intensive Contact Program Student of FIITJEE Mumbai Centre | AIR - 161 Vaibhav Pradeep Bhosale Two Year Classroom Program Student of FIITJEE Mumbai Centre | AIR - 167 Abhishek Anand Two Year Classroom Program Student of FIITJEE Bhilai/Raipur Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 144 Kabir Chhabra Two Year Classroom Program Student of FIITJEE Delhi (South) Centre"
+    },
+    {
+      "id": "topper-164",
+      "name": "AIR - 181 Sourya Basu Supreme - Four Year Integrated School Program Student of FIITJEE Delhi (Punjabi Bagh) Centre",
+      "rank": "AIR - 189 Shivanshu Gupta Two Year Condensed Classroom Program Student of FIITJEE Delhi (South) Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 185 Nishant Gaurav Pinnacle - Two Year Integrated School Program Student of FIITJEE Patna Centre | AIR - 186 Kavin Kumar S Supreme - 4 Yrs Integrated School Program Student of FIITJEE Chennai Centre | AIR - 189 Shivanshu Gupta Two Year Condensed Classroom Program Student of FIITJEE Delhi (South) Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 181 Sourya Basu Supreme - Four Year Integrated School Program Student of FIITJEE Delhi (Punjabi Bagh) Centre"
+    },
+    {
+      "id": "topper-165",
+      "name": "AIR - 197 Soham Banerjee Two Year Classroom Program Student of FIITJEE Shaktinagar Centre",
+      "rank": "AIR - 209 Keerti Anand Two Year Classroom Program Student of FIITJEE Delhi (South) Centre",
+      "exam": "JEE Advanced",
+      "year": "2025",
+      "program": "AIR - 198 Abhishek Pratap Singh Two Year Classroom Program Student of FIITJEE Delhi (East) Centre | AIR - 206 Suvajit Majumder Two Year Classroom Program Student of FIITJEE Kolkata Centre | AIR - 209 Keerti Anand Two Year Classroom Program Student of FIITJEE Delhi (South) Centre",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 197 Soham Banerjee Two Year Classroom Program Student of FIITJEE Shaktinagar Centre"
+    },
+    {
+      "id": "topper-166",
+      "name": "Bhubaneswar",
+      "rank": "Chennai",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Bokaro | Chandigarh | Chennai",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Bhubaneswar"
+    },
+    {
+      "id": "topper-167",
+      "name": "Coimbatore",
+      "rank": "Delhi (Janakpuri)",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Delhi (Dwarka) | Delhi (East) | Delhi (Janakpuri)",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Coimbatore"
+    },
+    {
+      "id": "topper-168",
+      "name": "Delhi (Punjabi Bagh)",
+      "rank": "Durgapur",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Delhi (South) | Dhanbad | Durgapur",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Delhi (Punjabi Bagh)"
+    },
+    {
+      "id": "topper-169",
+      "name": "Gorakhpur",
+      "rank": "Indore",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Gwalior | Hyderabad | Indore",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Gorakhpur"
+    },
+    {
+      "id": "topper-170",
+      "name": "Jaipur",
+      "rank": "Kolkata",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Kanpur | Kochi | Kolkata",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Jaipur"
+    },
+    {
+      "id": "topper-171",
+      "name": "Lucknow",
+      "rank": "Nagpur",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Meerut | Mumbai | Nagpur",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Lucknow"
+    },
+    {
+      "id": "topper-172",
+      "name": "NCR (Faridabad)",
+      "rank": "NCR (Noida)",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "NCR (Ghaziabad) | NCR (Gurugram) | NCR (Noida)",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=NCR (Faridabad)"
+    },
+    {
+      "id": "topper-173",
+      "name": "Patna",
+      "rank": "Ranchi",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Prayagraj | Pune | Ranchi",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Patna"
+    },
+    {
+      "id": "topper-174",
+      "name": "Shaktinagar",
+      "rank": "Vijayawada",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Vadodara | Varanasi | Vijayawada",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Shaktinagar"
+    },
+    {
+      "id": "topper-175",
+      "name": "Vizag",
+      "rank": "",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": " |  | ",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=Vizag"
+    },
+    {
+      "id": "topper-176",
+      "name": "Student of FIITJEE’s Two Year Classroom Program",
+      "rank": "",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Main_Student_of_FIITJEE_s_Two_Year_Classroom_Program.png"
+    },
+    {
+      "id": "topper-177",
+      "name": "Student of FIITJEE’s Four Year Classroom Program",
+      "rank": "",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Main_Student_of_FIITJEE_s_Four_Year_Classroom_Program.png"
+    },
+    {
+      "id": "topper-178",
+      "name": "Student of FIITJEE’s All India Test Series",
+      "rank": "",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Main_Student_of_FIITJEE_s_All_India_Test_Series.png"
+    },
+    {
+      "id": "topper-179",
+      "name": "PAL AGGARWAL",
+      "rank": "",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Main_PAL_AGGARWAL.png"
+    },
+    {
+      "id": "topper-180",
+      "name": "VAIBHAV VISHAL",
+      "rank": "",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Main_VAIBHAV_VISHAL.png"
+    },
+    {
+      "id": "topper-181",
+      "name": "AIR - 2",
+      "rank": "",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Main_AIR_-_2.jpg"
+    },
+    {
+      "id": "topper-182",
+      "name": "AIR - 9",
+      "rank": "",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Main_AIR_-_9.jpg"
+    },
+    {
+      "id": "topper-183",
+      "name": "AIR - 17",
+      "rank": "",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Main_AIR_-_17.jpg"
+    },
+    {
+      "id": "topper-184",
+      "name": "View On Map",
+      "rank": "",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/JEE_Main_View_On_Map.jpg"
+    },
+    {
+      "id": "topper-185",
+      "name": "AIR - 16 Anjishnu Bose Two Year Classroom Program Student of FIITJEE Delhi (East) Centre &#9998; Testimonial II Student Speak II Parents Speak",
+      "rank": "AIR - 32 Bihar State Topper Sayash Kapoor Three Year Classroom Program Student of FIITJEE Patna Centre &#9998; Testimonial II Student Speak II Parents Speak",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "AIR - 24 Aman Agarwal Four Year Classroom Program Student of FIITJEE Delhi (East) Centre &#9998; Testimonial II Student Speak II Parents Speak | AIR - 29 G Kavitha Three Year Classroom Program Student of FIITJEE Chennai Centre &#9998; Testimonial II Student Speak II Parents Speak | AIR - 32 Bihar State Topper Sayash Kapoor Three Year Classroom Program Student of FIITJEE Patna Centre &#9998; Testimonial II Student Speak II Parents Speak",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 16 Anjishnu Bose Two Year Classroom Program Student of FIITJEE Delhi (East) Centre &#9998; Testimonial II Student Speak II Parents Speak"
+    },
+    {
+      "id": "topper-186",
+      "name": "AIR - 33 Odisha State Topper Abhishek Sahoo Four Year Classroom Program Student of FIITJEE Bhubaneswar Centre &#9998; Testimonial II Student Speak II Parents Speak",
+      "rank": "AIR - 37 Chhattisgarh State Topper Simi Karan Four Year Classroom Program Student of FIITJEE Bhilai/Raipur Centre &#9998; Testimonial II Student Speak II Parents Speak",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "AIR - 35 Vinayak. K PINNACLE - Two Year Integrated School Program Student of FIITJEE Chennai Centre &#9998; Testimonial II Student Speak II Parents Speak | AIR - 36 Ayush Garg Two Year Classroom Program Student of FIITJEE Delhi (Punjabi Bagh) Centre &#9998; Testimonial II Student Speak II Parents Speak | AIR - 37 Chhattisgarh State Topper Simi Karan Four Year Classroom Program Student of FIITJEE Bhilai/Raipur Centre &#9998; Testimonial II Student Speak II Parents Speak",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 33 Odisha State Topper Abhishek Sahoo Four Year Classroom Program Student of FIITJEE Bhubaneswar Centre &#9998; Testimonial II Student Speak II Parents Speak"
+    },
+    {
+      "id": "topper-187",
+      "name": "AIR - 38 Abhisek Panda UDAYA- One Year Classroom Program + Four Year Classroom Program Student of FIITJEE Bhubaneswar Centre &#9998; Testimonial II Student Speak II Parents Speak",
+      "rank": "AIR - 44 B Akhil PINNACLE - Two Year Integrated School Program Student of FIITJEE Hyderabad Centre &#9998; Testimonial II Student Speak II Parents Speak",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "AIR - 40 Jharkhand State Topper Shashank Shekhar Four Year Classroom Program Student of FIITJEE Ranchi Centre &#9998; Testimonial II Student Speak II Parents Speak | AIR - 43 Dhanbad City Topper Abhishek Anand Two Year Classroom Program Student of FIITJEE Dhanbad Centre &#9998; Testimonial II Student Speak II Parents Speak | AIR - 44 B Akhil PINNACLE - Two Year Integrated School Program Student of FIITJEE Hyderabad Centre &#9998; Testimonial II Student Speak II Parents Speak",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 38 Abhisek Panda UDAYA- One Year Classroom Program + Four Year Classroom Program Student of FIITJEE Bhubaneswar Centre &#9998; Testimonial II Student Speak II Parents Speak"
+    },
+    {
+      "id": "topper-188",
+      "name": "AIR - 54 Ankur Sharma 3 Year Classroom Program then switched to PINNACLE- Two Year Integrated School Program Student of FIITJEE Delhi NCR (Ghaziabad) Centre &#9998; Testimonial II Student Speak II Parents Speak",
+      "rank": "AIR - 70 Utkarsh Sinha Four Year Classroom Program Student of FIITJEE Ranchi Centre &#9998; Testimonial II Student Speak II Parents Speak",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "AIR - 59 G.Kavya SUPREME- Four Year Integrated School Program Student of FIITJEE Chennai Centre &#9998; Testimonial II Student Speak II Parents Speak | AIR - 62 Jahnvi Rajesh Patel PINNACLE - Two Year Integrated School Program Student of FIITJEE Vadodara Centre &#9998; Testimonial II Student Speak II Parents Speak | AIR - 70 Utkarsh Sinha Four Year Classroom Program Student of FIITJEE Ranchi Centre &#9998; Testimonial II Student Speak II Parents Speak",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 54 Ankur Sharma 3 Year Classroom Program then switched to PINNACLE- Two Year Integrated School Program Student of FIITJEE Delhi NCR (Ghaziabad) Centre &#9998; Testimonial II Student Speak II Parents Speak"
+    },
+    {
+      "id": "topper-189",
+      "name": "AIR - 82 Abhishek Pathak Three Year Classroom Program Student of FIITJEE Kolkata Centre &#9998; Testimonial II Student Speak II Parents Speak",
+      "rank": "",
+      "exam": "JEE Main",
+      "year": "2025",
+      "program": "AIR - 94 Vishnuwardhan S SUPREME- Four Year Integrated School Program Student of FIITJEE Chennai Centre &#9998; Testimonial II Student Speak II Parents Speak | AIR - 97 Tanvi Aggarwal PINNACLE - Two Year Integrated School Program Student of FIITJEE Chandigarh Centre &#9998; Testimonial II Student Speak II Parents Speak | ",
+      "image": "https://api.dicebear.com/7.x/initials/svg?seed=AIR - 82 Abhishek Pathak Three Year Classroom Program Student of FIITJEE Kolkata Centre &#9998; Testimonial II Student Speak II Parents Speak"
+    },
+    {
+      "id": "topper-190",
+      "name": "Classroom Program for Students of Class X",
+      "rank": "",
+      "exam": "CBSE",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/CBSE_Classroom_Program_for_Students_of_Class_X.jpg"
+    },
+    {
+      "id": "topper-191",
+      "name": "Classroom Programs for Students of Class XII",
+      "rank": "",
+      "exam": "CBSE",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/CBSE_Classroom_Programs_for_Students_of_Class_XII.jpg"
+    },
+    {
+      "id": "topper-192",
+      "name": "99.40% Aggregate Marks",
+      "rank": "",
+      "exam": "CBSE",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/CBSE_99_40__Aggregate_Marks.jpg"
+    },
+    {
+      "id": "topper-193",
+      "name": "99.00% Aggregate Marks",
+      "rank": "",
+      "exam": "CBSE",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/CBSE_99_00__Aggregate_Marks.jpg"
+    },
+    {
+      "id": "topper-194",
+      "name": "98.60% Aggregate Marks",
+      "rank": "",
+      "exam": "CBSE",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/CBSE_98_60__Aggregate_Marks.jpg"
+    },
+    {
+      "id": "topper-195",
+      "name": "JEE Main Result, 2018",
+      "rank": "",
+      "exam": "CBSE",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/CBSE_JEE_Main_Result__2018.jpg"
+    },
+    {
+      "id": "topper-196",
+      "name": "98.40% Aggregate Marks",
+      "rank": "",
+      "exam": "CBSE",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/CBSE_98_40__Aggregate_Marks.png"
+    },
+    {
+      "id": "topper-197",
+      "name": "JEE Main Result, 2017",
+      "rank": "",
+      "exam": "CBSE",
+      "year": "2025",
+      "program": "Classroom Program",
+      "image": "/student_photos/CBSE_JEE_Main_Result__2017.jpg"
+    }
+  ],
+  "centers": [
+    {
+      "id": "delhi-south",
+      "city": "New Delhi",
+      "state": "Delhi NCR",
+      "name": "FIITJEE South Delhi (National Corporate Office)",
+      "address": "FIITJEE House, 29-A, Kalu Sarai, Sarvapriya Vihar, Near Hauz Khas Metro",
+      "phone": [
+        "011-49283471",
+        "011-46106000",
+        "1800 11 4242"
+      ],
+      "email": "southdelhi@fiitjee.com",
+      "isNationalHub": true,
+      "programsOffered": [
+        "PINNACLE",
+        "SUPREME",
+        "Two Year Classroom",
+        "UDAYA",
+        "ASCENT",
+        "Dropper Special"
+      ],
+      "timing": "Mon - Sun: 8:30 AM - 7:30 PM",
+      "pincode": "110016"
+    },
+    {
+      "id": "delhi-punjabi-bagh",
+      "city": "New Delhi",
+      "state": "Delhi NCR",
+      "name": "FIITJEE Punjabi Bagh Centre",
+      "address": "31, 32, 33, Central Market, West Avenue Road, Punjabi Bagh, New Delhi",
+      "phone": [
+        "011-45634000",
+        "011-45634001"
+      ],
+      "email": "punjabibagh@fiitjee.com",
+      "programsOffered": [
+        "PINNACLE",
+        "Two Year Classroom",
+        "ASCENT",
+        "Dropper Special"
+      ],
+      "timing": "Mon - Sun: 9:00 AM - 7:00 PM",
+      "pincode": "110026"
+    },
+    {
+      "id": "delhi-noida",
+      "city": "Noida",
+      "state": "Uttar Pradesh (Delhi NCR)",
+      "name": "FIITJEE Noida Sector-16",
+      "address": "B-4, Sector 16, Behind Metro Station, Noida",
+      "phone": [
+        "0120-4080400",
+        "0120-4080401"
+      ],
+      "email": "noida@fiitjee.com",
+      "programsOffered": [
+        "PINNACLE",
+        "SUPREME",
+        "Two Year Classroom",
+        "ASCENT",
+        "UDAYA"
+      ],
+      "timing": "Mon - Sun: 9:00 AM - 7:00 PM",
+      "pincode": "201301"
+    },
+    {
+      "id": "mumbai-andheri",
+      "city": "Mumbai",
+      "state": "Maharashtra",
+      "name": "FIITJEE Andheri West Centre",
+      "address": "201, 2nd Floor, Sterling Centre, Opp. Andheri Railway Station, Mumbai",
+      "phone": [
+        "022-42378100",
+        "022-26284700"
+      ],
+      "email": "andheri@fiitjee.com",
+      "programsOffered": [
+        "PINNACLE",
+        "Two Year Classroom",
+        "ASCENT",
+        "UDAYA"
+      ],
+      "timing": "Mon - Sun: 8:30 AM - 7:00 PM",
+      "pincode": "400058"
+    },
+    {
+      "id": "hyderabad-kukatpally",
+      "city": "Hyderabad",
+      "state": "Telangana",
+      "name": "FIITJEE Kukatpally Centre",
+      "address": "Plot No. 22 to 24, MIG, Housing Board Colony, Phase-1, Kukatpally, Hyderabad",
+      "phone": [
+        "040-66777000",
+        "040-66777001"
+      ],
+      "email": "kukatpally@fiitjee.com",
+      "isNationalHub": true,
+      "programsOffered": [
+        "Integrated College Program",
+        "PINNACLE",
+        "Two Year Classroom",
+        "ASCENT"
+      ],
+      "timing": "Mon - Sun: 8:00 AM - 8:00 PM",
+      "pincode": "500072"
+    },
+    {
+      "id": "bengaluru-hsr",
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "name": "FIITJEE Bengaluru HSR Layout Centre",
+      "address": "19th Main Road, Sector 4, HSR Layout, Bengaluru",
+      "phone": [
+        "080-49149999",
+        "080-41135682"
+      ],
+      "email": "bangalore@fiitjee.com",
+      "programsOffered": [
+        "PINNACLE",
+        "Two Year Classroom",
+        "ASCENT",
+        "Dropper Special"
+      ],
+      "timing": "Mon - Sun: 9:00 AM - 7:00 PM",
+      "pincode": "560102"
+    },
+    {
+      "id": "kolkata-south",
+      "city": "Kolkata",
+      "state": "West Bengal",
+      "name": "FIITJEE Kolkata South Centre",
+      "address": "124, Southern Avenue, Near Golpark, Kolkata",
+      "phone": [
+        "033-40566900",
+        "033-40566901"
+      ],
+      "email": "kolkata.south@fiitjee.com",
+      "programsOffered": [
+        "PINNACLE",
+        "SUPREME",
+        "Two Year Classroom",
+        "UDAYA",
+        "ASCENT"
+      ],
+      "timing": "Mon - Sun: 8:30 AM - 7:30 PM",
+      "pincode": "700029"
+    },
+    {
+      "id": "chennai-kilpauk",
+      "city": "Chennai",
+      "state": "Tamil Nadu",
+      "name": "FIITJEE Chennai Kilpauk Centre",
+      "address": "No. 175, Poonamallee High Road, Opp. Ega Theatre, Kilpauk, Chennai",
+      "phone": [
+        "044-43937100",
+        "044-42859701"
+      ],
+      "email": "chennai@fiitjee.com",
+      "programsOffered": [
+        "PINNACLE",
+        "Two Year Classroom",
+        "ASCENT",
+        "UDAYA"
+      ],
+      "timing": "Mon - Sun: 9:00 AM - 7:00 PM",
+      "pincode": "600010"
+    },
+    {
+      "id": "jaipur-malviya",
+      "city": "Jaipur",
+      "state": "Rajasthan",
+      "name": "FIITJEE Jaipur Malviya Nagar",
+      "address": "Plot No. 3-A, Girdhar Marg, Sector 9, Malviya Nagar, Jaipur",
+      "phone": [
+        "0141-4036666",
+        "0141-4036667"
+      ],
+      "email": "jaipur@fiitjee.com",
+      "programsOffered": [
+        "PINNACLE",
+        "Two Year Classroom",
+        "Dropper Special"
+      ],
+      "timing": "Mon - Sun: 9:00 AM - 7:00 PM",
+      "pincode": "302017"
+    },
+    {
+      "id": "dubai-gulf",
+      "city": "Dubai",
+      "state": "UAE & Gulf (International)",
+      "name": "FIITJEE GCC Global Centre (Dubai)",
+      "address": "Al Zarooni Building, Al Barsha 1, Sheikh Zayed Road, Dubai, UAE",
+      "phone": [
+        "+971-4-3563777",
+        "+971-55-9778900"
+      ],
+      "email": "dubai@fiitjee.com",
+      "programsOffered": [
+        "eSchool Global",
+        "Classroom Weekend",
+        "AITS International"
+      ],
+      "timing": "Mon - Sun: 9:00 AM - 8:00 PM (GST)",
+      "pincode": "UAE-001"
+    }
+  ],
+  "notices": [
+    {
+      "id": "n-big-bang",
+      "date": "31 Aug 2026",
+      "title": "Registration Open: Big Bang Edge Test — 11th & 18th Oct 2026 | Class V–XI | Offline & Proctored Online | Bhubaneswar · Ranchi · Dwarka · Hyderabad",
+      "category": "Exam Date",
+      "isUrgent": true,
+      "linkText": "Register for Big Bang",
+      "linkAction": "open-big-bang-modal"
+    },
+    {
+      "id": "n-1",
+      "date": "28 Aug 2026",
+      "title": "FTRE 2026-27 (FIITJEE Talent Reward Exam): Registration Open for Class V, VI, VII, VIII, IX, X & XI with up to 100% Tuition Fee Waiver.",
+      "category": "Scholarship",
+      "isUrgent": true,
+      "linkText": "Register for FTRE",
+      "linkAction": "open-ftre-modal"
+    },
+    {
+      "id": "n-2",
+      "date": "26 Aug 2026",
+      "title": "Admit Card released for All India Admission Test & Big Bang Edge Test (Offline CBT & Online Proctored).",
+      "category": "Admit Card",
+      "isUrgent": true,
+      "linkText": "Download Admit Card",
+      "linkAction": "open-ftre-modal"
+    },
+    {
+      "id": "n-3",
+      "date": "22 Aug 2026",
+      "title": "FIITJEEians dominate JEE Advanced 2026 with 37 Ranks in Top 100 All India Rankers from Classroom Programs.",
+      "category": "Result",
+      "isUrgent": false,
+      "linkText": "View Rankers"
+    },
+    {
+      "id": "n-4",
+      "date": "18 Aug 2026",
+      "title": "Computer Based All India Test Series (CBT-AITS) for JEE 2027: Registrations open with National Benchmarking.",
+      "category": "Exam Date",
+      "isUrgent": false,
+      "linkText": "Explore AITS"
+    }
+  ],
+  "why_fiitjee_points": [
+    {
+      "title": "Pattern-Proof Teaching Methodology",
+      "desc": "Our faculty prepares students to master fundamental principles so deeply that changes in examination pattern (from subjective to objective, multi-correct, matrix match, numerical integer) never throw them off.",
+      "icon": "ShieldCheck"
+    },
+    {
+      "title": "Comprehensive Study Material & GMP",
+      "desc": "Rankers Study Material (RSM) and Grand Master Package (GMP) with 1500+ curated problems have remained the undisputed gold standard in competitive test prep for over 3 decades.",
+      "icon": "BookOpen"
+    },
+    {
+      "title": "National Level Benchmarking (AITS & AI²TS)",
+      "desc": "With tens of thousands of top brains competing on the same test, students receive precise all-India percentile projections and micro-topic diagnostic heatmaps.",
+      "icon": "BarChart3"
+    },
+    {
+      "title": "Full-Time Dedicated Faculty Ecosystem",
+      "desc": "Unlike generic coaching hubs, all FIITJEE faculty are full-time, exclusively trained through rigorous faculty development programs and strictly monitored for instructional quality.",
+      "icon": "GraduationCap"
+    },
+    {
+      "title": "Holistic Student Development & Mental Conditioning",
+      "desc": "Beyond academics, regular motivational seminars, stress management, speed-enhancement drills, and meditation sessions keep aspirants peak-ready.",
+      "icon": "Sparkles"
+    },
+    {
+      "title": "Integrated Synchronized Schooling",
+      "desc": "PINNACLE and SUPREME models save 4-5 hours of daily travel and school-coaching scheduling friction, giving students crucial extra self-study hours.",
+      "icon": "Clock"
+    }
+  ],
+  "admission_exams": [
+    {
+      "id": "big-bang-edge-test",
+      "name": "Big Bang Edge Test",
+      "fullBrandedName": "FIITJEE Big Bang Edge Test",
+      "tagline": "Some choices are obvious.",
+      "description": "A 360° analysis of aptitude, potential & academic standing.",
+      "targetClasses": [
+        "V",
+        "VI",
+        "VII",
+        "VIII",
+        "IX",
+        "X",
+        "XI"
+      ],
+      "targetClassesDisplay": "Class V · VI · VII · VIII · IX · X · XI",
+      "testDates": [
+        "11th October 2026 (Sunday)",
+        "18th October 2026 (Sunday)"
+      ],
+      "modes": [
+        "Offline",
+        "Proctored Online"
+      ],
+      "offlineCenters": [
+        {
+          "city": "Bhubaneswar",
+          "phone": "76820 41257"
+        },
+        {
+          "city": "Ranchi",
+          "phone": "98351 55509"
+        },
+        {
+          "city": "Dwarka",
+          "phone": "85272 08022"
+        },
+        {
+          "city": "Hyderabad (Madhapur)",
+          "phone": "92475 51761"
+        }
+      ],
+      "year": "2026",
+      "registrationOpen": true,
+      "registrationDbPath": "registrations/big_bang_2026"
+    }
+  ]
+}

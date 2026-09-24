@@ -1,0 +1,47 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": false,
+    "registrations": {
+      ".write": true,
+      ".read": true
+    },
+    "coupons": {
+      ".read": true,
+      ".write": true
+    },
+    "crm_campaigns": {
+      ".read": true,
+      ".write": true
+    },
+    "crm_contacts_notes": {
+      ".read": true,
+      ".write": true
+    },
+    "crm_templates": {
+      ".read": true,
+      ".write": true
+    },
+    "admin_logs": {
+      ".write": true,
+      ".read": true
+    },
+    "students": {
+      ".read": true,
+      ".write": true
+    },
+    "student_centre_index": {
+      ".read": true,
+      ".write": true
+    },
+    "support_tickets": {
+      ".read": true,
+      ".write": true
+    },
+    "results": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}
+
