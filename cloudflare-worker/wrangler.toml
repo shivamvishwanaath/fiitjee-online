@@ -1,0 +1,8 @@
+name = "fiitjee-cashfree-api"
+main = "worker.js"
+compatibility_date = "2024-09-01"
+
+[vars]
+CASHFREE_APP_ID = "1413030833f298ae646e8a84a2c0303141"
+# Note: Set CASHFREE_SECRET_KEY as a secret using:
+# npx wrangler secret put CASHFREE_SECRET_KEY

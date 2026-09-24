@@ -127,10 +127,11 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
       return;
     }
 
-    // Live Cashfree Checkout Integration
+    // Live Cashfree Checkout Integration (Powered by Cloudflare Worker at edge)
+    const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://fiitjee-cashfree-api.shivam-strive.workers.dev').replace(/\/$/, '');
     try {
-      // 1. Create order on Cashfree via server endpoint
-      const response = await fetch('/api/create-cashfree-order', {
+      // 1. Create order on Cashfree via server / Cloudflare Worker endpoint
+      const response = await fetch(`${API_BASE_URL}/api/create-cashfree-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -169,10 +170,10 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
         return;
       }
 
-      // 4. Verify Payment Status with Cashfree backend
+      // 4. Verify Payment Status with backend / Cloudflare Worker
       let verifiedPaymentId = `CF_PAY_${Date.now()}`;
       try {
-        const verifyRes = await fetch(`/api/verify-cashfree-order?orderId=${encodeURIComponent(orderData.order_id)}`);
+        const verifyRes = await fetch(`${API_BASE_URL}/api/verify-cashfree-order?orderId=${encodeURIComponent(orderData.order_id)}`);
         if (verifyRes.ok) {
           const verifyData = await verifyRes.json();
           if (verifyData.isPaid) {
