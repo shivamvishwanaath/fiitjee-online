@@ -174,18 +174,39 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
         const selCentre = getCentreByName(formData.selectedCenter || 'Bhubaneswar');
         const centreId = selCentre.id;
         const dbRef = ref(db, `${BIG_BANG_EXAM.registrationDbPath}/${centreId}`);
-        const phoneQuery = query(dbRef, orderByChild('phone'), equalTo(formData.phone));
-        const snapshot = await get(phoneQuery);
-        if (snapshot.exists()) {
-          const val = snapshot.val();
-          const validRecords = Object.values(val).filter((r: any) => r && r.rollNo);
-          if (validRecords.length > 0) {
-            const existingReg = validRecords[0] as ExamRegistration;
-            setDuplicateWarning(`A registration already exists for this phone number at ${selCentre.name} Centre. Roll No: ${existingReg.rollNo}.`);
+        let existingReg: ExamRegistration | null = null;
+
+        try {
+          const phoneQuery = query(dbRef, orderByChild('phone'), equalTo(formData.phone));
+          const snapshot = await get(phoneQuery);
+          if (snapshot.exists()) {
+            const val = snapshot.val();
+            const validRecords = Object.values(val).filter((r: any) => r && r.rollNo);
+            if (validRecords.length > 0) {
+              existingReg = validRecords[0] as ExamRegistration;
+            }
+          }
+        } catch {
+          // Resilient fallback: fetch centre nodes and check phone client-side
+          try {
+            const snapshot = await get(dbRef);
+            if (snapshot.exists()) {
+              const val = snapshot.val();
+              const validRecords = Object.values(val).filter((r: any) => r && r.phone === formData.phone && r.rollNo);
+              if (validRecords.length > 0) {
+                existingReg = validRecords[0] as ExamRegistration;
+              }
+            }
+          } catch {
+            // Silently ignore if network or permissions fail
           }
         }
+
+        if (existingReg) {
+          setDuplicateWarning(`A registration already exists for this phone number at ${selCentre.name} Centre. Roll No: ${existingReg.rollNo}.`);
+        }
       } catch (err: any) {
-        console.error("Duplicate check failed:", err.message);
+        // Non-blocking warning only
       } finally {
         setSubmitState('idle');
       }

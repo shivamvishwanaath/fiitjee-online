@@ -14,7 +14,8 @@ import {
   EyeOff,
   Sparkles,
   Building2,
-  ChevronLeft
+  ChevronLeft,
+  Hash
 } from 'lucide-react';
 import { useStudentAuth } from '../hooks/useStudentAuth';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
@@ -25,14 +26,16 @@ export const StudentLogin: React.FC = () => {
   const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login';
   const redirectUrl = searchParams.get('redirect') || '/student/dashboard';
 
-  const { login, signup, isAuthenticated, loading: authLoading } = useStudentAuth();
+  const { login, loginWithRollOrPhone, signup, isAuthenticated, loading: authLoading } = useStudentAuth();
 
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
+  const [loginMethod, setLoginMethod] = useState<'roll_phone' | 'email_pass'>('roll_phone');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Form states
+  const [identifierInput, setIdentifierInput] = useState('');
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
@@ -54,6 +57,21 @@ export const StudentLogin: React.FC = () => {
     }
   }, [isAuthenticated, authLoading, navigate, redirectUrl]);
 
+  const handleRollLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+    setSubmitting(true);
+
+    try {
+      await loginWithRollOrPhone(identifierInput.trim());
+      navigate(redirectUrl);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'No candidate record found for this Roll Number or Mobile Number.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -64,8 +82,10 @@ export const StudentLogin: React.FC = () => {
       navigate(redirectUrl);
     } catch (err: any) {
       console.error('Student login error:', err);
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
-        setErrorMessage('Invalid student email or password. If you do not have an account, please click "Create Account".');
+      if (err.message && !err.message.includes('Firebase:')) {
+        setErrorMessage(err.message);
+      } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        setErrorMessage('Invalid student email or password. If you registered for an admission test, switch to "Roll No / Mobile" for instant access.');
       } else {
         setErrorMessage(err.message || 'Failed to sign in. Please verify your internet and credentials.');
       }
@@ -188,63 +208,128 @@ export const StudentLogin: React.FC = () => {
             )}
 
             {mode === 'login' ? (
-              /* --- SIGN IN FORM --- */
-              <form onSubmit={handleLoginSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Student Email Address
-                  </label>
-                  <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="email"
-                      required
-                      placeholder="e.g. rahul.sharma@gmail.com"
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
-                    />
-                  </div>
+              /* --- SIGN IN OPTIONS --- */
+              <div className="space-y-4">
+                {/* Login Method Sub-Tabs */}
+                <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => { setLoginMethod('roll_phone'); setErrorMessage(null); }}
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      loginMethod === 'roll_phone' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Roll No / Mobile (Fast Access)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setLoginMethod('email_pass'); setErrorMessage(null); }}
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      loginMethod === 'email_pass' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Email & Password
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      placeholder="Enter your account password"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
-                    />
+                {loginMethod === 'roll_phone' ? (
+                  /* Option A: Fast Access via Roll Number or Mobile */
+                  <form onSubmit={handleRollLoginSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Exam Roll Number or Registered 10-Digit Mobile
+                      </label>
+                      <div className="relative">
+                        <Hash className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. 7052 03733 111026 0012 or 9437012345"
+                          value={identifierInput}
+                          onChange={(e) => setIdentifierInput(e.target.value)}
+                          className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        Use the 10-digit mobile number or exam roll number from your admission test registration.
+                      </p>
+                    </div>
+
                     <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      type="submit"
+                      disabled={submitting || !identifierInput.trim()}
+                      className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 mt-2"
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {submitting ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <span>Access Candidate Dashboard</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
                     </button>
-                  </div>
-                </div>
+                  </form>
+                ) : (
+                  /* Option B: Standard Email & Password */
+                  <form onSubmit={handleLoginSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Student Email Address
+                      </label>
+                      <div className="relative">
+                        <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="email"
+                          required
+                          placeholder="e.g. rahul.sharma@gmail.com"
+                          value={loginEmail}
+                          onChange={(e) => setLoginEmail(e.target.value)}
+                          className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                        />
+                      </div>
+                    </div>
 
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 mt-2"
-                >
-                  {submitting ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <span>Sign In to Student Portal</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          required
+                          placeholder="Enter your account password"
+                          value={loginPassword}
+                          onChange={(e) => setLoginPassword(e.target.value)}
+                          className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 mt-2"
+                    >
+                      {submitting ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <span>Sign In to Student Portal</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
 
                 <div className="text-center pt-2">
                   <span className="text-xs text-slate-500">Don't have an account yet? </span>
@@ -256,7 +341,7 @@ export const StudentLogin: React.FC = () => {
                     Create Free Student Account
                   </button>
                 </div>
-              </form>
+              </div>
             ) : (
               /* --- REGISTER STUDENT FORM --- */
               <form onSubmit={handleRegisterSubmit} className="space-y-4">

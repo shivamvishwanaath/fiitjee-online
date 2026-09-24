@@ -4,7 +4,12 @@
     ".write": false,
     "registrations": {
       ".write": true,
-      ".read": true
+      ".read": true,
+      "$exam": {
+        "$centre": {
+          ".indexOn": ["phone", "email", "rollNo"]
+        }
+      }
     },
     "coupons": {
       ".read": true,

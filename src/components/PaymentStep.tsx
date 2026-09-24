@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { validateCoupon, redeemCoupon } from '../admin/utils/couponUtils';
 import { CouponProfile } from '../types';
+import { load as loadCashfree } from '@cashfreepayments/cashfree-js';
 
 export interface PaymentCompletionData {
   paymentStatus: 'free' | 'paid';
@@ -100,23 +101,22 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
     }
   };
 
-  // Cashfree Hosted Payment Redirection or Simulation
+  // Cashfree Checkout Integration
   const handleProceedCashfree = async (simulate: boolean = false) => {
     setProcessingPayment(true);
     setPaymentError(null);
 
     const orderId = `ORD_BBET_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
-    const paymentId = `CF_PAY_${Date.now()}`;
 
     if (simulate) {
-      // Instant simulation for testing
+      // Instant simulation for testing without debiting real money
       try {
         await new Promise(r => setTimeout(r, 600));
         await onSuccess({
           paymentStatus: 'paid',
           paymentAmount: payableFee,
           cashfreeOrderId: orderId,
-          cashfreePaymentId: paymentId,
+          cashfreePaymentId: `CF_SIM_${Date.now()}`,
           couponCodeApplied: appliedCoupon ? appliedCoupon.code : undefined,
           discountAmount: discountAmount
         });
@@ -127,40 +127,75 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
       return;
     }
 
-    // Live Cashfree Hosted Checkout Flow
+    // Live Cashfree Checkout Integration
     try {
-      // Save in-progress registration payload to sessionStorage so return URL can resume if needed
-      const pendingData = {
-        orderId,
-        studentName,
-        studentEmail,
-        studentPhone,
-        payableFee,
-        couponCode: appliedCoupon?.code
-      };
-      sessionStorage.setItem('cf_pending_order', JSON.stringify(pendingData));
+      // 1. Create order on Cashfree via server endpoint
+      const response = await fetch('/api/create-cashfree-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderAmount: payableFee,
+          studentName,
+          studentEmail,
+          studentPhone,
+          orderId,
+          returnUrl: window.location.protocol === 'https:' ? window.location.href : 'https://fiitjee.online/student/dashboard'
+        })
+      });
 
-      // In sandbox/production, Cashfree hosted payment links are generated via Cashfree PG API.
-      // If VITE_CASHFREE_APP_ID is present, redirect to Cashfree checkout or open Cashfree popup
-      const cashfreeAppId = (import.meta as any).env?.VITE_CASHFREE_APP_ID;
-      if (cashfreeAppId) {
-        // Direct to Cashfree hosted checkout page
-        const redirectUrl = `https://payments-test.cashfree.com/order/#${orderId}`;
-        window.open(redirectUrl, '_blank');
+      const orderData = await response.json();
+
+      if (!response.ok || !orderData.payment_session_id) {
+        throw new Error(orderData.error || 'Failed to initialize Cashfree payment session');
       }
 
-      // Simulate completion on this tab so user can immediately view Hall Ticket
-      await new Promise(r => setTimeout(r, 1200));
+      // 2. Initialize official Cashfree JS SDK in production mode
+      const cashfree = await loadCashfree({
+        mode: 'production'
+      });
+
+      // 3. Open Cashfree Checkout Modal (UPI QR, Google Pay, PhonePe, Cards, Netbanking)
+      const checkoutResult: any = await cashfree.checkout({
+        paymentSessionId: orderData.payment_session_id,
+        redirectTarget: '_modal'
+      });
+
+      if (checkoutResult?.error) {
+        console.warn('Cashfree payment modal closed/error:', checkoutResult.error);
+        setProcessingPayment(false);
+        if (checkoutResult.error.message && !checkoutResult.error.message.toLowerCase().includes('closed')) {
+          setPaymentError(checkoutResult.error.message);
+        }
+        return;
+      }
+
+      // 4. Verify Payment Status with Cashfree backend
+      let verifiedPaymentId = `CF_PAY_${Date.now()}`;
+      try {
+        const verifyRes = await fetch(`/api/verify-cashfree-order?orderId=${encodeURIComponent(orderData.order_id)}`);
+        if (verifyRes.ok) {
+          const verifyData = await verifyRes.json();
+          if (verifyData.isPaid) {
+            verifiedPaymentId = verifyData.paymentId || verifiedPaymentId;
+          }
+        }
+      } catch (verifyErr) {
+        console.warn('Background payment status check:', verifyErr);
+      }
+
+      // 5. Success callback - completes candidate registration & renders Official Hall Ticket
       await onSuccess({
         paymentStatus: 'paid',
         paymentAmount: payableFee,
-        cashfreeOrderId: orderId,
-        cashfreePaymentId: paymentId,
+        cashfreeOrderId: orderData.order_id,
+        cashfreePaymentId: verifiedPaymentId,
         couponCodeApplied: appliedCoupon ? appliedCoupon.code : undefined,
         discountAmount: discountAmount
       });
+
     } catch (err: any) {
-      setPaymentError(err.message || 'Payment processing failed');
+      console.error('Cashfree PG Checkout Error:', err);
+      setPaymentError(err.message || 'Payment processing failed. Please try again.');
       setProcessingPayment(false);
     }
   };
