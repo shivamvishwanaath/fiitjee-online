@@ -50,6 +50,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
 
   const [processingPayment, setProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [completedPayment, setCompletedPayment] = useState<PaymentCompletionData | null>(null);
 
   const payableFee = Math.max(0, Math.round((baseFee - discountAmount) * 100) / 100);
   const isFullyWaived = payableFee === 0;
@@ -89,12 +90,14 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
     setProcessingPayment(true);
     setPaymentError(null);
     try {
-      await onSuccess({
+      const freePayload: PaymentCompletionData = {
         paymentStatus: 'free',
         paymentAmount: 0,
-        couponCodeApplied: appliedCoupon ? appliedCoupon.code : undefined,
-        discountAmount: discountAmount
-      });
+        couponCodeApplied: appliedCoupon ? appliedCoupon.code : '',
+        discountAmount: discountAmount || 0
+      };
+      setCompletedPayment(freePayload);
+      await onSuccess(freePayload);
     } catch (err: any) {
       setPaymentError(err.message || 'Registration completion failed');
       setProcessingPayment(false);
@@ -112,14 +115,16 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
       // Instant simulation for testing without debiting real money
       try {
         await new Promise(r => setTimeout(r, 600));
-        await onSuccess({
+        const simPayload: PaymentCompletionData = {
           paymentStatus: 'paid',
           paymentAmount: payableFee,
           cashfreeOrderId: orderId,
           cashfreePaymentId: `CF_SIM_${Date.now()}`,
-          couponCodeApplied: appliedCoupon ? appliedCoupon.code : undefined,
-          discountAmount: discountAmount
-        });
+          couponCodeApplied: appliedCoupon ? appliedCoupon.code : '',
+          discountAmount: discountAmount || 0
+        };
+        setCompletedPayment(simPayload);
+        await onSuccess(simPayload);
       } catch (err: any) {
         setPaymentError(err.message || 'Payment simulation failed');
         setProcessingPayment(false);
@@ -185,14 +190,16 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
       }
 
       // 5. Success callback - completes candidate registration & renders Official Hall Ticket
-      await onSuccess({
+      const completionPayload: PaymentCompletionData = {
         paymentStatus: 'paid',
         paymentAmount: payableFee,
-        cashfreeOrderId: orderData.order_id,
-        cashfreePaymentId: verifiedPaymentId,
-        couponCodeApplied: appliedCoupon ? appliedCoupon.code : undefined,
-        discountAmount: discountAmount
-      });
+        cashfreeOrderId: orderData.order_id || '',
+        cashfreePaymentId: verifiedPaymentId || '',
+        couponCodeApplied: appliedCoupon ? appliedCoupon.code : '',
+        discountAmount: discountAmount || 0
+      };
+      setCompletedPayment(completionPayload);
+      await onSuccess(completionPayload);
 
     } catch (err: any) {
       console.error('Cashfree PG Checkout Error:', err);
@@ -251,7 +258,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
         <div className="border-t border-slate-200 pt-3 flex justify-between items-center">
           <div>
             <span className="text-base font-black text-[#002147]">Total Net Payable</span>
-            <span className="text-[11px] text-slate-400 block font-normal">Inclusive of 18% GST (CGST 9% + SGST 9%)</span>
+            <span className="text-[11px] text-slate-400 block font-normal">Inclusive of all applicable taxes &amp; examination fees</span>
           </div>
           <div className="text-right">
             <span className="text-2xl font-black text-[#ED1C24]">
@@ -354,6 +361,36 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
               </>
             )}
           </button>
+        ) : completedPayment ? (
+          <div className="flex items-center gap-2 flex-1 justify-end">
+            <button
+              type="button"
+              onClick={async () => {
+                setProcessingPayment(true);
+                setPaymentError(null);
+                try {
+                  await onSuccess(completedPayment);
+                } catch (e: any) {
+                  setPaymentError(e.message || 'Registration completion failed');
+                  setProcessingPayment(false);
+                }
+              }}
+              disabled={processingPayment}
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-md hover:shadow-lg cursor-pointer animate-pulse"
+            >
+              {processingPayment ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Submitting Registration...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Payment Verified · Complete Registration & Get Hall Ticket</span>
+                </>
+              )}
+            </button>
+          </div>
         ) : (
           <div className="flex items-center gap-2 flex-1 justify-end">
             <button

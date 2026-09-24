@@ -47,6 +47,20 @@ const initialFormData = {
   selectedCenter: 'Bhubaneswar'
 };
 
+// Deep sanitize helper to eliminate any undefined values that crash Firebase RTDB
+function sanitizeForFirebase<T>(obj: T): T {
+  if (obj === null || obj === undefined) return null as any;
+  if (typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(sanitizeForFirebase) as any;
+  const clean: Record<string, any> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v !== undefined) {
+      clean[k] = sanitizeForFirebase(v);
+    }
+  }
+  return clean as T;
+}
+
 export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> = ({
   isOpen,
   onClose
@@ -60,6 +74,8 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   const [registration, setRegistration] = useState<ExamRegistration | null>(null);
   const [formData, setFormData] = useState({ ...initialFormData });
+  const [lastPaymentData, setLastPaymentData] = useState<PaymentCompletionData | null>(null);
+  const [assignedRollNo, setAssignedRollNo] = useState<string | null>(null);
 
   // Reset form when modal opens and populate with authenticated student's profile
   useEffect(() => {
@@ -219,13 +235,15 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
   const handlePaymentComplete = async (paymentData: PaymentCompletionData) => {
     setSubmitState('submitting');
     setErrorMessage(null);
+    setLastPaymentData(paymentData);
 
     try {
       const selectedCentreProfile = getCentreByName(formData.selectedCenter || 'Bhubaneswar');
       const centreId = selectedCentreProfile.id;
       const seqSuffix = Date.now().toString().slice(-4);
       const counterId = Math.floor(10 + (Date.now() % 90));
-      const rollNo = `7052 ${selectedCentreProfile.numericCode}${seqSuffix} 111026 00${counterId}`;
+      const rollNo = assignedRollNo || `7052 ${selectedCentreProfile.numericCode}${seqSuffix} 111026 00${counterId}`;
+      if (!assignedRollNo) setAssignedRollNo(rollNo);
       const sid = generateSID(rollNo);
       const invoiceNo = generateInvoiceNumber(selectedCentreProfile, rollNo);
 
@@ -247,24 +265,24 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
         invoiceNo: invoiceNo,
         invoiceDate: new Date().toISOString().split('T')[0],
         status: 'Confirmed',
-        paymentStatus: paymentData.paymentStatus,
-        paymentAmount: paymentData.paymentAmount,
-        cashfreeOrderId: paymentData.cashfreeOrderId,
-        cashfreePaymentId: paymentData.cashfreePaymentId,
-        couponCodeApplied: paymentData.couponCodeApplied,
-        discountAmount: paymentData.discountAmount,
+        paymentStatus: paymentData.paymentStatus || 'paid',
+        paymentAmount: Number(paymentData.paymentAmount) || 0,
+        cashfreeOrderId: paymentData.cashfreeOrderId || '',
+        cashfreePaymentId: paymentData.cashfreePaymentId || '',
+        couponCodeApplied: paymentData.couponCodeApplied || '',
+        discountAmount: Number(paymentData.discountAmount) || 0,
         paymentRef: paymentData.cashfreePaymentId ? `CF-${paymentData.cashfreePaymentId}` : `${selectedCentreProfile.numericCode}/ADM-${seqSuffix}`
       };
 
       const cleanRollKey = rollNo.replace(/\s+/g, '_');
       const dbRef = ref(db, `${BIG_BANG_EXAM.registrationDbPath}/${centreId}/${cleanRollKey}`);
-      await set(dbRef, payload);
+      await set(dbRef, sanitizeForFirebase(payload));
 
       // Link registration to authenticated student profile
       if (student?.uid) {
         try {
           const studentExamLinkRef = ref(db, `students/${student.uid}/registeredExams/big_bang_2026`);
-          await set(studentExamLinkRef, {
+          await set(studentExamLinkRef, sanitizeForFirebase({
             examId: BIG_BANG_EXAM.id,
             examName: BIG_BANG_EXAM.name,
             rollNo: rollNo,
@@ -273,12 +291,12 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
             testDate: formData.testDate,
             testMode: formData.testMode,
             registeredAt: new Date().toISOString(),
-            paymentStatus: paymentData.paymentStatus,
-            paymentAmount: paymentData.paymentAmount,
-            paymentRef: payload.paymentRef,
+            paymentStatus: paymentData.paymentStatus || 'paid',
+            paymentAmount: Number(paymentData.paymentAmount) || 0,
+            paymentRef: payload.paymentRef || '',
             invoiceNo: invoiceNo,
             sid: sid
-          });
+          }));
 
           // Ensure student is also indexed under this centre in CRM
           await set(ref(db, `student_centre_index/${centreId}/${student.uid}`), true);
@@ -402,9 +420,36 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
         {/* Form Container */}
         <div className="p-6">
           {errorMessage && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-[#ED1C24] rounded-lg text-xs font-bold flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              <div>{errorMessage}</div>
+            <div className="mb-4 p-3.5 bg-red-50 border border-red-200 text-[#ED1C24] rounded-xl text-xs font-bold space-y-2.5">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="flex-1 font-semibold">{errorMessage}</div>
+              </div>
+              {lastPaymentData && (
+                <div className="pt-2 border-t border-red-200/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span className="text-slate-700 font-medium text-[11px]">
+                    Your payment of ₹{lastPaymentData.paymentAmount} was verified! Click retry to complete registration & get Hall Ticket:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handlePaymentComplete(lastPaymentData)}
+                    disabled={submitState === 'submitting'}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition-colors shadow-sm shrink-0 cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    {submitState === 'submitting' ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Confirming...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Retry & Get Hall Ticket</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

@@ -514,7 +514,7 @@ export const CENTERS: CenterLocation[] = [
     phone: ['+971-4-3563777', '+971-55-9778900'],
     email: 'dubai@fiitjee.com',
     programsOffered: ['eSchool Global', 'Classroom Weekend', 'AITS International'],
-    timing: 'Mon - Sun: 9:00 AM - 8:00 PM (GST)',
+    timing: 'Mon - Sun: 9:00 AM - 8:00 PM (Gulf Standard Time)',
     pincode: 'UAE-001'
   }
 ];

@@ -32,7 +32,7 @@ export const HallTicketModal: React.FC<HallTicketModalProps> = ({
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-400" />
             <div>
-              <h3 className="font-bold text-sm">Official FIITJEE Hall Ticket & Tax Invoice</h3>
+              <h3 className="font-bold text-sm">Official FIITJEE Hall Ticket &amp; Fee Receipt</h3>
               <p className="text-[11px] text-slate-300">Roll No: {registration.rollNo} | {registration.studentName}</p>
             </div>
           </div>

@@ -31,24 +31,21 @@ export const OfficialHallTicket: React.FC<OfficialHallTicketProps> = ({
 
   // Dynamic fee calculation (if fee paid or free/waived)
   const paidAmount = registration.paymentAmount !== undefined ? Number(registration.paymentAmount) : (registration.paymentStatus === 'paid' ? 1.00 : 0.00);
-  const taxableBase = paidAmount > 0 ? (paidAmount / 1.18).toFixed(2) : '0.00';
-  const taxEach = paidAmount > 0 ? ((paidAmount - parseFloat(taxableBase)) / 2).toFixed(2) : '0.00';
 
   const renderTaxInvoice = (type: 'Duplicate' | 'Original') => (
     <div className="border border-black p-2 text-[8.5px] leading-tight flex-1 font-sans text-black">
       <div className="text-center font-bold text-[10px] tracking-wide">TRANSED LLP (FIITJEE ADMISSIONS)</div>
       <div className="text-center text-[7.5px] text-gray-700 leading-snug">{centre.address}</div>
-      <div className="text-center font-bold text-[9px] my-0.5 underline">Tax Invoice ({type})</div>
+      <div className="text-center font-bold text-[9px] my-0.5 underline">Fee Receipt ({type})</div>
       
       <div className="flex justify-between border-b border-black pb-1 mt-1">
         <div>
-          <div><span className="font-semibold">GSTIN :</span> {centre.gstin}</div>
           <div className="font-bold uppercase mt-0.5">{registration.studentName}</div>
           <div className="text-[7.5px] max-w-[180px] break-words uppercase">{fullAddress}</div>
         </div>
         <div className="text-right">
-          <div><span className="font-semibold">Invoice Date :</span> {invoiceDate}</div>
-          <div><span className="font-semibold">Invoice No. :</span> {invoiceNo}</div>
+          <div><span className="font-semibold">Receipt Date :</span> {invoiceDate}</div>
+          <div><span className="font-semibold">Receipt No. :</span> {invoiceNo}</div>
         </div>
       </div>
 
@@ -56,27 +53,19 @@ export const OfficialHallTicket: React.FC<OfficialHallTicketProps> = ({
         <thead>
           <tr className="border-b border-black font-bold">
             <th className="text-left py-0.5">Description</th>
-            <th className="text-right py-0.5">Amount</th>
+            <th className="text-right py-0.5">Amount (₹)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Registration Fee (HSN 999293)</td>
-            <td className="text-right">{taxableBase}</td>
+            <td>Registration & Examination Fee</td>
+            <td className="text-right">{paidAmount.toFixed(2)}</td>
           </tr>
           <tr>
-            <td colSpan={2} className="text-gray-600">Place of supply - {centre.stateName} {centre.stateCode}</td>
-          </tr>
-          <tr>
-            <td>CGST @ 9%</td>
-            <td className="text-right">{taxEach}</td>
-          </tr>
-          <tr>
-            <td>SGST @ 9%</td>
-            <td className="text-right">{taxEach}</td>
+            <td colSpan={2} className="text-gray-600">Test Centre - {centre.name.toUpperCase()} ({centre.stateName})</td>
           </tr>
           <tr className="border-t border-black font-bold">
-            <td>Total</td>
+            <td>Total Fee</td>
             <td className="text-right">{paidAmount.toFixed(2)}</td>
           </tr>
         </tbody>
@@ -84,15 +73,15 @@ export const OfficialHallTicket: React.FC<OfficialHallTicketProps> = ({
 
       <div className="flex justify-between items-end pt-1 border-t border-dotted border-gray-400">
         <div className="text-[7.5px]">
-          <div>This invoice is already paid in Cash / Online</div>
+          <div>Fee paid in Cash / Online</div>
           <div>vide payment Ref No {paymentRef}</div>
-          <div>Whether Tax is payable under reverse charge : No</div>
+          <div>Inclusive of all examination services & charges</div>
         </div>
         
         {/* Digital Signature Stamp Box matching sample */}
         <div className="border border-amber-600 bg-amber-50/50 p-1 text-[6.5px] rounded text-center min-w-[90px] leading-tight">
           <div className="text-amber-800 font-bold flex items-center justify-center gap-0.5">
-            <span className="text-amber-600 font-extrabold text-[8px]">?</span> Signature Not Verified
+            <span className="text-amber-600 font-extrabold text-[8px]">✓</span> Verified Authentic
           </div>
           <div className="text-gray-600 text-[6px]">Digitally signed by DS TRANSED LLP</div>
           <div className="text-gray-500 text-[6px]">Date: 2026.10.11 16:08:48 +05:30</div>

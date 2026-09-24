@@ -83,8 +83,8 @@ export const TermsAndConditions: React.FC = () => {
             All online transaction processing, test fee collections, and coupon-adjusted payments made on this website are collected and processed by <strong>TRANSED LLP</strong>. Payments are routed through RBI-authorized, PCI-DSS compliant payment gateways (including Cashfree Payments India Pvt. Ltd.).
           </p>
           <ul className="list-disc pl-5 text-xs sm:text-sm text-slate-600 space-y-1.5">
-            <li>All examination fees are listed in Indian Rupees (₹ INR) inclusive/exclusive of applicable Goods and Services Tax (GST) as indicated on the checkout summary.</li>
-            <li>Upon successful payment confirmation from the payment aggregator, a digital Tax Invoice / Fee Receipt and an Official Hall Ticket are instantly made available in the candidate portal.</li>
+            <li>All examination fees are listed in Indian Rupees (₹ INR) inclusive of all applicable statutory taxes and examination charges as indicated on the checkout summary.</li>
+            <li>Upon successful payment confirmation from the payment aggregator, a digital Fee Receipt and an Official Hall Ticket are instantly made available in the candidate portal.</li>
             <li>TRANSED LLP does not capture, store, or view your full credit card numbers, debit card PINs, or UPI security credentials.</li>
           </ul>
         </section>
@@ -213,7 +213,7 @@ export const PrivacyPolicy: React.FC = () => {
             <li>Generating and validating the Official Test Hall Ticket with unique QR and roll number credentials.</li>
             <li>Transmitting examination slot reminders, venue directions, and score updates via SMS, WhatsApp, and email.</li>
             <li>Administering academic counselling and evaluating scholarship eligibility based on exam performance.</li>
-            <li>Issuing statutory GST-compliant tax invoices and payment reconciliations.</li>
+            <li>Issuing statutory fee receipts and payment reconciliations.</li>
           </ul>
         </section>
 

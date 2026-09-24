@@ -6,7 +6,6 @@ export interface CentreProfile {
   email: string;
   stateCode: string;
   stateName: string;
-  gstin: string;
   address: string;
   controllingOffice: string;
   testCentreDisplay: string;
@@ -23,7 +22,6 @@ export const CENTRES_CONFIG: Record<string, CentreProfile> = {
     email: 'fiitjee.bhubaneswar@fiitjee.online',
     stateCode: '[S.C-21]',
     stateName: 'Odisha',
-    gstin: '21AAACF2659M1ZN',
     address: 'Scouts Bhawan, Bharat Scouts & Guides Complex CIX/8, Unit 3, 751022 [S.C-21]',
     controllingOffice: 'Bhubaneswar - FIITJEE Ltd., 2nd Floor, Scouts Bhawan, Bharat Scouts & Guides Complex, C - IX / 8, Unit - 3, Bhubaneswar-22 Ph: 0674-2392022/2396725/2394925/2394825 [73]',
     testCentreDisplay: 'BHUBANESWAR - FIITJEE INFOCITY CENTRE, Near Infocity Square, BHUBANESWAR, , 1st Floor, E/3 , Near Infocity Square, BHUBANESWAR [733]',
@@ -38,7 +36,6 @@ export const CENTRES_CONFIG: Record<string, CentreProfile> = {
     email: 'fiitjee.dwarka@fiitjee.online',
     stateCode: '[S.C-07]',
     stateName: 'Delhi',
-    gstin: '07AAACF2659M1ZN',
     address: 'Plot No. 6, Sector 12, Dwarka, New Delhi, 110075 [S.C-07]',
     controllingOffice: 'Dwarka - FIITJEE Ltd., Plot No. 6, Sector 12, Dwarka, New Delhi - 110075 Ph: 011-45634000/45634001/8527208022 [21]',
     testCentreDisplay: 'DWARKA - FIITJEE DWARKA CENTRE, Institutional Plot No. 6, Sector 12, Dwarka, New Delhi [210]',
@@ -53,7 +50,6 @@ export const CENTRES_CONFIG: Record<string, CentreProfile> = {
     email: 'fiitjee.ranchi@fiitjee.online',
     stateCode: '[S.C-20]',
     stateName: 'Jharkhand',
-    gstin: '20AAACF2659M1ZN',
     address: 'SOPPORIUM, 5th Floor, Near Argora Chowk, Harmu Road, Ranchi, 834002 [S.C-20]',
     controllingOffice: 'Ranchi - FIITJEE Ltd., 5th Floor, SOPPORIUM, Near Argora Chowk, Harmu Road, Ranchi-834002 Ph: 0651-2244000/2244001/9835155509 [45]',
     testCentreDisplay: 'RANCHI - FIITJEE RANCHI CENTRE, SOPPORIUM, Near Argora Chowk, Harmu Road, Ranchi [450]',
@@ -68,7 +64,6 @@ export const CENTRES_CONFIG: Record<string, CentreProfile> = {
     email: 'fiitjee.hyderabad@fiitjee.online',
     stateCode: '[S.C-36]',
     stateName: 'Telangana',
-    gstin: '36AAACF2659M1ZN',
     address: 'Plot No. 22 & 23, Vittal Rao Nagar, Madhapur, Hyderabad, 500081 [S.C-36]',
     controllingOffice: 'Hyderabad - FIITJEE Ltd., Plot No. 22 & 23, Vittal Rao Nagar, Madhapur, Hyderabad-500081 Ph: 040-48550400/9247551761 [92]',
     testCentreDisplay: 'HYDERABAD - FIITJEE MADHAPUR CENTRE, Near Durgam Cheruvu Metro, Madhapur, Hyderabad [920]',

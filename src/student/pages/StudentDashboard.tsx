@@ -532,10 +532,10 @@ export const StudentDashboard: React.FC = () => {
       {/* ========================================================================= */}
       {/* 1. DESKTOP & TABLET LEFT SIDEBAR PANEL ("Dashboard inside the Dashboard")  */}
       {/* ========================================================================= */}
-      <aside className="hidden md:flex flex-col w-72 bg-[#001733] text-white border-r border-slate-800 shrink-0 sticky top-0 h-screen overflow-y-auto">
+      <aside className="hidden md:flex flex-col w-72 bg-[#001733] text-white border-r border-slate-800 shrink-0 sticky top-0 h-screen overflow-hidden">
         
         {/* Brand Header */}
-        <div className="p-5 border-b border-slate-800/80">
+        <div className="p-5 border-b border-slate-800/80 shrink-0">
           <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
             <FiitjeeLogo variant="white" size="sm" showTagline={false} />
             <div className="border-l border-slate-700 pl-2">
@@ -547,20 +547,20 @@ export const StudentDashboard: React.FC = () => {
         </div>
 
         {/* Student Profile Pill Card */}
-        <div className="p-3.5 mx-3 my-3 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-3 relative overflow-hidden group">
+        <div className="p-3 mx-3 my-2.5 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-3 shrink-0 shadow-xs">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ED1C24] to-[#990000] text-white flex items-center justify-center font-black text-sm shadow-md ring-2 ring-white/20 shrink-0">
             {student?.fullName ? student.fullName.charAt(0).toUpperCase() : 'S'}
           </div>
-          <div className="overflow-hidden flex-1 min-w-0">
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-black text-white truncate">
+              <span className="text-xs font-black text-white truncate max-w-[125px]">
                 {student?.fullName || 'Candidate'}
               </span>
-              <span className="text-[8px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
+              <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
                 Verified
               </span>
             </div>
-            <div className="text-[11px] text-amber-300 font-bold flex items-center gap-1 truncate">
+            <div className="text-[11px] text-amber-300 font-bold flex items-center gap-1 truncate mt-0.5">
               <span>{student?.currentClass || 'Class X'}</span>
               <span className="text-slate-500">•</span>
               <span className="text-slate-300 truncate text-[10px]">
@@ -575,78 +575,82 @@ export const StudentDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation Links with Grouped Sections */}
-        <nav className="flex-1 px-3 space-y-3 py-2">
-          {navSections.map((section) => (
-            <div key={section.label} className="space-y-1">
-              <div className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 px-3 pt-1">
-                {section.label}
-              </div>
-              <div className="space-y-0.5">
-                {section.ids.map((id) => {
-                  const item = navItems.find((n) => n.id === id);
-                  if (!item) return null;
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
+        {/* Scrollable Center: Nav Sections + Centre Helpline */}
+        <div className="flex-1 overflow-y-auto min-h-0 px-3 py-1 space-y-3">
 
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => handleTabChange(item.id)}
-                      className={`group relative w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer text-left ${
-                        isActive
-                          ? 'bg-[#ED1C24] text-white shadow-md'
-                          : 'text-slate-300 hover:bg-white/10 hover:text-white hover:translate-x-0.5'
-                      }`}
-                    >
-                      {isActive && (
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-white rounded-r-full shadow-xs" />
-                      )}
-                      <div className="flex items-center gap-2.5 pl-1">
-                        <Icon className={`w-[17px] h-[17px] shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`} />
-                        <span className="truncate">{item.label}</span>
-                      </div>
+          {/* Navigation Links with Grouped Sections */}
+          <nav className="space-y-3">
+            {navSections.map((section) => (
+              <div key={section.label} className="space-y-1">
+                <div className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 px-3 pt-1">
+                  {section.label}
+                </div>
+                <div className="space-y-0.5">
+                  {section.ids.map((id) => {
+                    const item = navItems.find((n) => n.id === id);
+                    if (!item) return null;
+                    const Icon = item.icon;
+                    const isActive = activeTab === item.id;
 
-                      {item.badge && (
-                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleTabChange(item.id)}
+                        className={`group relative w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer text-left shrink-0 ${
                           isActive
-                            ? 'bg-white text-[#ED1C24]'
-                            : 'bg-white/10 text-amber-300 border border-white/10'
-                        }`}>
-                          {item.badge}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </nav>
+                            ? 'bg-[#ED1C24] text-white shadow-md'
+                            : 'text-slate-300 hover:bg-white/10 hover:text-white hover:translate-x-0.5'
+                        }`}
+                      >
+                        {isActive && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-white rounded-r-full shadow-xs" />
+                        )}
+                        <div className="flex items-center gap-2.5 pl-1 truncate">
+                          <Icon className={`w-[17px] h-[17px] shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`} />
+                          <span className="truncate">{item.label}</span>
+                        </div>
 
-        {/* Assigned Centre Contact Card */}
-        <div className="p-3.5 m-3 bg-gradient-to-br from-[#002147] to-[#001026] rounded-2xl border border-white/10 space-y-2 text-xs shadow-xs">
-          <div className="flex items-center gap-1.5 text-amber-300 font-black text-[10px] uppercase tracking-wider">
-            <Building2 className="w-3.5 h-3.5 text-[#ED1C24]" />
-            <span>Assigned Centre Helpline</span>
-          </div>
-          <div className="font-bold text-white text-[11px] leading-tight">
-            FIITJEE {activeCentreProfile.name}
-          </div>
-          <div className="text-[10px] text-slate-300 flex items-center gap-1">
-            <Phone className="w-3 h-3 text-[#ED1C24] shrink-0" />
-            <a href={`tel:${activeCentreProfile.helplinePhone}`} className="hover:underline font-mono text-amber-200 font-bold">
-              {activeCentreProfile.helplinePhone}
-            </a>
-          </div>
-          <div className="text-[9px] text-slate-400 flex items-start gap-1 leading-snug line-clamp-2">
-            <MapPin className="w-3 h-3 text-slate-500 shrink-0 mt-0.5" />
-            <span>{activeCentreProfile.address}</span>
+                        {item.badge && (
+                          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                            isActive
+                              ? 'bg-white text-[#ED1C24]'
+                              : 'bg-white/10 text-amber-300 border border-white/10'
+                          }`}>
+                            {item.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </nav>
+
+          {/* Assigned Centre Contact Card */}
+          <div className="p-3 bg-gradient-to-br from-[#002147] to-[#001026] rounded-2xl border border-white/10 space-y-1.5 text-xs shadow-xs shrink-0">
+            <div className="flex items-center gap-1.5 text-amber-300 font-black text-[10px] uppercase tracking-wider">
+              <Building2 className="w-3.5 h-3.5 text-[#ED1C24]" />
+              <span>Assigned Centre Helpline</span>
+            </div>
+            <div className="font-bold text-white text-[11px] leading-tight">
+              FIITJEE {activeCentreProfile.name}
+            </div>
+            <div className="text-[10px] text-slate-300 flex items-center gap-1">
+              <Phone className="w-3 h-3 text-[#ED1C24] shrink-0" />
+              <a href={`tel:${activeCentreProfile.helplinePhone}`} className="hover:underline font-mono text-amber-200 font-bold">
+                {activeCentreProfile.helplinePhone}
+              </a>
+            </div>
+            <div className="text-[9px] text-slate-400 flex items-start gap-1 leading-snug line-clamp-2">
+              <MapPin className="w-3 h-3 text-slate-500 shrink-0 mt-0.5" />
+              <span>{activeCentreProfile.address}</span>
+            </div>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="p-3 border-t border-slate-800 flex items-center justify-between gap-2 text-xs">
+        <div className="p-3 border-t border-slate-800 flex items-center justify-between gap-2 text-xs shrink-0">
           <Link 
             to="/" 
             className="text-slate-400 hover:text-white transition-colors text-[11px] font-bold flex items-center gap-1"
@@ -708,7 +712,7 @@ export const StudentDashboard: React.FC = () => {
         <div className="md:hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex">
           <div className="w-72 bg-[#001733] text-white p-4 flex flex-col justify-between h-full animate-in slide-in-from-left duration-200 overflow-y-auto">
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3 shrink-0">
                 <FiitjeeLogo variant="white" size="sm" showTagline={false} />
                 <button 
                   onClick={() => setMobileDrawerOpen(false)}
@@ -719,7 +723,7 @@ export const StudentDashboard: React.FC = () => {
               </div>
 
               {/* Student info */}
-              <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-xs">
+              <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-xs shrink-0">
                 <div className="font-bold text-white">{student?.fullName || 'Candidate'}</div>
                 <div className="text-[11px] text-amber-300">{student?.currentClass || 'Class X'}</div>
                 <div className="text-[10px] text-slate-400 mt-1">
@@ -779,7 +783,7 @@ export const StudentDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 flex justify-between items-center text-xs">
+            <div className="pt-3 border-t border-slate-800 flex justify-between items-center text-xs shrink-0">
               <Link to="/" className="text-slate-400 hover:text-white font-bold text-xs">
                 &larr; Main Site
               </Link>

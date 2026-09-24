@@ -121,10 +121,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           <div className="text-xs font-black text-white flex items-center gap-1.5 truncate">
             <Building2 className="w-3.5 h-3.5 text-[#ED1C24] shrink-0" />
             <span className="truncate">{centre.name}</span>
-            <span className="bg-[#ED1C24] text-white px-1.5 py-0.2 rounded-sm text-[9px] font-mono font-bold shrink-0">{centre.code}</span>
+            <span className="bg-[#ED1C24] text-white px-1.5 py-0.5 rounded-sm text-[9px] font-mono font-bold shrink-0">{centre.code}</span>
           </div>
-          <div className="text-[10px] font-mono text-amber-300/80 mt-1 truncate">
-            GSTIN: {centre.gstin}
+          <div className="text-[10px] text-slate-400 mt-1 truncate">
+            {centre.stateName} ({centre.stateCode})
           </div>
         </div>
       )}

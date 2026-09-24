@@ -83,7 +83,7 @@ export const AdminDashboard: React.FC = () => {
             {centre?.name} Centre Portal
           </h1>
           <p className="text-xs text-slate-300">
-            GSTIN: <span className="font-mono text-amber-300">{centre?.gstin}</span> | POS: {centre?.stateName} {centre?.stateCode}
+            Centre Code: <span className="font-mono text-amber-300">{centre?.code}</span> | POS: {centre?.stateName} {centre?.stateCode}
           </p>
         </div>
 
