@@ -357,7 +357,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
             ) : (
               <>
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Complete Free Registration</span>
+                <span>Confirm &amp; Complete Registration</span>
               </>
             )}
           </button>

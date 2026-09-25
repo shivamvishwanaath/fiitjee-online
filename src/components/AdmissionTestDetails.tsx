@@ -38,7 +38,7 @@ export const AdmissionTestDetails: React.FC<AdmissionTestDetailsProps> = ({
               onClick={onOpenBigBangModal}
               className="px-8 py-3.5 bg-[#ED1C24] hover:bg-[#d6171e] text-white font-extrabold text-xs uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-md"
             >
-              <span>Register Now (Free)</span>
+              <span>Register Now</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

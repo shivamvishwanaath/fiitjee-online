@@ -139,7 +139,7 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <button onClick={onOpenBigBangModal} className="text-red-400 font-bold hover:underline text-left flex items-center gap-1">
                   <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping shrink-0" />
-                  Big Bang Edge Test 2026 (Register Free)
+                  Big Bang Edge Test 2026 (Register Now)
                 </button>
               </li>
               <li>

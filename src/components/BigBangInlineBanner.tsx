@@ -54,7 +54,7 @@ export const BigBangInlineBanner: React.FC<BigBangInlineBannerProps> = ({
             onClick={onOpenBigBangModal}
             className="w-full sm:w-auto px-6 py-2.5 bg-white hover:bg-slate-100 text-[#002147] hover:text-[#ED1C24] font-black text-xs uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-sm"
           >
-            <span>Register Free</span>
+            <span>Register Now</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
 

@@ -73,7 +73,7 @@ export const BigBangHeroBanner: React.FC<BigBangHeroBannerProps> = ({
                 onClick={onOpenBigBangModal}
                 className="w-full sm:w-auto px-8 py-3.5 bg-[#ED1C24] hover:bg-[#d6171e] text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-red-950/20"
               >
-                <span>Register Now (Free)</span>
+                <span>Register Now</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
               <div className="text-[10px] font-bold text-slate-400">

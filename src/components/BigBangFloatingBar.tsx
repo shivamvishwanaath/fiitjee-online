@@ -58,7 +58,7 @@ export const BigBangFloatingBar: React.FC<BigBangFloatingBarProps> = ({
             onClick={onOpenBigBangModal}
             className="px-5 py-2 bg-[#ED1C24] hover:bg-[#d6171e] text-white font-black text-[10px] uppercase tracking-widest rounded-lg transition-all flex items-center gap-1 cursor-pointer shadow-md shadow-red-950/20"
           >
-            <span>Register Free</span>
+            <span>Register Now</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
