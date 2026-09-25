@@ -46,6 +46,10 @@
     "results": {
       ".read": true,
       ".write": true
+    },
+    "admins": {
+      ".read": true,
+      ".write": true
     }
   }
 }

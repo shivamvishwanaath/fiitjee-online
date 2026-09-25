@@ -16,10 +16,12 @@ import { CRMFollowUps } from './pages/CRMFollowUps';
 import { CRMTickets } from './pages/CRMTickets';
 import { AdminLayout } from './components/AdminLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminAuthProvider } from './context/AdminAuthContext';
 
 export const AdminApp: React.FC = () => {
   return (
-    <Routes>
+    <AdminAuthProvider>
+      <Routes>
       {/* Public Admin Login Route */}
       <Route path="login" element={<AdminLogin />} />
 
@@ -172,6 +174,7 @@ export const AdminApp: React.FC = () => {
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/admin" replace />} />
     </Routes>
+    </AdminAuthProvider>
   );
 };
 

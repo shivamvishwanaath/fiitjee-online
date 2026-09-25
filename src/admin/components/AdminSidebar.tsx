@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { CentreProfile } from '../utils/centreUtils';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
+import { useAdminAuth } from '../hooks/useAdminAuth';
 
 interface AdminSidebarProps {
   collapsed: boolean;
@@ -41,6 +42,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   onLogout
 }) => {
   const navigate = useNavigate();
+  const { switchCentre, availableCentres } = useAdminAuth();
 
   const handleSignOut = async () => {
     await onLogout();
@@ -114,9 +116,23 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Centre Identifier Card */}
       {centre && !collapsed && (
         <div className="mx-3 my-3 p-3 bg-gradient-to-br from-[#002147] to-slate-900 rounded-xl border border-slate-700 shadow-inner">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Active Branch</span>
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+              <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Active Branch</span>
+            </div>
+            <select
+              value={centre.id}
+              onChange={(e) => switchCentre(e.target.value)}
+              className="bg-slate-800 text-[10px] text-amber-300 font-bold rounded px-1.5 py-0.5 border border-slate-600 focus:outline-none cursor-pointer"
+              title="Switch Active Operating Centre"
+            >
+              {availableCentres.map(c => (
+                <option key={c.id} value={c.id} className="bg-slate-900 text-white">
+                  {c.name} {c.code}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="text-xs font-black text-white flex items-center gap-1.5 truncate">
             <Building2 className="w-3.5 h-3.5 text-[#ED1C24] shrink-0" />
