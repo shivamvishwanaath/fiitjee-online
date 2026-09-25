@@ -145,7 +145,11 @@ export const OfficialHallTicket: React.FC<OfficialHallTicketProps> = ({
             <td className="p-1 font-bold border-r border-black bg-gray-50">Test Centre</td>
             <td className="p-1">
               {registration.testMode === 'Offline' ? (
-                <span>{centre.testCentreDisplay}</span>
+                <span>
+                  {centre.id === 'ranchi' && registration.rollNo?.includes('45850')
+                    ? 'Ranchi- FIITJEE, Samraddhi Complex, Ground Floor, South Office Para, Doranda, Ranchi - 834002 [850]'
+                    : centre.testCentreDisplay}
+                </span>
               ) : (
                 <span className="font-semibold text-purple-900">
                   PROCTORED ONLINE TESTING HUB — Test from home via secure link emailed to {registration.email} [ONLINE-001]
@@ -155,7 +159,11 @@ export const OfficialHallTicket: React.FC<OfficialHallTicketProps> = ({
           </tr>
           <tr className="border-b border-black">
             <td className="p-1 font-bold border-r border-black bg-gray-50">Studycentre Opted</td>
-            <td className="p-1 font-semibold">{centre.name} {centre.code}</td>
+            <td className="p-1 font-semibold">
+              {centre.id === 'ranchi' 
+                ? (registration.rollNo?.includes('45850') ? '85 (Ranchi-SOP Doranda)' : '82 (Ranchi-Lalpur)')
+                : (centre.studyCentres?.[0]?.name || `${centre.name} ${centre.code}`)}
+            </td>
           </tr>
           <tr className="border-b border-black">
             <td className="p-1 font-bold border-r border-black bg-gray-50">Test Date</td>
@@ -163,11 +171,14 @@ export const OfficialHallTicket: React.FC<OfficialHallTicketProps> = ({
           </tr>
           <tr className="border-b border-black">
             <td className="p-1 font-bold border-r border-black bg-gray-50">Exam Schedule</td>
-            <td className="p-1 font-medium">{schedule}</td>
+            <td className="p-1 font-medium">
+              <div>Test Duration : 3 Hours</div>
+              <div>Test Timing : 10:00 AM to 01:00 PM</div>
+            </td>
           </tr>
           <tr className="border-b border-black">
             <td className="p-1 font-bold border-r border-black bg-gray-50">Reporting Time</td>
-            <td className="p-1 font-bold text-red-700">45 Minutes Before The First Examination</td>
+            <td className="p-1 font-bold text-red-700">09:15 AM (45 Minutes Before Examination)</td>
           </tr>
           <tr className="border-b border-black">
             <td className="p-1 font-bold border-r border-black bg-gray-50">Type of Test</td>

@@ -2352,8 +2352,9 @@ export const StudentDashboard: React.FC = () => {
                   <Clock className="w-4 h-4" />
                   <span>Exam Schedule for {student?.currentClass || 'Class X'}</span>
                 </div>
-                <div className="text-xs font-semibold text-slate-800 leading-relaxed">
-                  {getExamScheduleForClass(student?.currentClass || 'Class X')}
+                <div className="text-xs font-semibold text-slate-800 leading-relaxed space-y-0.5">
+                  <div>Test Duration : 3 Hours</div>
+                  <div>Test Timing : 10:00 AM to 01:00 PM</div>
                 </div>
               </div>
 
@@ -2371,7 +2372,7 @@ export const StudentDashboard: React.FC = () => {
                   </div>
                   <div className="flex items-start gap-2 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
                     <CheckCircle2 className="w-4 h-4 text-[#ED1C24] shrink-0 mt-0.5" />
-                    <span>Report at test centre 30 minutes prior to Paper 1 commencement (8:30 AM).</span>
+                    <span>Report at test centre 45 minutes prior to test commencement (09:15 AM).</span>
                   </div>
                   <div className="flex items-start gap-2 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
                     <CheckCircle2 className="w-4 h-4 text-[#ED1C24] shrink-0 mt-0.5" />

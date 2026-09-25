@@ -14,14 +14,14 @@ import {
 } from 'lucide-react';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useRegistrations } from '../hooks/useRegistrations';
-import { ALL_CENTRES, generateSID, generateInvoiceNumber, getCentreByName } from '../utils/centreUtils';
+import { ALL_CENTRES, generateSID, generateInvoiceNumber, getCentreByName, generateRollNumber } from '../utils/centreUtils';
 import { HallTicketModal } from '../../components/HallTicketModal';
 import { ExamRegistration } from '../../types';
 
 export const AddRegistration: React.FC = () => {
   const navigate = useNavigate();
   const { centre, user } = useAdminAuth();
-  const { addRegistration } = useRegistrations(centre?.name, user?.email || undefined);
+  const { addRegistration, registrations } = useRegistrations(centre?.name, user?.email || undefined);
 
   const [formData, setFormData] = useState({
     studentName: '',
@@ -32,6 +32,7 @@ export const AddRegistration: React.FC = () => {
     email: '',
     address: '',
     selectedCenter: centre?.name || 'Bhubaneswar',
+    testCentreCode: '820',
     testMode: 'Offline' as 'Offline' | 'Proctored Online',
     testDate: '11th October 2026 (Sunday)',
     status: 'Confirmed' as ExamRegistration['status'],
@@ -51,9 +52,13 @@ export const AddRegistration: React.FC = () => {
 
     try {
       const selectedCentreProfile = getCentreByName(formData.selectedCenter);
+      const effectiveTestCentreCode = (selectedCentreProfile.id === 'ranchi' && formData.testCentreCode) 
+        ? formData.testCentreCode 
+        : selectedCentreProfile.testCentreCode;
+
       const seqSuffix = Date.now().toString().slice(-4);
-      const counterId = Math.floor(10 + (Date.now() % 90));
-      const generatedRoll = `7052 ${selectedCentreProfile.numericCode}${seqSuffix} 111026 00${counterId}`;
+      const nextSeq = registrations && registrations.length > 0 ? (registrations.length + 1) : Math.floor(1 + Math.random() * 99);
+      const generatedRoll = generateRollNumber(selectedCentreProfile, formData.testDate, nextSeq, effectiveTestCentreCode);
       const sid = generateSID(generatedRoll);
       const invoiceNo = generateInvoiceNumber(selectedCentreProfile, generatedRoll);
       const paymentRef = `${selectedCentreProfile.numericCode}/ADM-${seqSuffix}`;
@@ -252,6 +257,23 @@ export const AddRegistration: React.FC = () => {
                 ))}
               </select>
             </div>
+
+            {/* Ranchi Test Centre Venue Selection */}
+            {formData.selectedCenter.toLowerCase().includes('ranchi') && (
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
+                  Ranchi Test Centre Venue *
+                </label>
+                <select
+                  value={formData.testCentreCode}
+                  onChange={(e) => handleInputChange('testCentreCode', e.target.value)}
+                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] bg-white font-bold"
+                >
+                  <option value="820">820 - Ranchi- FIITJEE, Hariom Tower, Lalpur - 834001</option>
+                  <option value="850">850 - Ranchi- FIITJEE, Samraddhi Complex, Doranda - 834002</option>
+                </select>
+              </div>
+            )}
 
             {/* Mode */}
             <div>

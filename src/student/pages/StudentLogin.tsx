@@ -244,14 +244,14 @@ export const StudentLogin: React.FC = () => {
                         <input
                           type="text"
                           required
-                          placeholder="e.g. 7052 03733 111026 0012 or 9437012345"
+                          placeholder="e.g. 7052 45828 911105 60069 or 9437012345"
                           value={identifierInput}
                           onChange={(e) => setIdentifierInput(e.target.value)}
                           className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
                         />
                       </div>
                       <p className="text-[10px] text-slate-500 mt-1">
-                        Use the 10-digit mobile number or exam roll number from your admission test registration.
+                        Use the 10-digit mobile number or exam roll number (e.g. 7052 45828 911105 60069) from your admission test registration.
                       </p>
                     </div>
 

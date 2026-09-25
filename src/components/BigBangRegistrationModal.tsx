@@ -24,7 +24,7 @@ import { FiitjeeLogo } from './FiitjeeLogo';
 import { OfficialHallTicket } from './OfficialHallTicket';
 
 import { PaymentStep, PaymentCompletionData } from './PaymentStep';
-import { getCentreByName, generateSID, generateInvoiceNumber } from '../admin/utils/centreUtils';
+import { getCentreByName, generateSID, generateInvoiceNumber, generateRollNumber } from '../admin/utils/centreUtils';
 import { redeemCoupon } from '../admin/utils/couponUtils';
 import { printElementById } from '../utils/printUtils';
 import { useStudentAuth } from '../student/hooks/useStudentAuth';
@@ -44,7 +44,8 @@ const initialFormData = {
   email: '',
   testDate: '11th October 2026 (Sunday)',
   testMode: 'Offline' as 'Offline' | 'Proctored Online',
-  selectedCenter: 'Bhubaneswar'
+  selectedCenter: 'Bhubaneswar',
+  testCentreCode: '820'
 };
 
 // Deep sanitize helper to eliminate any undefined values that crash Firebase RTDB
@@ -240,9 +241,24 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
     try {
       const selectedCentreProfile = getCentreByName(formData.selectedCenter || 'Bhubaneswar');
       const centreId = selectedCentreProfile.id;
-      const seqSuffix = Date.now().toString().slice(-4);
-      const counterId = Math.floor(10 + (Date.now() % 90));
-      const rollNo = assignedRollNo || `7052 ${selectedCentreProfile.numericCode}${seqSuffix} 111026 00${counterId}`;
+
+      // Query current registrations count for clean sequential 4-digit roll number
+      let nextSeq = 1;
+      try {
+        const centreRegsRef = ref(db, `${BIG_BANG_EXAM.registrationDbPath}/${centreId}`);
+        const snap = await get(centreRegsRef);
+        if (snap.exists()) {
+          const val = snap.val();
+          const validKeys = Object.keys(val).filter(k => k !== '_init');
+          nextSeq = validKeys.length + 1;
+        }
+      } catch (e) {
+        console.warn('Could not query registrations count from db, fallback to counter:', e);
+        nextSeq = Math.floor(1 + Math.random() * 99);
+      }
+
+      const effectiveTestCentreCode = (centreId === 'ranchi' && formData.testCentreCode) ? formData.testCentreCode : selectedCentreProfile.testCentreCode;
+      const rollNo = assignedRollNo || generateRollNumber(selectedCentreProfile, formData.testDate, nextSeq, effectiveTestCentreCode);
       if (!assignedRollNo) setAssignedRollNo(rollNo);
       const sid = generateSID(rollNo);
       const invoiceNo = generateInvoiceNumber(selectedCentreProfile, rollNo);
@@ -258,7 +274,7 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
         email: formData.email.trim(),
         testDate: formData.testDate,
         testMode: formData.testMode,
-        selectedCenter: formData.testMode === 'Offline' ? selectedCentreProfile.name : selectedCentreProfile.name,
+        selectedCenter: selectedCentreProfile.name,
         registeredAt: new Date().toISOString(),
         rollNo: rollNo,
         sid: sid,
@@ -631,6 +647,44 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
                       </button>
                     ))}
                   </div>
+
+                  {formData.selectedCenter === 'Ranchi' && (
+                    <div className="mt-3.5 pt-3.5 border-t border-slate-200 space-y-2">
+                      <label className="block text-xs font-bold text-slate-700">Select Ranchi Test Centre Venue *</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, testCentreCode: '820' })}
+                          className={`p-3 rounded-xl border text-xs text-left cursor-pointer transition-all ${
+                            formData.testCentreCode !== '850'
+                              ? 'border-2 border-[#ED1C24] bg-red-50 text-[#ED1C24]'
+                              : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between font-bold">
+                            <span>Hariom Tower (Lalpur)</span>
+                            <span className="text-[10px] bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-mono font-bold">820</span>
+                          </div>
+                          <div className="text-[10px] font-normal text-slate-500 mt-1">7th Floor, Hariom Tower, Circular Road</div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, testCentreCode: '850' })}
+                          className={`p-3 rounded-xl border text-xs text-left cursor-pointer transition-all ${
+                            formData.testCentreCode === '850'
+                              ? 'border-2 border-[#ED1C24] bg-red-50 text-[#ED1C24]'
+                              : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between font-bold">
+                            <span>Samraddhi Complex (Doranda)</span>
+                            <span className="text-[10px] bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-mono font-bold">850</span>
+                          </div>
+                          <div className="text-[10px] font-normal text-slate-500 mt-1">Ground Floor, South Office Para, Doranda</div>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="p-3 bg-blue-50 border border-blue-200 text-[#002147] rounded-xl text-xs font-bold flex items-start gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
