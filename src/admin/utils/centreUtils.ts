@@ -77,10 +77,10 @@ export const CENTRES_CONFIG: Record<string, CentreProfile> = {
     stateCode: '[S.C-20]',
     stateName: 'Jharkhand',
     address: 'Ranchi- FIITJEE, 7th Floor, Hariom Tower, Circular Road, Ranchi - 834001 [S.C-20]',
-    controllingOffice: 'Ranchi- FIITJEE, 7th Floor, Hariom Tower, Circular Road, Ranchi - 834001 Ph: 0651-2244000/2244001/9835155509 [45]',
+    controllingOffice: 'Ranchi- FIITJEE, 7th Floor, Hariom Tower, Circular Road, Ranchi - 834001 Ph: 9835155509 [45]',
     testCentreDisplay: 'Ranchi- FIITJEE, 7th Floor, Hariom Tower, Circular Road, Ranchi - 834001 [820]',
     helplinePhone: '98351 55509',
-    phoneNumbers: ['0651-2244000', '0651-2244001', '98351 55509']
+    phoneNumbers: ['98351 55509']
   },
   hyderabad: {
     id: 'hyderabad',
@@ -217,3 +217,5 @@ export function getExamScheduleForClass(_className?: string): string {
   // Universal across all classes and centres: 3 Hours, 10:00 AM to 01:00 PM
   return 'Test Duration : 3 Hours; Test Timing : 10:00 AM to 01:00 PM';
 }
+
+export { getRegistrationFeeForClass } from '../../data/examsData';

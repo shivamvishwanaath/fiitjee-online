@@ -82,6 +82,8 @@ export const AddRegistration: React.FC = () => {
         invoiceNo,
         invoiceDate: new Date().toISOString().split('T')[0],
         status: formData.status,
+        paymentStatus: 'paid',
+        paymentAmount: getRegistrationFeeForClass(formData.currentClass),
         paymentRef,
         registeredByCentre: `${centre?.name || 'Counter'} Staff (${user?.email || 'Admin'})`
       };

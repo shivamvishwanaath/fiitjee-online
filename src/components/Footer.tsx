@@ -27,16 +27,15 @@ export const Footer: React.FC<FooterProps> = ({
   return (
     <footer className="bg-[#001733] text-slate-400 border-t border-[#002147] text-xs">
       
-      {/* Top Banner with Toll-Free Hotline */}
+      {/* Top Banner */}
       <div className="bg-[#ED1C24] text-white py-6 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <FiitjeeLogo variant="white" size="md" showDomain={false} showTagline={false} />
             <div>
-              <div className="text-xs font-bold text-white/90 uppercase tracking-wider">National Academic Helpline (All India)</div>
-              <div className="text-xl sm:text-2xl font-black font-display tracking-tight text-white flex items-center gap-2">
-                <Phone className="w-5 h-5 text-white" />
-                <span>1800 11 4242 / 011-49283471</span>
+              <div className="text-xs font-bold text-white/90 uppercase tracking-wider">National Academic & Admissions Testing Portal</div>
+              <div className="text-base sm:text-xl font-black font-display tracking-tight text-white flex items-center gap-2">
+                <span>Big Bang Edge Test 2026 • National Scholastic Assessment</span>
               </div>
             </div>
           </div>

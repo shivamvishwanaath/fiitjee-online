@@ -48,7 +48,7 @@ import { FtreRegistrationModal } from '../../components/FtreRegistrationModal';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
 import { ExamRegistration, StudentExamLink, SupportTicket, ExamResult } from '../../types';
 import { BIG_BANG_EXAM } from '../../data/examsData';
-import { getExamScheduleForClass, CENTRES_CONFIG } from '../../admin/utils/centreUtils';
+import { getExamScheduleForClass, CENTRES_CONFIG, getRegistrationFeeForClass } from '../../admin/utils/centreUtils';
 import { ref, onValue, get, push, set } from 'firebase/database';
 import { db } from '../../firebase';
 
@@ -631,7 +631,7 @@ export const StudentDashboard: React.FC = () => {
           <div className="p-3 bg-gradient-to-br from-[#002147] to-[#001026] rounded-2xl border border-white/10 space-y-1.5 text-xs shadow-xs shrink-0">
             <div className="flex items-center gap-1.5 text-amber-300 font-black text-[10px] uppercase tracking-wider">
               <Building2 className="w-3.5 h-3.5 text-[#ED1C24]" />
-              <span>Assigned Centre Helpline</span>
+              <span>Assigned Centre Desk</span>
             </div>
             <div className="font-bold text-white text-[11px] leading-tight">
               FIITJEE {activeCentreProfile.name}
@@ -1085,7 +1085,7 @@ export const StudentDashboard: React.FC = () => {
                     <div className="space-y-1">
                       <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
                         <Phone className="w-3 h-3 text-[#ED1C24]" />
-                        <span>Helpline Numbers</span>
+                        <span>Centre Contact Numbers</span>
                       </span>
                       <div className="flex flex-wrap gap-1.5 pt-0.5 pl-4">
                         {activeCentreProfile.phoneNumbers.map((p, idx) => (
@@ -1254,7 +1254,7 @@ export const StudentDashboard: React.FC = () => {
                                 <span>Payment Status</span>
                               </div>
                               <div className="font-bold text-emerald-600 uppercase">
-                                {reg.paymentStatus === 'free' ? 'Fee Waived (Coupon)' : reg.paymentStatus === 'paid' ? `Paid (₹${reg.paymentAmount || 1})` : 'Pending'}
+                                {reg.paymentStatus === 'free' ? 'Fee Waived (Coupon)' : reg.paymentStatus === 'paid' ? `Paid (₹${reg.paymentAmount || getRegistrationFeeForClass(reg.currentClass)})` : 'Pending'}
                               </div>
                             </div>
 
@@ -1733,7 +1733,7 @@ export const StudentDashboard: React.FC = () => {
                   {/* Routing status bar with live pulse */}
                   <div className="flex items-center gap-2 px-3.5 py-2 bg-[#002147]/5 border border-[#002147]/10 rounded-xl text-xs font-bold text-[#002147]">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                    <span>Routing directly to: <strong>FIITJEE {activeCentreProfile.name} Desk</strong> ({activeCentreProfile.helplinePhone})</span>
+                    <span>Routing directly to: <strong>FIITJEE {activeCentreProfile.name} Desk</strong></span>
                   </div>
                 </div>
 
@@ -2260,7 +2260,7 @@ export const StudentDashboard: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <CreditCard className="w-4 h-4 text-[#ED1C24]" />
-                        <span><strong>Test Fee:</strong> ₹1 (Testing Window)</span>
+                        <span><strong>Test Fee:</strong> ₹200 (Class V–VIII) · ₹250 (Class IX–XI)</span>
                       </div>
                     </div>
                   </div>

@@ -153,8 +153,8 @@ export const StudentLogin: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 text-xs">
-          <span className="text-slate-500 hidden sm:inline">Need assistance?</span>
-          <span className="font-bold text-[#002147]">1800 11 4242</span>
+          <span className="text-slate-500 hidden sm:inline">Admissions Support:</span>
+          <span className="font-bold text-[#002147]">support@fiitjee.online</span>
         </div>
       </header>
 

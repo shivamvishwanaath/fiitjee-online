@@ -18,7 +18,7 @@ import {
 import confetti from 'canvas-confetti';
 import { ref, push, set, get, query, orderByChild, equalTo } from 'firebase/database';
 import { db } from '../firebase';
-import { BIG_BANG_EXAM } from '../data/examsData';
+import { BIG_BANG_EXAM, getRegistrationFeeForClass } from '../data/examsData';
 import { ExamRegistration } from '../types';
 import { FiitjeeLogo } from './FiitjeeLogo';
 import { OfficialHallTicket } from './OfficialHallTicket';
@@ -735,10 +735,11 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
                   <div><strong>Email Address:</strong> {formData.email}</div>
                   <div><strong>School Name:</strong> {formData.schoolName}</div>
                 </div>
-                <div className="border-t border-slate-200 pt-2 grid grid-cols-2 gap-2 font-bold text-slate-800">
+                <div className="border-t border-slate-200 pt-2 grid grid-cols-2 sm:grid-cols-3 gap-2 font-bold text-slate-800">
                   <div>Date: {formData.testDate}</div>
                   <div>Mode: {formData.testMode}</div>
-                  {formData.testMode === 'Offline' && <div>Center: {formData.selectedCenter}</div>}
+                  <div>Exam Fee: <span className="text-[#ED1C24]">₹{getRegistrationFeeForClass(formData.currentClass)}</span></div>
+                  {formData.testMode === 'Offline' && <div className="sm:col-span-3">Center: {formData.selectedCenter}</div>}
                 </div>
               </div>
 
@@ -764,7 +765,7 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
           {/* STEP 4: Payment & Coupon Code Step */}
           {step === 4 && (
             <PaymentStep
-              baseFee={BIG_BANG_EXAM.registrationFee ?? 1}
+              baseFee={getRegistrationFeeForClass(formData.currentClass)}
               studentName={formData.studentName}
               studentEmail={formData.email}
               studentPhone={formData.phone}

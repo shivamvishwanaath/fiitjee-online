@@ -401,7 +401,7 @@ export const CENTERS: CenterLocation[] = [
     state: 'Delhi NCR',
     name: 'FIITJEE South Delhi (National Corporate Office)',
     address: 'FIITJEE House, 29-A, Kalu Sarai, Sarvapriya Vihar, Near Hauz Khas Metro',
-    phone: ['011-49283471', '011-46106000', '1800 11 4242'],
+    phone: ['011-49283471', '011-46106000'],
     email: 'southdelhi@fiitjee.com',
     isNationalHub: true,
     programsOffered: ['PINNACLE', 'SUPREME', 'Two Year Classroom', 'UDAYA', 'ASCENT', 'Dropper Special'],

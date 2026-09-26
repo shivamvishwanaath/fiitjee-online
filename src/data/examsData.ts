@@ -22,8 +22,19 @@ export const BIG_BANG_EXAM: AdmissionExam = {
   year: '2026',
   registrationOpen: true,
   registrationDbPath: 'registrations/big_bang_2026',
-  registrationFee: 1,
+  registrationFee: 200,
   isFree: false
 };
+
+export function getRegistrationFeeForClass(className?: string): number {
+  if (!className) return 250;
+  const clean = className.toUpperCase().replace(/^CLASS\s*/, '').trim();
+  // Class V, VI, VII, VIII (5, 6, 7, 8) -> 200
+  if (['V', 'VI', 'VII', 'VIII', '5', '6', '7', '8'].includes(clean)) {
+    return 200;
+  }
+  // Class IX, X, XI -> 250
+  return 250;
+}
 
 export const ADMISSION_EXAMS: AdmissionExam[] = [BIG_BANG_EXAM];

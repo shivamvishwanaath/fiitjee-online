@@ -50,7 +50,7 @@ Important Examination Particulars:
 
 Please ensure you carry a printed copy of your Official Hall Ticket along with an authorized school ID card to your examination center.
 
-For any queries, please reach out to the FIITJEE {{centreName}} helpline at {{centrePhone}}.
+For any queries, please reach out to the FIITJEE {{centreName}} desk at {{centrePhone}}.
 
 Best regards,
 Center Admissions Directorate
@@ -87,12 +87,12 @@ Reporting Checklist:
 [✔] Printed A4 Official Hall Ticket
 [✔] Valid Student ID or Aadhar Card
 [✔] 2 HB Pencils, Eraser & Sharpener
-[✔] Arrive by 08:15 AM (45 minutes before commencement)
+[✔] Arrive by 09:15 AM (45 minutes before commencement)
 
 Centre Address:
 {{centreAddress}}
 
-Helpline: {{centrePhone}}
+Contact Desk: {{centrePhone}}
 
 Good luck! Stand out and claim your academic excellence scholarship.
 

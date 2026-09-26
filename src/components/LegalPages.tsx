@@ -142,8 +142,6 @@ export const TermsAndConditions: React.FC = () => {
             <strong>TRANSED LLP</strong>
             <br />
             Email: <a href="mailto:support@fiitjee.online" className="text-[#ED1C24] font-semibold underline">support@fiitjee.online</a> / <a href="mailto:transedllp@gmail.com" className="text-[#ED1C24] font-semibold underline">transedllp@gmail.com</a>
-            <br />
-            Helpline: 011-49283471 / 1800 11 4242
           </p>
         </section>
       </div>
@@ -435,7 +433,7 @@ export const ShippingPolicy: React.FC = () => {
             Support for Non-Receipt
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            In rare cases of email spam filtering or network latency, if a candidate has not received their digital hall ticket or confirmation email within 30 minutes of payment debit, please email <a href="mailto:support@fiitjee.online" className="text-[#ED1C24] font-semibold underline">support@fiitjee.online</a> or call our helpline at <strong>011-49283471</strong> for instantaneous manual issuance.
+            In rare cases of email spam filtering or network latency, if a candidate has not received their digital hall ticket or confirmation email within 30 minutes of payment debit, please email <a href="mailto:support@fiitjee.online" className="text-[#ED1C24] font-semibold underline">support@fiitjee.online</a> for instantaneous manual issuance.
           </p>
         </section>
       </div>
@@ -521,24 +519,18 @@ export const ContactUsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Helpline & Operating Hours Card */}
+        {/* Operating Hours Card */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
           <div className="w-10 h-10 rounded-xl bg-red-50 text-[#ED1C24] flex items-center justify-center">
-            <Phone className="w-5 h-5" />
+            <Clock className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-black text-[#002147] uppercase">Phone & Working Hours</h3>
-            <p className="text-xs text-slate-500 font-semibold uppercase mt-0.5">Direct Helpdesk</p>
+            <h3 className="text-base font-black text-[#002147] uppercase">Operating Hours</h3>
+            <p className="text-xs text-slate-500 font-semibold uppercase mt-0.5">Admissions Helpdesk Schedule</p>
           </div>
           <div className="text-xs sm:text-sm text-slate-700 space-y-2 pt-2 border-t border-slate-100">
             <div>
-              <span className="font-bold text-slate-900">Toll-Free Helpline:</span> 1800 11 4242
-            </div>
-            <div>
-              <span className="font-bold text-slate-900">Direct Desk:</span> 011-49283471
-            </div>
-            <div>
-              <span className="font-bold text-slate-900">Operating Hours:</span>
+              <span className="font-bold text-slate-900">Working Days:</span>
               <br />
               Monday – Saturday: 09:30 AM to 06:30 PM IST
               <br />

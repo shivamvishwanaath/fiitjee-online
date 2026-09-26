@@ -5,7 +5,8 @@ import {
   formatRegistrationNumber, 
   generateSID, 
   generateInvoiceNumber, 
-  getExamScheduleForClass 
+  getExamScheduleForClass,
+  getRegistrationFeeForClass 
 } from '../admin/utils/centreUtils';
 
 interface OfficialHallTicketProps {
@@ -30,7 +31,8 @@ export const OfficialHallTicket: React.FC<OfficialHallTicketProps> = ({
     `${registration.schoolName ? `${registration.schoolName}, ` : ''}${centre.name.toUpperCase()}, ${centre.stateName}::${centre.stateCode}, India`;
 
   // Dynamic fee calculation (if fee paid or free/waived)
-  const paidAmount = registration.paymentAmount !== undefined ? Number(registration.paymentAmount) : (registration.paymentStatus === 'paid' ? 1.00 : 0.00);
+  const standardFee = getRegistrationFeeForClass(registration.currentClass);
+  const paidAmount = registration.paymentAmount !== undefined ? Number(registration.paymentAmount) : (registration.paymentStatus === 'paid' ? standardFee : 0.00);
 
   const renderTaxInvoice = (type: 'Duplicate' | 'Original') => (
     <div className="border border-black p-2 text-[8.5px] leading-tight flex-1 font-sans text-black">

@@ -77,7 +77,7 @@ export const AdmissionTestDetails: React.FC<AdmissionTestDetailsProps> = ({
         {/* Bhubaneswar / Ranchi / Dwarka / Hyderabad Contact Grid */}
         <div>
           <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3.5">
-            Participating Centers & Helplines (Select Center during Registration)
+            Participating Centers & Contacts (Select Center during Registration)
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {BIG_BANG_EXAM.offlineCenters.map((center) => (

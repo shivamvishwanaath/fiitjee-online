@@ -118,7 +118,7 @@ export const BigBangHeroBanner: React.FC<BigBangHeroBannerProps> = ({
 
             <div className="border-t border-white/10 pt-4 space-y-3">
               <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                Official Center Helplines
+                Official Center Contacts
               </h4>
               <div className="grid grid-cols-2 gap-3 text-[10px]">
                 <div className="space-y-1">

@@ -76,13 +76,8 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="bg-[#001733] text-white text-[11px] py-1.5 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-5">
-            <a href="tel:1800114242" className="flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors">
-              <Phone className="w-3 h-3 text-amber-400" />
-              <span>Helpline: <strong className="text-white">1800 11 4242</strong></span>
-            </a>
-            <span className="hidden sm:inline text-slate-600">|</span>
-            <span className="hidden md:inline-flex items-center gap-1 text-slate-400">
-              <MapPin className="w-3 h-3 text-[#ED1C24]" />
+            <span className="inline-flex items-center gap-1.5 text-slate-300">
+              <MapPin className="w-3.5 h-3.5 text-[#ED1C24]" />
               <span>Bhubaneswar • Dwarka • Ranchi • Hyderabad</span>
             </span>
           </div>

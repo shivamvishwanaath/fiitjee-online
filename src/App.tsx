@@ -197,7 +197,7 @@ function AppContent() {
         <Route path="/fiitjee-centres" element={
           <SEOWrapper
             title="Locate FIITJEE Centres | Dwarka, Bhubaneswar, Ranchi, Hyderabad"
-            description="Find direct contact information, helpline numbers, and map locations for our major participating test centers."
+            description="Find direct contact information, office contacts, and map locations for our major participating test centers."
             canonical="https://fiitjee-online.web.app/fiitjee-centres"
           >
             <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -352,7 +352,7 @@ function AppContent() {
         <Route path="/contact-us" element={
           <SEOWrapper
             title="Contact Us & Merchant Details | TRANSED LLP"
-            description="Official contact information, support helpline, email, and corporate address for merchant TRANSED LLP."
+            description="Official contact information, support email, and corporate address for merchant TRANSED LLP."
             canonical="https://fiitjee-online.web.app/contact-us"
           >
             <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -363,7 +363,7 @@ function AppContent() {
         <Route path="/contact" element={
           <SEOWrapper
             title="Contact Us & Merchant Details | TRANSED LLP"
-            description="Official contact information, support helpline, email, and corporate address for merchant TRANSED LLP."
+            description="Official contact information, support email, and corporate address for merchant TRANSED LLP."
             canonical="https://fiitjee-online.web.app/contact"
           >
             <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -437,7 +437,7 @@ function AppContent() {
         <Route path="/fiitjee-admission-test-details" element={
           <SEOWrapper
             title="Big Bang Edge Test 2026 Details | FIITJEE Admission Test"
-            description="Detailed info regarding exam schedules, eligible classes, center helplines, and modes for the Big Bang Edge Test 2026."
+            description="Detailed info regarding exam schedules, eligible classes, test centers, and modes for the Big Bang Edge Test 2026."
             canonical="https://fiitjee-online.web.app/fiitjee-admission-test-details"
           >
             <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -490,11 +490,11 @@ function AppContent() {
             <button
               onClick={() => handleOpenEnquiry('Urgent Counseling')}
               className="bg-[#002147] text-white p-3 rounded-full shadow-xl hover:bg-[#001733] transition-all flex items-center gap-2 group cursor-pointer border border-[#002147]/50"
-              title="Call Helpline"
+              title="Request Counseling Callback"
             >
-              <PhoneCall className="w-5 h-5 text-amber-400 animate-pulse" />
+              <PhoneCall className="w-5 h-5 text-amber-400" />
               <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-300 text-xs font-bold pr-1">
-                Talk to Counselor: 1800 11 4242
+                Request Callback
               </span>
             </button>
 
