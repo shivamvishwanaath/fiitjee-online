@@ -10,17 +10,18 @@ import {
   Phone, 
   Mail, 
   School,
-  Sparkles
+  Sparkles,
+  Lock
 } from 'lucide-react';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useRegistrations } from '../hooks/useRegistrations';
-import { ALL_CENTRES, generateSID, generateInvoiceNumber, getCentreByName, generateRollNumber } from '../utils/centreUtils';
+import { ALL_CENTRES, generateSID, generateInvoiceNumber, getCentreByName, generateRollNumber, getRegistrationFeeForClass } from '../utils/centreUtils';
 import { HallTicketModal } from '../../components/HallTicketModal';
 import { ExamRegistration } from '../../types';
 
 export const AddRegistration: React.FC = () => {
   const navigate = useNavigate();
-  const { centre, user } = useAdminAuth();
+  const { centre, user, canSwitchCentres } = useAdminAuth();
   const { addRegistration, registrations } = useRegistrations(centre?.name, user?.email || undefined);
 
   const [formData, setFormData] = useState({
@@ -38,6 +39,12 @@ export const AddRegistration: React.FC = () => {
     status: 'Confirmed' as ExamRegistration['status'],
     paymentMode: 'Free Counter Registration / Scholarship Voucher'
   });
+
+  React.useEffect(() => {
+    if (centre?.name && !canSwitchCentres) {
+      setFormData(prev => ({ ...prev, selectedCenter: centre.name }));
+    }
+  }, [centre?.name, canSwitchCentres]);
 
   const [submitting, setSubmitting] = useState(false);
   const [createdReg, setCreatedReg] = useState<ExamRegistration | null>(null);
@@ -249,15 +256,29 @@ export const AddRegistration: React.FC = () => {
               <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
                 Examination / Study Centre *
               </label>
-              <select
-                value={formData.selectedCenter}
-                onChange={(e) => handleInputChange('selectedCenter', e.target.value)}
-                className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] bg-white font-bold"
-              >
-                {ALL_CENTRES.map(c => (
-                  <option key={c.id} value={c.name}>{c.name} {c.code}</option>
-                ))}
-              </select>
+              {canSwitchCentres ? (
+                <select
+                  value={formData.selectedCenter}
+                  onChange={(e) => handleInputChange('selectedCenter', e.target.value)}
+                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] bg-white font-bold"
+                >
+                  {ALL_CENTRES.map(c => (
+                    <option key={c.id} value={c.name}>{c.name} {c.code}</option>
+                  ))}
+                </select>
+              ) : (
+                <div className="w-full p-2.5 border border-slate-200 bg-slate-100 rounded-lg flex items-center justify-between text-xs font-bold text-slate-800">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-[#ED1C24]" />
+                    <span>FIITJEE {centre?.name}</span>
+                    <span className="font-mono text-[10px] text-slate-500">{centre?.code}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] text-slate-500 font-semibold bg-white px-2 py-0.5 rounded border border-slate-200 select-none">
+                    <Lock className="w-3 h-3 text-slate-400" />
+                    <span>Locked to Branch</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Ranchi Test Centre Venue Selection */}

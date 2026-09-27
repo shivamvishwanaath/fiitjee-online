@@ -8,9 +8,15 @@ import {
   signOut,
   sendPasswordResetEmail
 } from 'firebase/auth';
-import { ref, set, update } from 'firebase/database';
+import { ref, get, update } from 'firebase/database';
 import { auth, db } from '../../firebase';
-import { CentreProfile, ALL_CENTRES, CENTRES_CONFIG, getCentreByEmail } from '../utils/centreUtils';
+import { 
+  CentreProfile, 
+  ALL_CENTRES, 
+  CENTRES_CONFIG, 
+  getCentreByEmail, 
+  isSuperAdminEmail 
+} from '../utils/centreUtils';
 
 export interface AdminAuthContextType {
   user: User | null;
@@ -18,10 +24,12 @@ export interface AdminAuthContextType {
   activeCentreId: string;
   loading: boolean;
   isAuthenticated: boolean;
+  isCentreLocked: boolean;
+  canSwitchCentres: boolean;
   availableCentres: CentreProfile[];
   switchCentre: (centreId: string) => void;
-  loginWithEmail: (email: string, pass: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
+  loginWithEmail: (email: string, pass: string, targetCentreId?: string) => Promise<void>;
+  loginWithGoogle: (targetCentreId?: string) => Promise<void>;
   logout: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
 }
@@ -36,27 +44,63 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const saved = localStorage.getItem(STORAGE_KEY);
     return (saved && CENTRES_CONFIG[saved]) || CENTRES_CONFIG.bhubaneswar;
   });
+  const [isCentreLocked, setIsCentreLocked] = useState<boolean>(true);
+  const [canSwitchCentres, setCanSwitchCentres] = useState<boolean>(false);
+  const [availableCentres, setAvailableCentres] = useState<CentreProfile[]>([CENTRES_CONFIG.bhubaneswar]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Sync with Firebase Authentication state changes
+  // Sync with Firebase Authentication state changes & strictly enforce centre isolation
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
 
       if (currentUser && currentUser.email) {
-        // 1. If user email directly maps to a specific centre email (e.g. fiitjee.dwarka@fiitjee.online)
-        const emailCentre = getCentreByEmail(currentUser.email);
-        if (emailCentre) {
-          setCentre(emailCentre);
-          localStorage.setItem(STORAGE_KEY, emailCentre.id);
-        } else {
-          // 2. For general admin / developer accounts, use persisted centre or fallback to Bhubaneswar
+        const isSuper = isSuperAdminEmail(currentUser.email);
+
+        if (isSuper) {
+          // 1. Superadmin (Developer / National Corporate Office): Can inspect all branches
+          setIsCentreLocked(false);
+          setCanSwitchCentres(true);
+          setAvailableCentres(ALL_CENTRES);
+
           const saved = localStorage.getItem(STORAGE_KEY);
-          const fallback = (saved && CENTRES_CONFIG[saved]) || CENTRES_CONFIG.bhubaneswar;
-          setCentre(fallback);
+          const activeCentre = (saved && CENTRES_CONFIG[saved]) || CENTRES_CONFIG.bhubaneswar;
+          setCentre(activeCentre);
+          localStorage.setItem(STORAGE_KEY, activeCentre.id);
+        } else {
+          // 2. Regular Centre Staff: Strictly locked to their assigned centre only
+          let assignedCentre = getCentreByEmail(currentUser.email);
+
+          // If email didn't match directly, check RTDB admin profile
+          if (!assignedCentre && currentUser.uid) {
+            try {
+              const snap = await get(ref(db, `admins/${currentUser.uid}`));
+              if (snap.exists()) {
+                const data = snap.val();
+                if (data.assignedCentreId && CENTRES_CONFIG[data.assignedCentreId]) {
+                  assignedCentre = CENTRES_CONFIG[data.assignedCentreId];
+                }
+              }
+            } catch (err) {
+              console.error('Error fetching admin centre assignment:', err);
+            }
+          }
+
+          // If still unresolved, fallback to saved or default and persist
+          if (!assignedCentre) {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            assignedCentre = (saved && CENTRES_CONFIG[saved]) || CENTRES_CONFIG.bhubaneswar;
+          }
+
+          setCentre(assignedCentre);
+          setIsCentreLocked(true);
+          setCanSwitchCentres(false);
+          setAvailableCentres([assignedCentre]);
+          // Strict overwrite of storage to lock access
+          localStorage.setItem(STORAGE_KEY, assignedCentre.id);
         }
 
-        // Record admin active session in RTDB
+        // Record admin active session & centre assignment in RTDB
         try {
           const adminRef = ref(db, `admins/${currentUser.uid}`);
           await update(adminRef, {
@@ -68,9 +112,13 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           // Non-blocking RTDB update
         }
       } else {
-        // When logged out, keep default centre reference ready
+        // When logged out
+        setIsCentreLocked(true);
+        setCanSwitchCentres(false);
         const saved = localStorage.getItem(STORAGE_KEY);
-        setCentre((saved && CENTRES_CONFIG[saved]) || CENTRES_CONFIG.bhubaneswar);
+        const fallback = (saved && CENTRES_CONFIG[saved]) || CENTRES_CONFIG.bhubaneswar;
+        setCentre(fallback);
+        setAvailableCentres([fallback]);
       }
 
       setLoading(false);
@@ -80,6 +128,12 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   const switchCentre = (centreId: string) => {
+    // Security check: Block unauthorized cross-centre access
+    if (!canSwitchCentres) {
+      console.warn(`[Security Notice] User ${user?.email} is restricted to centre ${centre?.name}. Cross-centre switching is disabled.`);
+      return;
+    }
+
     const nextCentre = CENTRES_CONFIG[centreId];
     if (nextCentre) {
       setCentre(nextCentre);
@@ -87,30 +141,64 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const loginWithEmail = async (email: string, pass: string): Promise<void> => {
+  const loginWithEmail = async (email: string, pass: string, targetCentreId?: string): Promise<void> => {
     setLoading(true);
     try {
       const cred = await signInWithEmailAndPassword(auth, email.trim(), pass);
-      const emailCentre = getCentreByEmail(cred.user.email);
-      if (emailCentre) {
-        setCentre(emailCentre);
-        localStorage.setItem(STORAGE_KEY, emailCentre.id);
+      const isSuper = isSuperAdminEmail(cred.user.email);
+      let assignedCentre = getCentreByEmail(cred.user.email);
+
+      if (!assignedCentre && targetCentreId && CENTRES_CONFIG[targetCentreId]) {
+        assignedCentre = CENTRES_CONFIG[targetCentreId];
+      }
+
+      if (!isSuper && assignedCentre) {
+        setCentre(assignedCentre);
+        setIsCentreLocked(true);
+        setCanSwitchCentres(false);
+        setAvailableCentres([assignedCentre]);
+        localStorage.setItem(STORAGE_KEY, assignedCentre.id);
+
+        try {
+          await update(ref(db, `admins/${cred.user.uid}`), {
+            assignedCentreId: assignedCentre.id,
+            centreName: assignedCentre.name,
+            lastLoginAt: new Date().toISOString()
+          });
+        } catch {}
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const loginWithGoogle = async (): Promise<void> => {
+  const loginWithGoogle = async (targetCentreId?: string): Promise<void> => {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
       const cred = await signInWithPopup(auth, provider);
-      const emailCentre = getCentreByEmail(cred.user.email);
-      if (emailCentre) {
-        setCentre(emailCentre);
-        localStorage.setItem(STORAGE_KEY, emailCentre.id);
+      const isSuper = isSuperAdminEmail(cred.user.email);
+      let assignedCentre = getCentreByEmail(cred.user.email);
+
+      if (!assignedCentre && targetCentreId && CENTRES_CONFIG[targetCentreId]) {
+        assignedCentre = CENTRES_CONFIG[targetCentreId];
+      }
+
+      if (!isSuper && assignedCentre) {
+        setCentre(assignedCentre);
+        setIsCentreLocked(true);
+        setCanSwitchCentres(false);
+        setAvailableCentres([assignedCentre]);
+        localStorage.setItem(STORAGE_KEY, assignedCentre.id);
+
+        try {
+          await update(ref(db, `admins/${cred.user.uid}`), {
+            assignedCentreId: assignedCentre.id,
+            centreName: assignedCentre.name,
+            lastLoginAt: new Date().toISOString()
+          });
+        } catch {}
       }
     } finally {
       setLoading(false);
@@ -120,6 +208,9 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const logout = async (): Promise<void> => {
     await signOut(auth);
     setUser(null);
+    setIsCentreLocked(true);
+    setCanSwitchCentres(false);
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const sendPasswordReset = async (email: string): Promise<void> => {
@@ -132,7 +223,9 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     activeCentreId: centre?.id || 'bhubaneswar',
     loading,
     isAuthenticated: !!user,
-    availableCentres: ALL_CENTRES,
+    isCentreLocked,
+    canSwitchCentres,
+    availableCentres,
     switchCentre,
     loginWithEmail,
     loginWithGoogle,

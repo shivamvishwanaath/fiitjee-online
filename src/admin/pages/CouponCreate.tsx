@@ -76,7 +76,7 @@ export const CouponCreate: React.FC = () => {
       await createCoupon({
         code: cleanCode,
         description: description.trim() || undefined,
-        centreId: centre?.name || 'ALL',
+        centreId: centre?.name || 'Bhubaneswar',
         discountType,
         discountValue: discountType === 'full' ? 100 : Number(discountValue),
         maxUses: Number(maxUses),

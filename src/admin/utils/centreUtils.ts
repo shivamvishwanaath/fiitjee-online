@@ -107,6 +107,18 @@ export const CENTRES_CONFIG: Record<string, CentreProfile> = {
 
 export const ALL_CENTRES = Object.values(CENTRES_CONFIG);
 
+export const SUPERADMIN_EMAILS = [
+  'shivam.strive@gmail.com',
+  'admin@fiitjee.online',
+  'corporate@fiitjee.online'
+];
+
+export function isSuperAdminEmail(email?: string | null): boolean {
+  if (!email) return false;
+  const clean = email.trim().toLowerCase();
+  return SUPERADMIN_EMAILS.includes(clean);
+}
+
 export function getCentreByEmail(email?: string | null): CentreProfile | null {
   if (!email) return null;
   const cleanEmail = email.trim().toLowerCase();

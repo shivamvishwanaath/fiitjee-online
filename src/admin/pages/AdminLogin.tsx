@@ -25,13 +25,13 @@ export const AdminLogin: React.FC = () => {
     loading, 
     user, 
     centre, 
-    switchCentre, 
     loginWithEmail, 
     loginWithGoogle, 
     sendPasswordReset, 
     logout 
   } = useAdminAuth();
 
+  const [selectedTargetCentreId, setSelectedTargetCentreId] = useState<string>('bhubaneswar');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -52,7 +52,7 @@ export const AdminLogin: React.FC = () => {
     setResetSent(false);
 
     try {
-      await loginWithEmail(email.trim(), password);
+      await loginWithEmail(email.trim(), password, selectedTargetCentreId);
       navigate('/admin');
     } catch (err: any) {
       console.error('Firebase Auth Login error:', err);
@@ -78,7 +78,7 @@ export const AdminLogin: React.FC = () => {
     setResetSent(false);
 
     try {
-      await loginWithGoogle();
+      await loginWithGoogle(selectedTargetCentreId);
       navigate('/admin');
     } catch (err: any) {
       console.error('Firebase Google Auth error:', err);
@@ -93,9 +93,9 @@ export const AdminLogin: React.FC = () => {
   };
 
   const handleSelectPreset = (centreId: string, centreEmail: string) => {
+    setSelectedTargetCentreId(centreId);
     setEmail(centreEmail);
     setPassword('password');
-    switchCentre(centreId);
     setErrorMessage(null);
     setResetSent(false);
   };
@@ -147,8 +147,20 @@ export const AdminLogin: React.FC = () => {
                   <UserCheck className="w-4 h-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[11px] font-bold text-emerald-800">Firebase Session Active</div>
+                  <div className="text-[11px] font-bold text-emerald-800">Authenticated Session Active</div>
                   <div className="text-xs font-mono font-semibold text-emerald-950 truncate">{user.email}</div>
+                </div>
+              </div>
+              <div className="p-2.5 bg-white/80 border border-emerald-100 rounded-lg text-xs">
+                <div className="text-[10px] uppercase font-bold text-slate-400">Assigned Branch Vault</div>
+                <div className="font-bold text-[#002147] flex items-center gap-1.5 mt-0.5">
+                  <Building2 className="w-3.5 h-3.5 text-[#ED1C24]" />
+                  <span>FIITJEE {centre?.name}</span>
+                  <span className="bg-[#002147] text-white px-1.5 py-0.2 rounded text-[10px] font-mono">{centre?.code}</span>
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
+                  <Lock className="w-2.5 h-2.5 text-slate-400 shrink-0" />
+                  <span>Access is locked to this centre. To access another centre, sign out first.</span>
                 </div>
               </div>
               <div className="flex items-center gap-2 pt-1">
@@ -157,17 +169,17 @@ export const AdminLogin: React.FC = () => {
                   onClick={() => navigate('/admin')}
                   className="flex-1 py-2 bg-[#002147] hover:bg-[#001733] text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                 >
-                  <span>Continue to {centre?.name || 'Admin'}</span>
+                  <span>Open {centre?.name || 'Admin'} Dashboard</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
                 <button
                   type="button"
                   onClick={() => logout()}
-                  className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
-                  title="Sign out from this session"
+                  className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                  title="Sign out from this session to switch branch"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span>Switch</span>
+                  <span>Sign Out</span>
                 </button>
               </div>
             </div>
@@ -176,11 +188,11 @@ export const AdminLogin: React.FC = () => {
           {/* Quick Centre Buttons */}
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-              Select Operating Branch:
+              Select Operating Branch to Sign In:
             </label>
             <div className="grid grid-cols-2 gap-2">
               {ALL_CENTRES.map((c) => {
-                const isSelected = email === c.email || centre?.id === c.id;
+                const isSelected = selectedTargetCentreId === c.id || email === c.email;
                 return (
                   <button
                     key={c.id}
@@ -188,7 +200,7 @@ export const AdminLogin: React.FC = () => {
                     onClick={() => handleSelectPreset(c.id, c.email)}
                     className={`p-2 rounded-xl text-left border text-xs font-bold transition-all cursor-pointer flex items-center justify-between ${
                       isSelected
-                        ? 'border-[#ED1C24] bg-red-50/60 text-[#002147] shadow-xs'
+                        ? 'border-[#ED1C24] bg-red-50/60 text-[#002147] shadow-xs ring-1 ring-[#ED1C24]'
                         : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
                     }`}
                   >
