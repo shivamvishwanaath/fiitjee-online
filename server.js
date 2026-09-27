@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { createCashfreeOrder, verifyCashfreeOrder } from './server/cashfreeHandler.js';
+import { sendCrmCampaign, testSmtpConnection } from './server/emailHandler.js';
 
 dotenv.config();
 
@@ -66,6 +67,48 @@ app.all('/api/verify-cashfree-order', async (req, res) => {
   } catch (error) {
     console.error('Error verifying Cashfree order:', error);
     res.status(500).json({ error: error.message || 'Failed to verify payment status' });
+  }
+});
+
+// API: Test Centre SMTP Connection
+app.post('/api/test-crm-smtp', async (req, res) => {
+  try {
+    const { senderEmail, senderName, customPassword, targetEmail } = req.body || {};
+    if (!senderEmail) {
+      return res.status(400).json({ error: 'senderEmail is required' });
+    }
+    const result = await testSmtpConnection({ senderEmail, senderName, customPassword, targetEmail });
+    res.json(result);
+  } catch (error) {
+    console.error('SMTP Test Error:', error);
+    res.status(500).json({ error: error.message || 'SMTP Authentication Failed' });
+  }
+});
+
+// API: Dispatch CRM Campaign Emails
+app.post('/api/send-crm-email', async (req, res) => {
+  try {
+    const { senderEmail, senderName, replyTo, recipients, subject, bodyTemplate, customPassword, centreInfo } = req.body || {};
+    
+    if (!senderEmail || !recipients || !recipients.length || !subject || !bodyTemplate) {
+      return res.status(400).json({ error: 'Missing required parameters (senderEmail, recipients, subject, bodyTemplate)' });
+    }
+
+    const outcome = await sendCrmCampaign({
+      senderEmail,
+      senderName,
+      replyTo,
+      recipients,
+      subject,
+      bodyTemplate,
+      customPassword,
+      centreInfo
+    });
+
+    res.json(outcome);
+  } catch (error) {
+    console.error('CRM Outreach Error:', error);
+    res.status(500).json({ error: error.message || 'Failed to dispatch email campaign' });
   }
 });
 
