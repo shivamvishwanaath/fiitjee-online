@@ -228,13 +228,6 @@ export const CRMCompose: React.FC = () => {
     setTimeout(() => setCopiedPhones(false), 2000);
   };
 
-  // Launch Desktop mail client with BCC
-  const handleLaunchMailClient = () => {
-    const bccList = recipients.map(r => r.email).filter(Boolean).slice(0, 80).join(',');
-    const mailto = `mailto:?bcc=${encodeURIComponent(bccList)}&subject=${encodeURIComponent(customSubject)}&body=${encodeURIComponent(customBody)}`;
-    window.location.href = mailto;
-  };
-
   // Save campaign draft
   const handleSaveCampaignDraft = async () => {
     if (!campaignTitle.trim()) {
@@ -277,7 +270,7 @@ export const CRMCompose: React.FC = () => {
     setSendError(null);
     setSendResults(null);
 
-    const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+    const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://fiitjee-cashfree-api.shivam-strive.workers.dev').replace(/\/$/, '');
     const senderEmail = user?.email || centre?.email || 'fiitjee.bhubaneswar@fiitjee.online';
     const senderName = `FIITJEE ${centre?.name || 'Admissions'} Centre`;
 
@@ -346,7 +339,7 @@ export const CRMCompose: React.FC = () => {
     setTestSuccess(null);
     setTestError(null);
 
-    const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+    const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://fiitjee-cashfree-api.shivam-strive.workers.dev').replace(/\/$/, '');
     const senderEmail = user?.email || centre?.email || 'fiitjee.bhubaneswar@fiitjee.online';
     const senderName = `FIITJEE ${centre?.name || 'Admissions'} Centre`;
 
@@ -625,33 +618,22 @@ export const CRMCompose: React.FC = () => {
               )}
             </div>
 
-            {/* Action Buttons Row */}
+            {/* Direct Platform Outreach Actions */}
             <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleSendTestEmail}
                   disabled={sendingTest}
-                  className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 border border-slate-200"
-                  title={`Send a test email to ${user?.email || 'shivam.strive@gmail.com'}`}
+                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 border border-slate-200"
+                  title={`Send a test preview email to ${user?.email || 'shivam.strive@gmail.com'}`}
                 >
                   {sendingTest ? (
                     <RefreshCw className="w-3.5 h-3.5 animate-spin text-slate-600" />
                   ) : (
                     <Mail className="w-3.5 h-3.5 text-slate-600" />
                   )}
-                  <span>{sendingTest ? 'Sending Test...' : 'Send Test Preview to Me'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleLaunchMailClient}
-                  disabled={recipients.length === 0}
-                  className="px-3 py-2.5 text-slate-500 hover:text-slate-700 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
-                  title="Fallback to desktop email client (BCC)"
-                >
-                  <Send className="w-3 h-3 text-slate-400" />
-                  <span>Mailto Fallback</span>
+                  <span>{sendingTest ? 'Sending Preview...' : 'Send Test Preview to Me'}</span>
                 </button>
               </div>
 
@@ -659,10 +641,14 @@ export const CRMCompose: React.FC = () => {
                 type="button"
                 onClick={() => setShowConfirmModal(true)}
                 disabled={recipients.length === 0 || sendingCampaign}
-                className="bg-[#ED1C24] hover:bg-[#c9141b] disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md cursor-pointer tracking-wide"
+                className="bg-[#ED1C24] hover:bg-[#c9141b] disabled:opacity-50 text-white px-6 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg cursor-pointer tracking-wide"
               >
                 <Send className="w-4 h-4" />
-                <span>Dispatch Campaign ({recipients.length} Candidates)</span>
+                <span>
+                  {recipients.length === 1
+                    ? `Send Email from Platform (1 Candidate)`
+                    : `Dispatch Campaign from Platform (${recipients.length} Candidates)`}
+                </span>
               </button>
             </div>
 
