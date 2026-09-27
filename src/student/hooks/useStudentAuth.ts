@@ -32,6 +32,7 @@ async function findRegistrationInDatabase(identifier: string): Promise<{ reg: an
         const regEmail = (r.email || '').trim().toLowerCase();
         const regPhone = (r.phone || '').replace(/\D/g, '');
         const regRoll = (r.rollNo || '').replace(/\s+/g, '').toLowerCase();
+        const prevRoll = (r.previousRollNo || '').replace(/\s+/g, '').toLowerCase();
 
         // 1. Check exact email match
         if (clean.includes('@') && regEmail === clean) {
@@ -41,8 +42,8 @@ async function findRegistrationInDatabase(identifier: string): Promise<{ reg: an
         if (cleanDigits.length >= 10 && regPhone.slice(-10) === cleanDigits.slice(-10)) {
           return { reg: r, centreId };
         }
-        // 3. Check roll number match
-        if (cleanRoll.length >= 6 && regRoll === cleanRoll) {
+        // 3. Check roll number match (matches either updated roll or legacy previous roll)
+        if (cleanRoll.length >= 6 && (regRoll === cleanRoll || prevRoll === cleanRoll)) {
           return { reg: r, centreId };
         }
       }

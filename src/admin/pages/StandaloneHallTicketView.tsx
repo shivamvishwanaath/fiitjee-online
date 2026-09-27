@@ -44,6 +44,7 @@ export const StandaloneHallTicketView: React.FC = () => {
                   const reg = centreNode[regKey];
                   if (
                     (reg.rollNo && reg.rollNo.replace(/\s+/g, '') === cleanRollNoSpaces) ||
+                    (reg.previousRollNo && reg.previousRollNo.replace(/\s+/g, '') === cleanRollNoSpaces) ||
                     (reg.phone && reg.phone === cleanRoll) ||
                     regKey === cleanRollNoSpaces
                   ) {
