@@ -131,7 +131,7 @@ export const OfficialHallTicket: React.FC<OfficialHallTicketProps> = ({
           </tr>
           <tr className="border-b border-black">
             <td className="p-1 font-bold border-r border-black bg-gray-50">Profile Status</td>
-            <td className="p-1 text-gray-700">Not yet updated. Please logon to www.fiitjeelogin.com and update your user profile</td>
+            <td className="p-1 text-gray-700">{registration.profileStatus || 'Not yet updated. Please logon to www.fiitjee.online and update your user profile'}</td>
           </tr>
           <tr className="border-b border-black">
             <td className="p-1 font-bold border-r border-black bg-gray-50">E-Mail ID</td>

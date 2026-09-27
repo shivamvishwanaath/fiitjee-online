@@ -11,8 +11,13 @@ import {
   Mail, 
   School,
   Sparkles,
-  Lock
+  Lock,
+  CreditCard
 } from 'lucide-react';
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { ref, set } from 'firebase/database';
+import { firebaseConfig, db } from '../../firebase';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useRegistrations } from '../hooks/useRegistrations';
 import { ALL_CENTRES, generateSID, generateInvoiceNumber, getCentreByName, generateRollNumber, getRegistrationFeeForClass } from '../utils/centreUtils';
@@ -37,7 +42,10 @@ export const AddRegistration: React.FC = () => {
     testMode: 'Offline' as 'Offline' | 'Proctored Online',
     testDate: '11th October 2026 (Sunday)',
     status: 'Confirmed' as ExamRegistration['status'],
-    paymentMode: 'Free Counter Registration / Scholarship Voucher'
+    paymentAmount: getRegistrationFeeForClass('Class X'),
+    paymentMode: 'Cash (Counter)',
+    paymentStatus: 'paid' as 'paid' | 'pending' | 'free',
+    paymentRef: ''
   });
 
   React.useEffect(() => {
@@ -53,6 +61,15 @@ export const AddRegistration: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleClassChange = (newClass: string) => {
+    const standardFee = getRegistrationFeeForClass(newClass);
+    setFormData(prev => ({
+      ...prev,
+      currentClass: newClass,
+      paymentAmount: standardFee
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -65,10 +82,56 @@ export const AddRegistration: React.FC = () => {
 
       const seqSuffix = Date.now().toString().slice(-4);
       const nextSeq = registrations && registrations.length > 0 ? (registrations.length + 1) : Math.floor(1 + Math.random() * 99);
-      const generatedRoll = generateRollNumber(selectedCentreProfile, formData.testDate, nextSeq, effectiveTestCentreCode);
+      const generatedRoll = generateRollNumber(selectedCentreProfile, formData.testDate, nextSeq, effectiveTestCentreCode, formData.currentClass);
       const sid = generateSID(generatedRoll);
       const invoiceNo = generateInvoiceNumber(selectedCentreProfile, generatedRoll);
-      const paymentRef = `${selectedCentreProfile.numericCode}/ADM-${seqSuffix}`;
+      const autoPaymentRef = `${selectedCentreProfile.numericCode}/ADM-${seqSuffix}`;
+
+      // Automatically register student user in Auth and create student profile in database
+      let studentUid = '';
+      const cleanEmail = formData.email.trim();
+      if (cleanEmail) {
+        try {
+          const secondaryApp = getApps().find(a => a.name === 'SecondaryStudentRegistrar') 
+            || initializeApp(firebaseConfig, 'SecondaryStudentRegistrar');
+          const secondaryAuth = getAuth(secondaryApp);
+          const tempPassword = 'Fiitjee@' + Math.random().toString(36).slice(-8) + '2026';
+          try {
+            const userCred = await createUserWithEmailAndPassword(secondaryAuth, cleanEmail, tempPassword);
+            studentUid = userCred.user.uid;
+            await signOut(secondaryAuth);
+          } catch (authErr: any) {
+            // Already registered or exists
+            console.log('Student account registration notice:', authErr.code);
+          }
+        } catch (e) {
+          console.warn('Could not initialize secondary auth:', e);
+        }
+
+        if (studentUid) {
+          try {
+            await set(ref(db, `students/${studentUid}`), {
+              uid: studentUid,
+              fullName: formData.studentName.trim(),
+              parentName: formData.parentName.trim(),
+              email: cleanEmail,
+              phone: formData.phone.trim(),
+              currentClass: formData.currentClass,
+              schoolName: formData.schoolName.trim(),
+              city: selectedCentreProfile.name,
+              preferredCentreId: selectedCentreProfile.id,
+              profileStatus: 'Not yet updated. Please logon to www.fiitjee.online and update your user profile',
+              registeredBy: 'Admin Counter',
+              registeredByCentre: centre?.name || selectedCentreProfile.name,
+              registeredByEmail: user?.email || 'admin',
+              createdAt: new Date().toISOString()
+            });
+            await set(ref(db, `student_centre_index/${selectedCentreProfile.id}/${studentUid}`), true);
+          } catch (rtdbErr) {
+            console.error('Error recording student record:', rtdbErr);
+          }
+        }
+      }
 
       const newRecord: ExamRegistration = {
         examId: 'big_bang_2026',
@@ -89,9 +152,13 @@ export const AddRegistration: React.FC = () => {
         invoiceNo,
         invoiceDate: new Date().toISOString().split('T')[0],
         status: formData.status,
-        paymentStatus: 'paid',
-        paymentAmount: getRegistrationFeeForClass(formData.currentClass),
-        paymentRef,
+        paymentStatus: formData.paymentStatus,
+        paymentAmount: Number(formData.paymentAmount),
+        paymentMode: formData.paymentMode,
+        paymentRef: formData.paymentRef.trim() || autoPaymentRef,
+        profileStatus: 'Not yet updated. Please logon to www.fiitjee.online and update your user profile',
+        studentUid: studentUid || undefined,
+        registeredByAdmin: true,
         registeredByCentre: `${centre?.name || 'Counter'} Staff (${user?.email || 'Admin'})`
       };
 
@@ -178,7 +245,7 @@ export const AddRegistration: React.FC = () => {
               </label>
               <select
                 value={formData.currentClass}
-                onChange={(e) => handleInputChange('currentClass', e.target.value)}
+                onChange={(e) => handleClassChange(e.target.value)}
                 className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] bg-white font-bold"
               >
                 <option value="Class V">Class V</option>
@@ -342,6 +409,92 @@ export const AddRegistration: React.FC = () => {
                 <option value="New">New</option>
                 <option value="Contacted">Contacted</option>
               </select>
+            </div>
+
+            {/* --- Fee Collection & Counter Payment Section --- */}
+            <div className="sm:col-span-2 pt-4 border-t border-slate-200 mt-2">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="p-1.5 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200">
+                  <CreditCard className="w-4 h-4" />
+                </span>
+                <div>
+                  <h4 className="text-xs font-black uppercase text-slate-800 tracking-wider">Fee Collection & Counter Payment Details</h4>
+                  <p className="text-[10px] text-slate-500">Record amount taken and payment instrument at registration</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Amount Collected */}
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
+                    Amount Taken (₹) *
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-xs">₹</span>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      step="10"
+                      value={formData.paymentAmount}
+                      onChange={(e) => handleInputChange('paymentAmount', Number(e.target.value))}
+                      className="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] font-mono font-bold text-xs"
+                    />
+                  </div>
+                  <span className="text-[9px] text-slate-400 mt-0.5 block">
+                    Standard fee for {formData.currentClass}: ₹{getRegistrationFeeForClass(formData.currentClass)}
+                  </span>
+                </div>
+
+                {/* Mode of Payment */}
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
+                    Mode of Payment *
+                  </label>
+                  <select
+                    value={formData.paymentMode}
+                    onChange={(e) => handleInputChange('paymentMode', e.target.value)}
+                    className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] bg-white font-bold text-xs"
+                  >
+                    <option value="Cash (Counter)">Cash (Counter)</option>
+                    <option value="UPI / QR Code (Counter)">UPI / QR Code (Counter)</option>
+                    <option value="Debit / Credit Card (POS Swipe)">Debit / Credit Card (POS Swipe)</option>
+                    <option value="Net Banking / NEFT">Net Banking / NEFT</option>
+                    <option value="Cheque / Demand Draft">Cheque / Demand Draft</option>
+                    <option value="Scholarship / Concession Voucher (Free)">Scholarship / Concession Voucher (Free)</option>
+                  </select>
+                </div>
+
+                {/* Payment Status */}
+                <div>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
+                    Payment Status *
+                  </label>
+                  <select
+                    value={formData.paymentStatus}
+                    onChange={(e) => handleInputChange('paymentStatus', e.target.value as any)}
+                    className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] bg-white font-bold text-xs"
+                  >
+                    <option value="paid">Paid (Confirmed)</option>
+                    <option value="free">100% Scholarship / Free Voucher</option>
+                    <option value="pending">Pending Counter Collection</option>
+                  </select>
+                </div>
+
+                {/* Counter Receipt / Transaction Reference */}
+                <div className="sm:col-span-3">
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
+                    Counter Receipt No. / Transaction Ref ID (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. REC-2026-0042 / UPI Transaction ID / Bank Scroll Ref"
+                    value={formData.paymentRef}
+                    onChange={(e) => handleInputChange('paymentRef', e.target.value)}
+                    className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] font-mono text-xs"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

@@ -343,6 +343,66 @@ export const RegistrationDetail: React.FC = () => {
                   <option value="Absent">Absent</option>
                 </select>
               </div>
+
+              {/* Fee & Payment Breakdown */}
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
+                  Fee Collected (₹)
+                </label>
+                <input
+                  type="number"
+                  value={formData.paymentAmount ?? 200}
+                  onChange={(e) => handleInputChange('paymentAmount', Number(e.target.value))}
+                  className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] font-mono font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
+                  Payment Mode
+                </label>
+                <select
+                  value={formData.paymentMode || 'Cash (Counter)'}
+                  onChange={(e) => handleInputChange('paymentMode', e.target.value)}
+                  className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] bg-white font-semibold text-xs"
+                >
+                  <option value="Cash (Counter)">Cash (Counter)</option>
+                  <option value="UPI / QR Code (Counter)">UPI / QR Code (Counter)</option>
+                  <option value="Debit / Credit Card (POS Swipe)">Debit / Credit Card (POS Swipe)</option>
+                  <option value="Online (Cashfree)">Online (Cashfree Gateway)</option>
+                  <option value="Net Banking / NEFT">Net Banking / NEFT</option>
+                  <option value="Cheque / Demand Draft">Cheque / Demand Draft</option>
+                  <option value="Scholarship / Concession Voucher (Free)">Scholarship / Concession Voucher (Free)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
+                  Payment Status
+                </label>
+                <select
+                  value={formData.paymentStatus || 'paid'}
+                  onChange={(e) => handleInputChange('paymentStatus', e.target.value as any)}
+                  className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] bg-white font-semibold text-xs"
+                >
+                  <option value="paid">Paid</option>
+                  <option value="free">Free / Concession</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
+                  Receipt / Transaction Ref
+                </label>
+                <input
+                  type="text"
+                  placeholder="Receipt / Ref ID"
+                  value={formData.paymentRef || ''}
+                  onChange={(e) => handleInputChange('paymentRef', e.target.value)}
+                  className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] font-mono text-xs"
+                />
+              </div>
             </div>
 
             {/* Save CTA */}

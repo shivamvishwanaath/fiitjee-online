@@ -19,7 +19,7 @@ import { useRegistrations } from '../hooks/useRegistrations';
 import { StatCard } from '../components/StatCard';
 import { StatusBadge } from '../components/StatusBadge';
 import { HallTicketModal } from '../../components/HallTicketModal';
-import { exportToExcel } from '../utils/exportExcel';
+import { exportToCSV } from '../utils/exportExcel';
 import { ExamRegistration } from '../../types';
 
 export const AdminDashboard: React.FC = () => {
@@ -63,8 +63,8 @@ export const AdminDashboard: React.FC = () => {
   // Recent 8 registrations
   const recentRegistrations = registrations.slice(0, 8);
 
-  const handleExportQuickExcel = () => {
-    exportToExcel(registrations, `FIITJEE_${(centre?.name || 'Centre').replace(/\s+/g, '_')}_Overview`);
+  const handleExportQuickCSV = () => {
+    exportToCSV(registrations, `FIITJEE_${(centre?.name || 'Centre').replace(/\s+/g, '_')}_Overview`);
   };
 
   return (
@@ -97,11 +97,11 @@ export const AdminDashboard: React.FC = () => {
             <span>Register Candidate</span>
           </button>
           <button
-            onClick={handleExportQuickExcel}
+            onClick={handleExportQuickCSV}
             className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border border-slate-700"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-            <span>Export Excel</span>
+            <span>Export CSV</span>
           </button>
         </div>
       </div>
@@ -161,11 +161,11 @@ export const AdminDashboard: React.FC = () => {
             <span>Register Walk-in Student</span>
           </button>
           <button
-            onClick={handleExportQuickExcel}
+            onClick={handleExportQuickCSV}
             className="bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
           >
             <FileSpreadsheet className="w-4 h-4" />
-            <span>Download Excel</span>
+            <span>Download CSV</span>
           </button>
         </div>
 

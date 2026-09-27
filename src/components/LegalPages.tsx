@@ -237,7 +237,7 @@ export const PrivacyPolicy: React.FC = () => {
           </p>
           <ul className="list-disc pl-5 text-xs sm:text-sm text-slate-600 space-y-1.5">
             <li><strong>Payment Aggregators (Cashfree Payments):</strong> To process online fee transactions securely.</li>
-            <li><strong>Cloud Service Providers (Google Firebase / GCP):</strong> For encrypted database storage and real-time syncing.</li>
+            <li><strong>Cloud Infrastructure Partners:</strong> For encrypted database storage and real-time syncing under enterprise security standards.</li>
             <li><strong>Regulatory / Law Enforcement Bodies:</strong> Strictly where required under applicable Indian laws or judicial orders.</li>
           </ul>
         </section>

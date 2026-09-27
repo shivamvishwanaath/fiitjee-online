@@ -141,14 +141,14 @@ export const AdminNavbar: React.FC<AdminNavbarProps> = ({
 
         {/* Authenticated Admin Account Pill */}
         <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/80 px-2.5 py-1 rounded-lg">
-          <div className="w-2 h-2 rounded-full bg-emerald-500" title="Firebase Auth Connected"></div>
+          <div className="w-2 h-2 rounded-full bg-emerald-500" title="Secure Session Connected"></div>
           <span className="text-[11px] font-mono font-bold text-slate-700 hidden sm:inline truncate max-w-[140px]">
             {user?.email ? user.email.split('@')[0] : 'admin'}
           </span>
           <button
             onClick={handleSignOut}
             className="text-slate-400 hover:text-red-600 ml-1 p-0.5 rounded cursor-pointer transition-colors"
-            title="Sign out of Firebase Auth"
+            title="Sign out of Admin Session"
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>

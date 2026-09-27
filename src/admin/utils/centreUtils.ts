@@ -168,12 +168,115 @@ export function formatRegistrationNumber(rollNo?: string): string {
   return chunks ? chunks.join(' ') : rollNo;
 }
 
+export function getExamCodeForClass(className?: string): string {
+  if (!className) return '7052';
+  const c = className.trim().toUpperCase();
+
+  // Class 5 / V (going to 6th) -> 6052
+  if (
+    c === 'CLASS V' || 
+    c === 'CLASS 5' || 
+    c.includes('CLASS V ') || 
+    c.includes('CLASS 5TH') || 
+    c.includes('5TH') || 
+    (c.includes('CLASS V') && !c.includes('VI') && !c.includes('VII') && !c.includes('VIII'))
+  ) {
+    return '6052';
+  }
+
+  // Class 6 / VI (going to 7th) -> 7052
+  if (
+    c === 'CLASS VI' || 
+    c === 'CLASS 6' || 
+    c.includes('CLASS VI ') || 
+    c.includes('CLASS 6TH') || 
+    c.includes('6TH') || 
+    (c.includes('CLASS VI') && !c.includes('VII') && !c.includes('VIII'))
+  ) {
+    return '7052';
+  }
+
+  // Class 7 / VII (going to 8th) -> 8052
+  if (
+    c === 'CLASS VII' || 
+    c === 'CLASS 7' || 
+    c.includes('CLASS VII ') || 
+    c.includes('CLASS 7TH') || 
+    c.includes('7TH') || 
+    (c.includes('CLASS VII') && !c.includes('VIII'))
+  ) {
+    return '8052';
+  }
+
+  // Class 8 / VIII (going to 9th) -> 9052
+  if (
+    c === 'CLASS VIII' || 
+    c === 'CLASS 8' || 
+    c.includes('CLASS VIII ') || 
+    c.includes('CLASS 8TH') || 
+    c.includes('8TH') || 
+    c.includes('CLASS VIII')
+  ) {
+    return '9052';
+  }
+
+  // Class 9 / IX (going to 10th) -> 1052
+  if (
+    c === 'CLASS IX' || 
+    c === 'CLASS 9' || 
+    c.includes('CLASS IX ') || 
+    c.includes('CLASS 9TH') || 
+    c.includes('9TH') || 
+    c.includes('CLASS IX')
+  ) {
+    return '1052';
+  }
+
+  // Class 10 / X (going to 11th) -> 1152
+  if (
+    c === 'CLASS X' || 
+    c === 'CLASS 10' || 
+    c.includes('CLASS X ') || 
+    c.includes('CLASS 10TH') || 
+    c.includes('10TH') || 
+    (c.includes('CLASS X') && !c.includes('XI') && !c.includes('XII'))
+  ) {
+    return '1152';
+  }
+
+  // Class 11 / XI (going to 12th) -> 1252
+  if (
+    c === 'CLASS XI' || 
+    c === 'CLASS 11' || 
+    c.includes('CLASS XI ') || 
+    c.includes('CLASS 11TH') || 
+    c.includes('11TH') || 
+    (c.includes('CLASS XI') && !c.includes('XII'))
+  ) {
+    return '1252';
+  }
+
+  // Class 12 / XII -> 1252
+  if (
+    c === 'CLASS XII' || 
+    c === 'CLASS 12' || 
+    c.includes('CLASS XII') || 
+    c.includes('12TH')
+  ) {
+    return '1252';
+  }
+
+  return '7052';
+}
+
 export function generateRollNumber(
   centre: CentreProfile,
   testDate?: string,
   sequence?: number | string,
-  testCentreCodeOverride?: string
+  testCentreCodeOverride?: string,
+  className?: string
 ): string {
+  const examCode = getExamCodeForClass(className);
   // Test Centre Code
   const tcCode = testCentreCodeOverride || centre.testCentreCode || '820';
   const centreSegment = `${centre.numericCode}${tcCode}`; // e.g. "45820"
@@ -199,7 +302,7 @@ export function generateRollNumber(
     seqChunk = String(rand).padStart(4, '0');
   }
 
-  return `7052 ${centreSegment} ${dateChunk} ${seqChunk}`;
+  return `${examCode} ${centreSegment} ${dateChunk} ${seqChunk}`;
 }
 
 export function generateSID(rollNo?: string): string {

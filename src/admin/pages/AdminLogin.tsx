@@ -55,13 +55,13 @@ export const AdminLogin: React.FC = () => {
       await loginWithEmail(email.trim(), password, selectedTargetCentreId);
       navigate('/admin');
     } catch (err: any) {
-      console.error('Firebase Auth Login error:', err);
+      console.error('Admin Auth Login error [AUTH-ERR-401]:', err);
       if (
         err.code === 'auth/invalid-credential' || 
         err.code === 'auth/wrong-password' || 
         err.code === 'auth/user-not-found'
       ) {
-        setErrorMessage('Invalid credentials. Please verify your email and password in Firebase Authentication.');
+        setErrorMessage('Invalid credentials. Please verify your email and password [AUTH-ERR-401].');
       } else if (err.code === 'auth/too-many-requests') {
         setErrorMessage('Access temporarily blocked due to repeated failed attempts. Please try again later.');
       } else {
@@ -81,7 +81,7 @@ export const AdminLogin: React.FC = () => {
       await loginWithGoogle(selectedTargetCentreId);
       navigate('/admin');
     } catch (err: any) {
-      console.error('Firebase Google Auth error:', err);
+      console.error('Google Auth error [AUTH-ERR-403]:', err);
       if (err.code === 'auth/popup-closed-by-user') {
         setErrorMessage('Google Sign-In was cancelled.');
       } else {
@@ -132,14 +132,14 @@ export const AdminLogin: React.FC = () => {
           Centre Operations Portal
         </h2>
         <p className="mt-1 text-xs text-slate-300">
-          Management &amp; Admissions Console with Firebase Authentication
+          Management &amp; Admissions Operations Console
         </p>
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
         <div className="bg-white py-8 px-6 shadow-2xl rounded-2xl border border-slate-200 sm:px-10 space-y-6">
           
-          {/* Active Firebase User Banner (if already logged in) */}
+          {/* Active User Session Banner (if already logged in) */}
           {user && (
             <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-3">
               <div className="flex items-center gap-2.5">
@@ -212,7 +212,7 @@ export const AdminLogin: React.FC = () => {
             </div>
           </div>
 
-          {/* Google Sign In with Firebase Auth */}
+          {/* Google Sign In */}
           <button
             type="button"
             onClick={handleGoogleLogin}
@@ -225,7 +225,7 @@ export const AdminLogin: React.FC = () => {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
             </svg>
-            <span>{googleSubmitting ? 'Authenticating with Google...' : 'Sign In with Google (Firebase Auth)'}</span>
+            <span>{googleSubmitting ? 'Authenticating with Google...' : 'Sign In with Google'}</span>
           </button>
 
           <div className="relative flex items-center justify-center">
@@ -311,7 +311,7 @@ export const AdminLogin: React.FC = () => {
               disabled={submitting || googleSubmitting}
               className="w-full py-2.5 px-4 bg-[#ED1C24] hover:bg-[#c9141b] disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider mt-2"
             >
-              <span>{submitting ? 'Verifying with Firebase Auth...' : 'Sign In via Firebase Auth'}</span>
+              <span>{submitting ? 'Verifying credentials...' : 'Sign In to Operations Console'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
@@ -319,7 +319,7 @@ export const AdminLogin: React.FC = () => {
           {/* Institutional note */}
           <div className="border-t border-slate-100 pt-4 text-center">
             <p className="text-[10px] text-slate-400">
-              Authenticated via Google Firebase Identity Platform. All actions are cryptographically authorized.
+              Enterprise Secure Operations Gateway. All access events are cryptographically authenticated and logged.
             </p>
           </div>
         </div>

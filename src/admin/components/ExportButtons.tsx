@@ -1,7 +1,7 @@
 import React from 'react';
 import { FileSpreadsheet, FileText, Download } from 'lucide-react';
 import { ExamRegistration } from '../../types';
-import { exportToExcel } from '../utils/exportExcel';
+import { exportToCSV } from '../utils/exportExcel';
 import { exportToPDF } from '../utils/exportPDF';
 
 interface ExportButtonsProps {
@@ -19,9 +19,9 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({
   const targetData = isSelective ? selectedRegistrations : allRegistrations;
   const labelSuffix = isSelective ? `(${selectedRegistrations.length} Selected)` : `All (${allRegistrations.length})`;
 
-  const handleExcelExport = () => {
+  const handleCSVExport = () => {
     const filename = `FIITJEE_${centreName.replace(/\s+/g, '_')}_Registrations_${new Date().toISOString().split('T')[0]}`;
-    exportToExcel(targetData, filename);
+    exportToCSV(targetData, filename);
   };
 
   const handlePDFExport = () => {
@@ -37,13 +37,13 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <button
-        onClick={handleExcelExport}
+        onClick={handleCSVExport}
         disabled={targetData.length === 0}
         className="bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
-        title="Download spreadsheet in Excel (.xlsx) format"
+        title="Download spreadsheet in CSV format"
       >
         <FileSpreadsheet className="w-4 h-4" />
-        <span>Export Excel {labelSuffix}</span>
+        <span>Export CSV {labelSuffix}</span>
       </button>
 
       <button

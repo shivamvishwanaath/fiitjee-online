@@ -15,8 +15,12 @@ import {
   Sparkles,
   Building2,
   ChevronLeft,
-  Hash
+  Hash,
+  X,
+  KeyRound
 } from 'lucide-react';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../../firebase';
 import { useStudentAuth } from '../hooks/useStudentAuth';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
 
@@ -38,6 +42,13 @@ export const StudentLogin: React.FC = () => {
   const [identifierInput, setIdentifierInput] = useState('');
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+
+  // Forgot Password modal state
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSubmitting, setForgotSubmitting] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState(false);
+  const [forgotError, setForgotError] = useState<string | null>(null);
 
   const [registerData, setRegisterData] = useState({
     fullName: '',
@@ -85,12 +96,37 @@ export const StudentLogin: React.FC = () => {
       if (err.message && !err.message.includes('Firebase:')) {
         setErrorMessage(err.message);
       } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
-        setErrorMessage('Invalid student email or password. If you registered for an admission test, switch to "Roll No / Mobile" for instant access.');
+        setErrorMessage('Invalid student email or password. Use "Forgot Password?" below to reset it, or switch to "Roll No / Mobile" for instant access.');
       } else {
         setErrorMessage(err.message || 'Failed to sign in. Please verify your internet and credentials.');
       }
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail.trim()) {
+      setForgotError('Please enter your registered student email address.');
+      return;
+    }
+    setForgotSubmitting(true);
+    setForgotError(null);
+    try {
+      await sendPasswordResetEmail(auth, forgotEmail.trim());
+      setForgotSuccess(true);
+    } catch (err: any) {
+      console.error('Password reset error:', err);
+      if (err.code === 'auth/user-not-found') {
+        setForgotError('No student account found with this email address. If registered at a centre, you can also sign in directly using "Roll No / Mobile".');
+      } else if (err.code === 'auth/invalid-email') {
+        setForgotError('Please enter a valid email address.');
+      } else {
+        setForgotError(err.message || 'Unable to send password reset email. Please try again or sign in via Roll No / Mobile.');
+      }
+    } finally {
+      setForgotSubmitting(false);
     }
   };
 
@@ -291,9 +327,23 @@ export const StudentLogin: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Password
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                          Password
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowForgotModal(true);
+                            setForgotEmail(loginEmail || '');
+                            setForgotSuccess(false);
+                            setForgotError(null);
+                          }}
+                          className="text-[11px] font-bold text-[#ED1C24] hover:underline cursor-pointer"
+                        >
+                          Forgot Password?
+                        </button>
+                      </div>
                       <div className="relative">
                         <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                         <input
@@ -552,6 +602,132 @@ export const StudentLogin: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-[#002147] to-[#0A3663] px-6 py-4 flex items-center justify-between text-white">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 bg-white/10 rounded-lg">
+                  <KeyRound className="w-5 h-5 text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold tracking-tight">Reset Password</h3>
+                  <p className="text-[10px] text-slate-300">FIITJEE Student Portal Access</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowForgotModal(false)}
+                className="p-1 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              {forgotSuccess ? (
+                <div className="space-y-4 text-center py-2">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-slate-900">Reset Email Dispatched!</h4>
+                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                      We have sent password recovery instructions to:
+                      <br />
+                      <strong className="text-slate-900 font-mono text-xs">{forgotEmail}</strong>
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-2">
+                      Please check your inbox (and spam folder) and follow the link to establish your new password.
+                    </p>
+                  </div>
+
+                  <div className="pt-2 flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotModal(false)}
+                      className="w-full py-2.5 bg-[#002147] hover:bg-[#0A3663] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                    >
+                      Return to Sign In
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowForgotModal(false);
+                        setLoginMethod('roll_phone');
+                      }}
+                      className="text-xs font-medium text-slate-600 hover:text-[#ED1C24] transition-colors py-1 cursor-pointer"
+                    >
+                      Or Sign in via Roll No / Mobile &rarr;
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Enter your registered student email address. We'll send you a secure link to reset your account password.
+                  </p>
+
+                  {forgotError && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5 text-red-700 text-xs">
+                      <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
+                      <div>{forgotError}</div>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Registered Student Email
+                    </label>
+                    <div className="relative">
+                      <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="email"
+                        required
+                        placeholder="e.g. student@gmail.com"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl text-[11px] text-amber-900 leading-relaxed">
+                    <span className="font-bold">Registered at a FIITJEE Centre?</span>
+                    <br />
+                    Your account has been provisioned! You can also sign in instantly using the <strong>Roll No / Mobile</strong> tab without needing a password.
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotModal(false)}
+                      className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={forgotSubmitting || !forgotEmail.trim()}
+                      className="flex-1 py-2.5 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow"
+                    >
+                      {forgotSubmitting ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <span>Send Reset Link</span>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="py-4 text-center text-slate-400 text-[11px] space-y-1">

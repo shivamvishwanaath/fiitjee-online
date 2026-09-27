@@ -448,7 +448,8 @@ export const StudentDashboard: React.FC = () => {
   };
 
   const isBigBangRegistered = useMemo(() => {
-    return registeredList.some(r => r.examId === BIG_BANG_EXAM.id || r.rollNo?.startsWith('7052'));
+    const validCodes = ['6052', '7052', '8052', '9052', '1052', '1152', '1252'];
+    return registeredList.some(r => r.examId === BIG_BANG_EXAM.id || validCodes.some(code => r.rollNo?.startsWith(code)));
   }, [registeredList]);
 
   // Active centre info

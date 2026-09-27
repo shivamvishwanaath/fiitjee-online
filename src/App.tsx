@@ -80,11 +80,11 @@ function AppContent() {
           if (data.centers) CENTERS.splice(0, CENTERS.length, ...data.centers);
           if (data.notices) NOTICES.splice(0, NOTICES.length, ...data.notices);
           if (data.admission_exams) ADMISSION_EXAMS.splice(0, ADMISSION_EXAMS.length, ...data.admission_exams);
-          console.log("Synced live results and toppers from Firebase Realtime DB!");
+          console.log("Synced live results, programs and centres from cloud database!");
           setDbLoaded(prev => !prev); // Trigger re-render
         }
       } catch (err) {
-        console.error("Firebase Realtime DB sync error:", err);
+        console.error("Cloud database sync error [SYNC-ERR-500]:", err);
       }
     }
     syncFirebaseData();

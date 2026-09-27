@@ -258,7 +258,7 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
       }
 
       const effectiveTestCentreCode = (centreId === 'ranchi' && formData.testCentreCode) ? formData.testCentreCode : selectedCentreProfile.testCentreCode;
-      const rollNo = assignedRollNo || generateRollNumber(selectedCentreProfile, formData.testDate, nextSeq, effectiveTestCentreCode);
+      const rollNo = assignedRollNo || generateRollNumber(selectedCentreProfile, formData.testDate, nextSeq, effectiveTestCentreCode, formData.currentClass);
       if (!assignedRollNo) setAssignedRollNo(rollNo);
       const sid = generateSID(rollNo);
       const invoiceNo = generateInvoiceNumber(selectedCentreProfile, rollNo);

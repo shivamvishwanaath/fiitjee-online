@@ -88,6 +88,8 @@ export const RegistrationTable: React.FC<RegistrationTableProps> = ({
               <th className="p-3.5">Contact</th>
               <th className="p-3.5">Centre & Mode</th>
               <th className="p-3.5">Test Date</th>
+              <th className="p-3.5">Fee & Paid</th>
+              <th className="p-3.5">Payment Mode</th>
               <th className="p-3.5">Status</th>
               <th className="p-3.5 text-right">Actions</th>
             </tr>
@@ -201,6 +203,36 @@ export const RegistrationTable: React.FC<RegistrationTableProps> = ({
                     {reg.registeredAt && (
                       <div className="text-[10px] text-slate-400 mt-0.5">
                         {reg.registeredAt.split('T')[0]}
+                      </div>
+                    )}
+                  </td>
+
+                  {/* Fee & Payment Status */}
+                  <td className="p-3.5 whitespace-nowrap">
+                    <div className="font-mono font-bold text-slate-900">
+                      ₹{reg.paymentAmount ?? 200}
+                    </div>
+                    <div className="mt-0.5">
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                        reg.paymentStatus === 'paid' 
+                          ? 'bg-emerald-100 text-emerald-800' 
+                          : reg.paymentStatus === 'free'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        {reg.paymentStatus === 'free' ? 'Free Voucher' : (reg.paymentStatus || 'Paid')}
+                      </span>
+                    </div>
+                  </td>
+
+                  {/* Payment Instrument / Mode */}
+                  <td className="p-3.5">
+                    <div className="text-slate-800 font-semibold text-[11px] truncate max-w-[130px]" title={reg.paymentMode || 'Counter'}>
+                      {reg.paymentMode || 'Counter'}
+                    </div>
+                    {reg.paymentRef && (
+                      <div className="font-mono text-[9.5px] text-slate-400 truncate max-w-[130px]" title={reg.paymentRef}>
+                        Ref: {reg.paymentRef}
                       </div>
                     )}
                   </td>

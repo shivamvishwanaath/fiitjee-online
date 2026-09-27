@@ -2,7 +2,7 @@ import * as XLSX from 'xlsx';
 import { ExamRegistration } from '../../types';
 import { generateSID } from './centreUtils';
 
-export function exportToExcel(registrations: ExamRegistration[], filename = 'FIITJEE_Registrations') {
+export function exportToCSV(registrations: ExamRegistration[], filename = 'FIITJEE_Registrations') {
   if (!registrations || registrations.length === 0) {
     alert('No registrations available to export.');
     return;
@@ -23,7 +23,12 @@ export function exportToExcel(registrations: ExamRegistration[], filename = 'FII
       'Test Mode': reg.testMode,
       'Allotted Centre': reg.selectedCenter || 'FIITJEE Centre',
       'Test Date': reg.testDate,
-      'Status': reg.status || 'New',
+      'Fee Amount (INR)': reg.paymentAmount ?? 200,
+      'Payment Mode': reg.paymentMode || 'Counter Cash / UPI',
+      'Payment Status': reg.paymentStatus || 'Paid',
+      'Payment Ref / Txn': reg.paymentRef || reg.transactionId || '',
+      'Candidate Status': reg.status || 'New',
+      'Profile Status': reg.profileStatus || 'Updated',
       'Registration Date': reg.registeredAt,
       'Registered By': reg.registeredByCentre || 'Online Self Portal',
       'Invoice No': reg.invoiceNo || '',
@@ -32,33 +37,23 @@ export function exportToExcel(registrations: ExamRegistration[], filename = 'FII
   });
 
   const worksheet = XLSX.utils.json_to_sheet(rows);
+  const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
 
-  // Set column widths
-  const colWidths = [
-    { wch: 6 },  // S.No
-    { wch: 22 }, // Roll Number
-    { wch: 14 }, // SID
-    { wch: 22 }, // Student Name
-    { wch: 20 }, // Parent Name
-    { wch: 12 }, // Class
-    { wch: 26 }, // School
-    { wch: 14 }, // Phone
-    { wch: 24 }, // Email
-    { wch: 30 }, // Address
-    { wch: 18 }, // Mode
-    { wch: 22 }, // Centre
-    { wch: 18 }, // Date
-    { wch: 12 }, // Status
-    { wch: 22 }, // Reg Date
-    { wch: 18 }, // Registered By
-    { wch: 22 }, // Invoice
-    { wch: 40 }  // Notes
-  ];
-  worksheet['!cols'] = colWidths;
+  // Add UTF-8 BOM so Excel opens CSV with correct encoding
+  const blob = new Blob(['\uFEFF' + csvOutput], { type: 'text/csv;charset=utf-8;' });
+  const cleanFilename = filename.replace(/\.(xlsx|csv)$/i, '');
+  const finalFilename = `${cleanFilename}.csv`;
 
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
-
-  const finalFilename = filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`;
-  XLSX.writeFile(workbook, finalFilename);
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', finalFilename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
+
+// Keep exportToExcel as an alias pointing to exportToCSV
+export const exportToExcel = exportToCSV;

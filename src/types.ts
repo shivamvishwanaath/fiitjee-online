@@ -124,6 +124,7 @@ export interface ExamRegistration {
   // Payment & Coupon Fields
   paymentStatus?: 'free' | 'paid' | 'pending' | 'failed';
   paymentAmount?: number;
+  paymentMode?: string;
   cashfreeOrderId?: string;
   cashfreePaymentId?: string;
   couponCodeApplied?: string;
@@ -132,6 +133,9 @@ export interface ExamRegistration {
   status?: 'New' | 'Contacted' | 'Confirmed' | 'Absent' | 'Selected';
   notes?: RegistrationNote[];
   paymentRef?: string;
+  profileStatus?: string;
+  studentUid?: string;
+  registeredByAdmin?: boolean;
   registeredByCentre?: string;
   lastUpdatedBy?: string;
   lastUpdatedAt?: string;

@@ -25,7 +25,7 @@ import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useRegistrations } from '../hooks/useRegistrations';
 import { useCRMContacts } from '../hooks/useCRMContacts';
 import { useStudentsByCentre } from '../hooks/useStudentsByCentre';
-import { exportToExcel } from '../utils/exportExcel';
+import { exportToCSV } from '../utils/exportExcel';
 import { CRMSubNav } from '../components/CRMSubNav';
 import { ExamRegistration } from '../../types';
 
@@ -168,12 +168,12 @@ export const CRMContacts: React.FC = () => {
             </button>
 
             <button
-              onClick={() => exportToExcel(filteredContacts, `FIITJEE_CRM_Contacts_${centre?.name || 'All'}`)}
+              onClick={() => exportToCSV(filteredContacts, `FIITJEE_CRM_Contacts_${centre?.name || 'All'}`)}
               className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-              title="Export to Excel Spreadsheet"
+              title="Export to CSV Spreadsheet"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>Export Excel</span>
+              <span>Export CSV</span>
             </button>
           </>
         }

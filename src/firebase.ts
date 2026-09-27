@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
 import { getAuth } from "firebase/auth";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyALyLS1XTbgAmgea3ifsZm5RzrtU6B-WPk",
   authDomain: "fiitjee-online.firebaseapp.com",
   databaseURL: "https://fiitjee-online-default-rtdb.firebaseio.com",
