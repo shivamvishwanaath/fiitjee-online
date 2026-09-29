@@ -26,7 +26,7 @@ export function exportToCSV(registrations: ExamRegistration[], filename = 'FIITJ
       'Fee Amount (INR)': reg.paymentAmount ?? 200,
       'Payment Mode': reg.paymentMode || 'Counter Cash / UPI',
       'Payment Status': reg.paymentStatus || 'Paid',
-      'Payment Ref / Txn': reg.paymentRef || reg.transactionId || '',
+      'Payment Ref / Txn': reg.paymentRef || (reg as any).transactionId || '',
       'Candidate Status': reg.status || 'New',
       'Profile Status': reg.profileStatus || 'Updated',
       'Registration Date': reg.registeredAt,

@@ -13,7 +13,8 @@ import {
   School,
   ArrowRight,
   ShieldCheck,
-  AlertTriangle
+  AlertTriangle,
+  Loader2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { ref, push, set, get, query, orderByChild, equalTo, update } from 'firebase/database';

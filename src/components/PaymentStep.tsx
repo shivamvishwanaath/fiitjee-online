@@ -23,6 +23,7 @@ export interface PaymentCompletionData {
   cashfreePaymentId?: string;
   couponCodeApplied?: string;
   discountAmount?: number;
+  paymentRef?: string;
 }
 
 interface PaymentStepProps {

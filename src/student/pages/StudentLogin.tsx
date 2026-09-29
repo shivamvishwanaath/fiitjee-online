@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { 
   GraduationCap, 
@@ -20,6 +20,7 @@ import {
   KeyRound
 } from 'lucide-react';
 import { sendPasswordResetEmail, ConfirmationResult } from 'firebase/auth';
+import { auth } from '../../firebase';
 import { useStudentAuth, findRegistrationInDatabase } from '../hooks/useStudentAuth';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
 
