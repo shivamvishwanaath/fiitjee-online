@@ -18,19 +18,42 @@ import { StudentProfile } from '../../types';
  * Searches the Realtime Database registrations across centres for an email, phone, or roll number
  */
 export async function findRegistrationInDatabase(identifier: string): Promise<{ reg: any; centreId: string } | null> {
-  const clean = identifier.trim().toLowerCase();
-  const cleanDigits = identifier.replace(/\D/g, '');
-  const cleanRoll = identifier.replace(/\s+/g, '').toLowerCase();
+  let clean = identifier.trim().toLowerCase();
+
+  // If identifier is synthetic candidate email, extract original candidate identifier
+  if (clean.includes('@candidate.fiitjee.online')) {
+    const match = clean.match(/^cand_([^@]+)@/);
+    if (match) {
+      clean = match[1];
+    }
+  }
+
+  const cleanDigits = clean.replace(/\D/g, '');
+  const cleanRollWithUnderscores = clean.replace(/\s+/g, '_').toLowerCase();
+  const cleanRollNoSpaces = clean.replace(/[\s_]+/g, '').toLowerCase();
 
   const centreIds = ['bhubaneswar', 'dwarka', 'ranchi', 'hyderabad'];
 
   try {
     for (const centreId of centreIds) {
-      // 1. Direct roll number key lookup if identifier looks like roll number
-      if (cleanRoll.length >= 6) {
-        const directSnap = await get(ref(db, `registrations/big_bang_2026/${centreId}/${cleanRoll}`));
+      // 1. Direct roll number key lookup ONLY if clean is NOT an email and contains only valid RTDB key characters
+      // (Firebase path characters ., #, $, [, ], /, @ are illegal as keys)
+      const isCandidateKeyValid = cleanRollWithUnderscores.length >= 6 && 
+        !/[.#$\[\]/@]/.test(cleanRollWithUnderscores) && 
+        !clean.includes('@');
+
+      if (isCandidateKeyValid) {
+        // Try with underscore format
+        const directSnap = await get(ref(db, `registrations/big_bang_2026/${centreId}/${cleanRollWithUnderscores}`));
         if (directSnap.exists()) {
           return { reg: directSnap.val(), centreId };
+        }
+        // If clean has underscores or spaces, also try without spaces/underscores
+        if (cleanRollNoSpaces !== cleanRollWithUnderscores && !/[.#$\[\]/@]/.test(cleanRollNoSpaces)) {
+          const directSnapNoSpaces = await get(ref(db, `registrations/big_bang_2026/${centreId}/${cleanRollNoSpaces}`));
+          if (directSnapNoSpaces.exists()) {
+            return { reg: directSnapNoSpaces.val(), centreId };
+          }
         }
       }
 
@@ -47,8 +70,8 @@ export async function findRegistrationInDatabase(identifier: string): Promise<{ 
         const r = reg as any;
         const regEmail = (r.email || '').trim().toLowerCase();
         const regPhone = (r.phone || '').replace(/\D/g, '');
-        const regRoll = (r.rollNo || '').replace(/\s+/g, '').toLowerCase();
-        const prevRoll = (r.previousRollNo || '').replace(/\s+/g, '').toLowerCase();
+        const regRoll = (r.rollNo || '').replace(/[\s_]+/g, '').toLowerCase();
+        const prevRoll = (r.previousRollNo || '').replace(/[\s_]+/g, '').toLowerCase();
 
         // 1. Check exact email match
         if (clean.includes('@') && regEmail === clean) {
@@ -59,7 +82,7 @@ export async function findRegistrationInDatabase(identifier: string): Promise<{ 
           return { reg: r, centreId };
         }
         // 3. Check roll number match (matches either updated roll or legacy previous roll)
-        if (cleanRoll.length >= 6 && (regRoll === cleanRoll || prevRoll === cleanRoll)) {
+        if (cleanRollNoSpaces.length >= 6 && (regRoll === cleanRollNoSpaces || prevRoll === cleanRollNoSpaces)) {
           return { reg: r, centreId };
         }
       }
@@ -325,9 +348,23 @@ export function useStudentAuth() {
   const loginWithRollOrPhone = async (identifier: string): Promise<void> => {
     setLoading(true);
     try {
+      const cleanDigits = identifier.replace(/\D/g, '');
       const found = await findRegistrationInDatabase(identifier);
       if (!found || !found.reg) {
-        throw new Error('No registration found for this Roll Number or Mobile Number. Please verify your entry or register for the test.');
+        if (cleanDigits.length >= 10) {
+          try {
+            const studentQuery = query(ref(db, 'students'), orderByChild('phone'), equalTo(cleanDigits.slice(-10)));
+            const phoneSnap = await get(studentQuery);
+            if (phoneSnap.exists()) {
+              throw new Error('A student portal account was found for this mobile number! Please use the "Mobile / Email & Password" tab to sign in with your password.');
+            }
+          } catch (e: any) {
+            if (e.message && e.message.includes('student portal account was found')) {
+              throw e;
+            }
+          }
+        }
+        throw new Error('No admission test registration found for this Roll Number or Mobile Number. Please verify your entry or use "Mobile / Email & Password" to sign in.');
       }
 
       // Generate deterministic credentials for this verified registration

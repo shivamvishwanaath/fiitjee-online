@@ -196,17 +196,19 @@ export const StudentDashboard: React.FC = () => {
           for (const link of Object.values(links)) {
             if (link.centreId && link.rollNo) {
               const cleanRoll = link.rollNo.replace(/\s+/g, '_');
-              const centreRegRef = ref(db, `registrations/big_bang_2026/${link.centreId}/${cleanRoll}`);
-              const centreSnap = await get(centreRegRef);
-              if (centreSnap.exists()) {
-                foundRegs.push({
-                  id: cleanRoll,
-                  ...centreSnap.val(),
-                  rollNo: centreSnap.val().rollNo || link.rollNo,
-                  selectedCenter: centreSnap.val().selectedCenter || link.selectedCenter,
-                  registeredByCentre: link.centreId
-                });
-                continue;
+              if (!/[.#$\[\]/@]/.test(cleanRoll)) {
+                const centreRegRef = ref(db, `registrations/big_bang_2026/${link.centreId}/${cleanRoll}`);
+                const centreSnap = await get(centreRegRef);
+                if (centreSnap.exists()) {
+                  foundRegs.push({
+                    id: cleanRoll,
+                    ...centreSnap.val(),
+                    rollNo: centreSnap.val().rollNo || link.rollNo,
+                    selectedCenter: centreSnap.val().selectedCenter || link.selectedCenter,
+                    registeredByCentre: link.centreId
+                  });
+                  continue;
+                }
               }
             }
             foundRegs.push({
@@ -304,6 +306,7 @@ export const StudentDashboard: React.FC = () => {
       for (const reg of registeredList) {
         if (!reg.rollNo) continue;
         const cleanRoll = reg.rollNo.replace(/\s+/g, '_');
+        if (/[.#$\[\]/@]/.test(cleanRoll)) continue;
         const primaryCentre = reg.registeredByCentre || student?.preferredCentreId || 'bhubaneswar';
 
         try {

@@ -21,7 +21,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { sendPasswordResetEmail, ConfirmationResult } from 'firebase/auth';
-import { auth } from '../../firebase';
+import { ref, get, query, orderByChild, equalTo } from 'firebase/database';
+import { auth, db } from '../../firebase';
 import { useStudentAuth, findRegistrationInDatabase } from '../hooks/useStudentAuth';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
 
@@ -50,7 +51,7 @@ export const StudentLogin: React.FC = () => {
   }, [clearRecaptcha]);
 
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
-  const [loginMethod, setLoginMethod] = useState<'phone_otp' | 'roll_phone' | 'email_pass'>('phone_otp');
+  const [loginMethod, setLoginMethod] = useState<'password' | 'roll_phone' | 'phone_otp'>('password');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -125,14 +126,18 @@ export const StudentLogin: React.FC = () => {
       setResendCooldown(30);
     } catch (err: any) {
       console.error('Phone OTP dispatch error:', err);
-      if (err.code === 'auth/invalid-phone-number') {
+      if (err.code === 'auth/operation-not-allowed' || err.message?.includes('SMS unable to be sent until this region enabled') || err.message?.includes('operation-not-allowed')) {
+        setErrorMessage(
+          'SMS verification is currently restricted by Firebase SMS Region Policy. Please use the "Mobile / Email & Pass" tab above to sign in instantly with your registered mobile and password.'
+        );
+      } else if (err.code === 'auth/invalid-phone-number') {
         setErrorMessage('Invalid phone number format. Please enter a valid 10-digit mobile number.');
       } else if (err.code === 'auth/quota-exceeded') {
-        setErrorMessage('SMS verification quota reached for now. Please switch to "Roll No / Fast Access" for instant sign in.');
+        setErrorMessage('SMS verification quota reached for now. Please switch to "Mobile / Email & Pass" or "Roll No / Fast" for instant sign in.');
       } else if (err.code === 'auth/captcha-check-failed') {
         setErrorMessage('reCAPTCHA verification failed. Please try again.');
       } else {
-        setErrorMessage(err.message || 'Unable to send SMS OTP. You can also sign in via "Roll No / Fast Access".');
+        setErrorMessage(err.message || 'Unable to send SMS OTP. Please switch to "Mobile / Email & Pass" tab.');
       }
     } finally {
       setSubmitting(false);
@@ -189,7 +194,7 @@ export const StudentLogin: React.FC = () => {
     }
   };
 
-  const switchLoginMethod = (method: 'phone_otp' | 'roll_phone' | 'email_pass') => {
+  const switchLoginMethod = (method: 'password' | 'roll_phone' | 'phone_otp') => {
     setLoginMethod(method);
     setErrorMessage(null);
     setOtpStep('phone');
@@ -205,28 +210,6 @@ export const StudentLogin: React.FC = () => {
 
     try {
       const input = identifierInput.trim();
-      const cleanDigits = input.replace(/\D/g, '');
-
-      // If user entered 10-digit mobile number, route directly to Phone OTP
-      if (cleanDigits.length === 10) {
-        setPhoneInput(cleanDigits);
-        switchLoginMethod('phone_otp');
-        setSubmitting(false);
-        return;
-      }
-
-      // Check if registration exists and has registered phone
-      const found = await findRegistrationInDatabase(input);
-      if (found && found.reg && found.reg.phone) {
-        const regDigits = found.reg.phone.replace(/\D/g, '').slice(-10);
-        if (regDigits.length === 10) {
-          setPhoneInput(regDigits);
-          switchLoginMethod('phone_otp');
-          setSubmitting(false);
-          return;
-        }
-      }
-
       await loginWithRollOrPhone(input);
       navigate(redirectUrl);
     } catch (err: any) {
@@ -249,7 +232,7 @@ export const StudentLogin: React.FC = () => {
       if (err.message && !err.message.includes('Firebase:')) {
         setErrorMessage(err.message);
       } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
-        setErrorMessage('Invalid student email or password. Use "Forgot Password?" below to reset it, or switch to "Roll No / Mobile" for instant access.');
+        setErrorMessage('Incorrect mobile number/email or password. Please verify your details, or switch to "Roll No / Fast" if you registered for an admission test.');
       } else {
         setErrorMessage(err.message || 'Failed to sign in. Please verify your internet and credentials.');
       }
@@ -260,23 +243,51 @@ export const StudentLogin: React.FC = () => {
 
   const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!forgotEmail.trim()) {
-      setForgotError('Please enter your registered student email address.');
+    const input = forgotEmail.trim();
+    if (!input) {
+      setForgotError('Please enter your registered student email address or 10-digit mobile.');
       return;
     }
+
+    const cleanDigits = input.replace(/\D/g, '');
+    if (cleanDigits.length === 10 && !input.includes('@')) {
+      setForgotSubmitting(true);
+      setForgotError(null);
+      try {
+        const studentQuery = query(ref(db, 'students'), orderByChild('phone'), equalTo(cleanDigits));
+        const phoneSnap = await get(studentQuery);
+        if (phoneSnap.exists()) {
+          const studentsObj = phoneSnap.val();
+          const matched = Object.values(studentsObj)[0] as any;
+          if (matched?.email && matched.email.includes('@')) {
+            await sendPasswordResetEmail(auth, matched.email);
+            setForgotSuccess(true);
+            return;
+          }
+        }
+        setForgotError('This account was registered using only a Mobile Number without an email address. You can log in using your Password or access your test details via "Roll No / Fast Access".');
+        return;
+      } catch (err: any) {
+        setForgotError(err.message || 'Unable to process password reset.');
+        return;
+      } finally {
+        setForgotSubmitting(false);
+      }
+    }
+
     setForgotSubmitting(true);
     setForgotError(null);
     try {
-      await sendPasswordResetEmail(auth, forgotEmail.trim());
+      await sendPasswordResetEmail(auth, input);
       setForgotSuccess(true);
     } catch (err: any) {
       console.error('Password reset error:', err);
       if (err.code === 'auth/user-not-found') {
-        setForgotError('No student account found with this email address. If registered at a centre, you can also sign in directly using "Roll No / Mobile".');
+        setForgotError('No student account found with this email address. If registered at a centre, you can also sign in directly using "Roll No / Fast".');
       } else if (err.code === 'auth/invalid-email') {
         setForgotError('Please enter a valid email address.');
       } else {
-        setForgotError(err.message || 'Unable to send password reset email. Please try again or sign in via Roll No / Mobile.');
+        setForgotError(err.message || 'Unable to send password reset email. Please try again or sign in via Roll No / Fast.');
       }
     } finally {
       setForgotSubmitting(false);
@@ -438,9 +449,25 @@ export const StudentLogin: React.FC = () => {
           {/* Form Body */}
           <div className="p-6 sm:p-8">
             {errorMessage && (
-              <div className="mb-6 p-3.5 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-xs text-red-700">
-                <ShieldAlert className="w-4 h-4 text-[#ED1C24] shrink-0 mt-0.5" />
-                <span className="font-semibold">{errorMessage}</span>
+              <div className="mb-6 p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 space-y-2">
+                <div className="flex items-start gap-2">
+                  <ShieldAlert className="w-4 h-4 text-[#ED1C24] shrink-0 mt-0.5" />
+                  <span className="font-semibold leading-relaxed">{errorMessage}</span>
+                </div>
+                {loginMethod === 'phone_otp' && (
+                  <div className="pt-1 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (phoneInput) setLoginEmail(phoneInput);
+                        switchLoginMethod('password');
+                      }}
+                      className="px-3 py-1.5 bg-[#002147] text-white font-bold rounded-lg text-[11px] hover:bg-slate-800 transition-colors cursor-pointer shadow-xs"
+                    >
+                      Sign In with Mobile & Password instead
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -451,13 +478,13 @@ export const StudentLogin: React.FC = () => {
                 <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 gap-1">
                   <button
                     type="button"
-                    onClick={() => switchLoginMethod('phone_otp')}
+                    onClick={() => switchLoginMethod('password')}
                     className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                      loginMethod === 'phone_otp' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                      loginMethod === 'password' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    <Phone className="w-3.5 h-3.5" />
-                    <span>Mobile SMS OTP</span>
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>Mobile / Email & Pass</span>
                   </button>
                   <button
                     type="button"
@@ -471,18 +498,135 @@ export const StudentLogin: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => switchLoginMethod('email_pass')}
+                    onClick={() => switchLoginMethod('phone_otp')}
                     className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                      loginMethod === 'email_pass' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                      loginMethod === 'phone_otp' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    <Mail className="w-3.5 h-3.5" />
-                    <span>Email & Pass</span>
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Mobile SMS OTP</span>
                   </button>
                 </div>
 
-                {loginMethod === 'phone_otp' ? (
-                  /* Option 1: Native Firebase Phone OTP Authentication */
+                {loginMethod === 'password' ? (
+                  /* Option 1: Mobile Number or Email & Password (Primary & Default) */
+                  <form onSubmit={handleLoginSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Mobile Number (10 digits) or Email Address
+                      </label>
+                      <div className="relative">
+                        <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. 9470356441 or rahul.sharma@gmail.com"
+                          value={loginEmail}
+                          onChange={(e) => setLoginEmail(e.target.value)}
+                          className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        Enter the 10-digit mobile number or email address registered with your student account.
+                      </p>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                          Password
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowForgotModal(true);
+                            setForgotEmail(loginEmail || '');
+                            setForgotSuccess(false);
+                            setForgotError(null);
+                          }}
+                          className="text-[11px] font-bold text-[#ED1C24] hover:underline cursor-pointer"
+                        >
+                          Forgot Password?
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          required
+                          placeholder="Enter your account password"
+                          value={loginPassword}
+                          onChange={(e) => setLoginPassword(e.target.value)}
+                          className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1.5">
+                        If you registered for a test without setting a password, use the <strong className="font-semibold text-slate-800">"Roll No / Fast"</strong> tab.
+                      </p>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 mt-2"
+                    >
+                      {submitting ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <span>Sign In to Candidate Dashboard</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                ) : loginMethod === 'roll_phone' ? (
+                  /* Option 2: Fast Access via Roll Number or Mobile */
+                  <form onSubmit={handleRollLoginSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Exam Roll Number or Registered 10-Digit Mobile
+                      </label>
+                      <div className="relative">
+                        <Hash className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. 7052 45828 911105 60069 or 9470356441"
+                          value={identifierInput}
+                          onChange={(e) => setIdentifierInput(e.target.value)}
+                          className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        Use your 10-digit mobile number or exam roll number from your admission test registration for direct access.
+                      </p>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={submitting || !identifierInput.trim()}
+                      className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 mt-2"
+                    >
+                      {submitting ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <span>Access Candidate Dashboard</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                ) : (
+                  /* Option 3: Native Firebase Phone OTP Authentication */
                   <div className="space-y-4">
                     {otpStep === 'phone' ? (
                       <form onSubmit={handleSendPhoneOtp} className="space-y-4">
@@ -592,123 +736,6 @@ export const StudentLogin: React.FC = () => {
                       </form>
                     )}
                   </div>
-                ) : loginMethod === 'roll_phone' ? (
-                  /* Option 2: Fast Access via Roll Number or Mobile */
-                  <form onSubmit={handleRollLoginSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Exam Roll Number or Registered 10-Digit Mobile
-                      </label>
-                      <div className="relative">
-                        <Hash className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="text"
-                          required
-                          placeholder="e.g. 7052 45828 911105 60069 or 9437012345"
-                          value={identifierInput}
-                          onChange={(e) => setIdentifierInput(e.target.value)}
-                          className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
-                        />
-                      </div>
-                      <p className="text-[10px] text-slate-500 mt-1">
-                        Use the 10-digit mobile number or exam roll number (e.g. 7052 45828 911105 60069) from your admission test registration.
-                      </p>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={submitting || !identifierInput.trim()}
-                      className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 mt-2"
-                    >
-                      {submitting ? (
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          <span>Access Candidate Dashboard</span>
-                          <ArrowRight className="w-4 h-4" />
-                        </>
-                      )}
-                    </button>
-                  </form>
-                ) : (
-                  /* Option B: Standard Email or Mobile & Password */
-                  <form onSubmit={handleLoginSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Email Address or Registered Mobile
-                      </label>
-                      <div className="relative">
-                        <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="text"
-                          required
-                          placeholder="e.g. rahul.sharma@gmail.com or 9876543210"
-                          value={loginEmail}
-                          onChange={(e) => setLoginEmail(e.target.value)}
-                          className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
-                        />
-                      </div>
-                      <p className="text-[10px] text-slate-400 mt-1">
-                        Enter the email address or 10-digit mobile number used when creating your account.
-                      </p>
-                    </div>
-
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                          Password
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowForgotModal(true);
-                            setForgotEmail(loginEmail || '');
-                            setForgotSuccess(false);
-                            setForgotError(null);
-                          }}
-                          className="text-[11px] font-bold text-[#ED1C24] hover:underline cursor-pointer"
-                        >
-                          Forgot Password?
-                        </button>
-                      </div>
-                      <div className="relative">
-                        <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          required
-                          placeholder="Enter your account password"
-                          value={loginPassword}
-                          onChange={(e) => setLoginPassword(e.target.value)}
-                          className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                        >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                      <p className="text-[10px] text-slate-500 mt-1.5">
-                        Default password for test registrations: <strong className="font-mono text-slate-800">Fiitjee@2026</strong>. Or use "Roll No / Mobile" above.
-                      </p>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 mt-2"
-                    >
-                      {submitting ? (
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <>
-                          <span>Sign In to Student Portal</span>
-                          <ArrowRight className="w-4 h-4" />
-                        </>
-                      )}
-                    </button>
-                  </form>
                 )}
 
                 <div className="text-center pt-2">
