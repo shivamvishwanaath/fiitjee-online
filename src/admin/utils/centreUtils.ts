@@ -119,19 +119,53 @@ export function isSuperAdminEmail(email?: string | null): boolean {
   return SUPERADMIN_EMAILS.includes(clean);
 }
 
+export function isValidAdminEmail(email?: string | null): boolean {
+  if (!email) return false;
+  const clean = email.trim().toLowerCase();
+
+  // Exclude candidate virtual accounts
+  if (clean.includes('@candidate.fiitjee.online')) return false;
+
+  // Superadmin emails
+  if (SUPERADMIN_EMAILS.includes(clean)) return true;
+
+  // Official FIITJEE organisation domains
+  if (clean.endsWith('@fiitjee.online') || clean.endsWith('@fiitjee.com')) {
+    return true;
+  }
+
+  // Exact centre emails
+  for (const centre of ALL_CENTRES) {
+    if (centre.email.toLowerCase() === clean) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function getCentreByEmail(email?: string | null): CentreProfile | null {
   if (!email) return null;
   const cleanEmail = email.trim().toLowerCase();
+
+  // Candidate emails can never be centre accounts
+  if (cleanEmail.includes('@candidate.fiitjee.online')) return null;
+
   for (const centre of ALL_CENTRES) {
     if (centre.email.toLowerCase() === cleanEmail) {
       return centre;
     }
   }
-  // Fallback matching by identifier in email
-  if (cleanEmail.includes('dwarka')) return CENTRES_CONFIG.dwarka;
-  if (cleanEmail.includes('bhubaneswar')) return CENTRES_CONFIG.bhubaneswar;
-  if (cleanEmail.includes('ranchi')) return CENTRES_CONFIG.ranchi;
-  if (cleanEmail.includes('hyderabad') || cleanEmail.includes('madhapur')) return CENTRES_CONFIG.hyderabad;
+
+  // Fallback matching by identifier in email ONLY for official organisation domains
+  const isOfficialDomain = cleanEmail.endsWith('@fiitjee.online') || cleanEmail.endsWith('@fiitjee.com');
+  if (isOfficialDomain) {
+    if (cleanEmail.includes('dwarka')) return CENTRES_CONFIG.dwarka;
+    if (cleanEmail.includes('bhubaneswar')) return CENTRES_CONFIG.bhubaneswar;
+    if (cleanEmail.includes('ranchi')) return CENTRES_CONFIG.ranchi;
+    if (cleanEmail.includes('hyderabad') || cleanEmail.includes('madhapur')) return CENTRES_CONFIG.hyderabad;
+  }
+
   return null;
 }
 

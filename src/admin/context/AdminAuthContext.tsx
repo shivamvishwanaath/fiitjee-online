@@ -15,7 +15,8 @@ import {
   ALL_CENTRES, 
   CENTRES_CONFIG, 
   getCentreByEmail, 
-  isSuperAdminEmail 
+  isSuperAdminEmail,
+  isValidAdminEmail 
 } from '../utils/centreUtils';
 
 export interface AdminAuthContextType {
@@ -52,10 +53,41 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Sync with Firebase Authentication state changes & strictly enforce centre isolation
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-
       if (currentUser && currentUser.email) {
         const isSuper = isSuperAdminEmail(currentUser.email);
+        const isOfficialAdmin = isValidAdminEmail(currentUser.email);
+
+        // Check if explicitly authorized in RTDB admins/${uid}
+        let isRtdbAdmin = false;
+        let rtdbAssignedCentre: CentreProfile | null = null;
+        try {
+          const snap = await get(ref(db, `admins/${currentUser.uid}`));
+          if (snap.exists()) {
+            isRtdbAdmin = true;
+            const data = snap.val();
+            if (data.assignedCentreId && CENTRES_CONFIG[data.assignedCentreId]) {
+              rtdbAssignedCentre = CENTRES_CONFIG[data.assignedCentreId];
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching admin centre assignment:', err);
+        }
+
+        const isAuthorizedAdmin = isSuper || isOfficialAdmin || isRtdbAdmin;
+
+        if (!isAuthorizedAdmin) {
+          // Strictly reject non-admin / student accounts from the admin portal
+          setUser(null);
+          setCentre(null);
+          setIsCentreLocked(true);
+          setCanSwitchCentres(false);
+          setAvailableCentres([]);
+          setLoading(false);
+          return;
+        }
+
+        // Only authorized admins reach this point
+        setUser(currentUser);
 
         if (isSuper) {
           // 1. Superadmin (Developer / National Corporate Office): Can inspect all branches
@@ -69,24 +101,9 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           localStorage.setItem(STORAGE_KEY, activeCentre.id);
         } else {
           // 2. Regular Centre Staff: Strictly locked to their assigned centre only
-          let assignedCentre = getCentreByEmail(currentUser.email);
+          let assignedCentre = getCentreByEmail(currentUser.email) || rtdbAssignedCentre;
 
-          // If email didn't match directly, check RTDB admin profile
-          if (!assignedCentre && currentUser.uid) {
-            try {
-              const snap = await get(ref(db, `admins/${currentUser.uid}`));
-              if (snap.exists()) {
-                const data = snap.val();
-                if (data.assignedCentreId && CENTRES_CONFIG[data.assignedCentreId]) {
-                  assignedCentre = CENTRES_CONFIG[data.assignedCentreId];
-                }
-              }
-            } catch (err) {
-              console.error('Error fetching admin centre assignment:', err);
-            }
-          }
-
-          // If still unresolved, fallback to saved or default and persist
+          // If still unresolved, default to Bhubaneswar
           if (!assignedCentre) {
             const saved = localStorage.getItem(STORAGE_KEY);
             assignedCentre = (saved && CENTRES_CONFIG[saved]) || CENTRES_CONFIG.bhubaneswar;
@@ -96,7 +113,6 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           setIsCentreLocked(true);
           setCanSwitchCentres(false);
           setAvailableCentres([assignedCentre]);
-          // Strict overwrite of storage to lock access
           localStorage.setItem(STORAGE_KEY, assignedCentre.id);
         }
 
@@ -112,13 +128,13 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           // Non-blocking RTDB update
         }
       } else {
-        // When logged out
+        // When logged out or unauthenticated
+        setUser(null);
+        setCentre(null);
         setIsCentreLocked(true);
         setCanSwitchCentres(false);
-        const saved = localStorage.getItem(STORAGE_KEY);
-        const fallback = (saved && CENTRES_CONFIG[saved]) || CENTRES_CONFIG.bhubaneswar;
-        setCentre(fallback);
-        setAvailableCentres([fallback]);
+        setAvailableCentres([]);
+        localStorage.removeItem(STORAGE_KEY);
       }
 
       setLoading(false);
@@ -144,10 +160,29 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const loginWithEmail = async (email: string, pass: string, targetCentreId?: string): Promise<void> => {
     setLoading(true);
     try {
-      const cred = await signInWithEmailAndPassword(auth, email.trim(), pass);
+      const cleanEmail = email.trim().toLowerCase();
+      const cred = await signInWithEmailAndPassword(auth, cleanEmail, pass);
       const isSuper = isSuperAdminEmail(cred.user.email);
-      let assignedCentre = getCentreByEmail(cred.user.email);
+      const isOfficial = isValidAdminEmail(cred.user.email);
+      let isRtdbAdmin = false;
+      let rtdbAssignedCentre: CentreProfile | null = null;
+      try {
+        const snap = await get(ref(db, `admins/${cred.user.uid}`));
+        if (snap.exists()) {
+          isRtdbAdmin = true;
+          const data = snap.val();
+          if (data.assignedCentreId && CENTRES_CONFIG[data.assignedCentreId]) {
+            rtdbAssignedCentre = CENTRES_CONFIG[data.assignedCentreId];
+          }
+        }
+      } catch {}
 
+      if (!isSuper && !isOfficial && !isRtdbAdmin) {
+        await signOut(auth);
+        throw new Error('Access Denied: Only authorized FIITJEE centre emails can access the administration portal.');
+      }
+
+      let assignedCentre = getCentreByEmail(cred.user.email) || rtdbAssignedCentre;
       if (!assignedCentre && targetCentreId && CENTRES_CONFIG[targetCentreId]) {
         assignedCentre = CENTRES_CONFIG[targetCentreId];
       }
@@ -179,8 +214,26 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       provider.setCustomParameters({ prompt: 'select_account' });
       const cred = await signInWithPopup(auth, provider);
       const isSuper = isSuperAdminEmail(cred.user.email);
-      let assignedCentre = getCentreByEmail(cred.user.email);
+      const isOfficial = isValidAdminEmail(cred.user.email);
+      let isRtdbAdmin = false;
+      let rtdbAssignedCentre: CentreProfile | null = null;
+      try {
+        const snap = await get(ref(db, `admins/${cred.user.uid}`));
+        if (snap.exists()) {
+          isRtdbAdmin = true;
+          const data = snap.val();
+          if (data.assignedCentreId && CENTRES_CONFIG[data.assignedCentreId]) {
+            rtdbAssignedCentre = CENTRES_CONFIG[data.assignedCentreId];
+          }
+        }
+      } catch {}
 
+      if (!isSuper && !isOfficial && !isRtdbAdmin) {
+        await signOut(auth);
+        throw new Error('Access Denied: This Google account is not authorized as a centre administrator.');
+      }
+
+      let assignedCentre = getCentreByEmail(cred.user.email) || rtdbAssignedCentre;
       if (!assignedCentre && targetCentreId && CENTRES_CONFIG[targetCentreId]) {
         assignedCentre = CENTRES_CONFIG[targetCentreId];
       }
@@ -208,6 +261,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const logout = async (): Promise<void> => {
     await signOut(auth);
     setUser(null);
+    setCentre(null);
     setIsCentreLocked(true);
     setCanSwitchCentres(false);
     localStorage.removeItem(STORAGE_KEY);
@@ -222,7 +276,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     centre,
     activeCentreId: centre?.id || 'bhubaneswar',
     loading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user && !!centre,
     isCentreLocked,
     canSwitchCentres,
     availableCentres,
