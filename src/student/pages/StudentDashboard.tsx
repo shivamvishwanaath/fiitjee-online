@@ -232,9 +232,13 @@ export const StudentDashboard: React.FC = () => {
           }
         }
 
-        // Secondary search by email or phone
+        // Secondary search by email or phone (strictly prevented from false-matching across different accounts or dummy phones)
         if (foundRegs.length === 0) {
           const centres = ['bhubaneswar', 'dwarka', 'ranchi', 'hyderabad'];
+          const studentEmail = (student.email || '').toLowerCase().trim();
+          const studentPhone = (student.phone || '').replace(/\D/g, '');
+          const dummyPhones = new Set(['1111111111', '0000000000', '1234567890', '9999999999', '8888888888', '7777777777', '123456789']);
+
           for (const c of centres) {
             const centreRef = ref(db, `registrations/big_bang_2026/${c}`);
             const centreSnap = await get(centreRef);
@@ -243,9 +247,24 @@ export const StudentDashboard: React.FC = () => {
               for (const [key, val] of Object.entries(centreData)) {
                 if (key === '_init' || !val || typeof val !== 'object') continue;
                 const r = val as any;
-                const matchEmail = (r.email || '').toLowerCase().trim() === student.email.toLowerCase().trim();
-                const matchPhone = (r.phone || '').replace(/\D/g, '') === student.phone.replace(/\D/g, '');
-                if (matchEmail || matchPhone) {
+                const regEmail = (r.email || '').toLowerCase().trim();
+                const regPhone = (r.phone || '').replace(/\D/g, '');
+
+                // Match rules:
+                // 1. Explicit UID link
+                const matchUid = Boolean(r.studentUid && r.studentUid === student.uid);
+                // 2. Exact email match (only if email is populated on both)
+                const matchEmail = Boolean(studentEmail && regEmail && regEmail === studentEmail);
+                // 3. Phone match ONLY IF registration has no conflicting email or UID, and phone is a valid non-dummy 10-digit number
+                const matchPhone = !matchEmail && 
+                  studentPhone.length >= 10 && 
+                  !dummyPhones.has(studentPhone) && 
+                  regPhone.length >= 10 && 
+                  regPhone.slice(-10) === studentPhone.slice(-10) &&
+                  (!r.studentUid || r.studentUid === student.uid) &&
+                  (!regEmail || regEmail === studentEmail);
+
+                if (matchUid || matchEmail || matchPhone) {
                   foundRegs.push({
                     id: key,
                     ...r,

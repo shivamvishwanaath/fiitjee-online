@@ -4,6 +4,7 @@ import { db } from '../../firebase';
 import { ExamRegistration, RegistrationNote } from '../../types';
 import { logActivity } from '../utils/logActivity';
 import { getCentreIdByName } from '../utils/centreUtils';
+import { deleteRegistrationAndAuth } from '../utils/deleteRegistrationUtil';
 
 export function useRegistrations(currentCentreName?: string, actorEmail?: string) {
   const [registrations, setRegistrations] = useState<ExamRegistration[]>([]);
@@ -152,13 +153,11 @@ export function useRegistrations(currentCentreName?: string, actorEmail?: string
   };
 
   const deleteRegistration = async (id: string) => {
-    if (!centreId) throw new Error('No centre authenticated');
-    const cleanKey = sanitizeKey(id);
-    const targetRef = ref(db, `registrations/big_bang_2026/${centreId}/${cleanKey}`);
-    await remove(targetRef);
-    if (currentCentreName && actorEmail) {
-      await logActivity('DELETE_REGISTRATION', currentCentreName, actorEmail, id);
-    }
+    const existing = registrations.find(r => r.rollNo === id || r.id === id);
+    const result = await deleteRegistrationAndAuth(existing || id, actorEmail);
+    // Refresh local state by filtering out deleted registration
+    setRegistrations(prev => prev.filter(r => r.rollNo !== id && r.id !== id));
+    return result;
   };
 
   return {

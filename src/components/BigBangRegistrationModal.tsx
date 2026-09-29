@@ -88,6 +88,8 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
       setErrorMessage(null);
       setDuplicateWarning(null);
       setRegistration(null);
+      setAssignedRollNo(null);
+      setLastPaymentData(null);
 
       if (student) {
         let defaultCenter = 'Bhubaneswar';
@@ -244,33 +246,50 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
       const selectedCentreProfile = getCentreByName(formData.selectedCenter || 'Bhubaneswar');
       const centreId = selectedCentreProfile.id;
 
-      // Query current registrations count for clean sequential 4-digit roll number
-      let nextSeq = 1;
-      try {
-        const centreRegsRef = ref(db, `${BIG_BANG_EXAM.registrationDbPath}/${centreId}`);
-        const snap = await get(centreRegsRef);
-        if (snap.exists()) {
-          const val = snap.val();
-          const validKeys = Object.keys(val).filter(k => k !== '_init');
-          nextSeq = validKeys.length + 1;
-        }
-      } catch (e) {
-        console.warn('Could not query registrations count from db, fallback to counter:', e);
-        nextSeq = Math.floor(1 + Math.random() * 99);
-      }
-
       const effectiveTestCentreCode = (centreId === 'ranchi' && formData.testCentreCode) ? formData.testCentreCode : selectedCentreProfile.testCentreCode;
       const seqSuffix = Date.now().toString().slice(-4);
-      const rollNo = assignedRollNo || generateRollNumber(selectedCentreProfile, formData.testDate, nextSeq, effectiveTestCentreCode, formData.currentClass);
-      if (!assignedRollNo) setAssignedRollNo(rollNo);
+      
+      // Determine guaranteed collision-free Roll Number
+      let rollNo = assignedRollNo;
+      if (!rollNo) {
+        try {
+          const centreRegsRef = ref(db, `${BIG_BANG_EXAM.registrationDbPath}/${centreId}`);
+          const snap = await get(centreRegsRef);
+          const existingKeys = snap.exists() ? Object.keys(snap.val()) : [];
+          
+          let candidateSeq = Math.max(1, existingKeys.filter(k => k !== '_init').length + 1);
+          let generated = generateRollNumber(selectedCentreProfile, formData.testDate, candidateSeq, effectiveTestCentreCode, formData.currentClass);
+          let cleanKey = generated.replace(/\s+/g, '_');
+          
+          while (existingKeys.includes(cleanKey)) {
+            candidateSeq++;
+            generated = generateRollNumber(selectedCentreProfile, formData.testDate, candidateSeq, effectiveTestCentreCode, formData.currentClass);
+            cleanKey = generated.replace(/\s+/g, '_');
+          }
+          rollNo = generated;
+        } catch {
+          const randSuffix = Math.floor(1000 + Math.random() * 9000);
+          rollNo = generateRollNumber(selectedCentreProfile, formData.testDate, randSuffix, effectiveTestCentreCode, formData.currentClass);
+        }
+        setAssignedRollNo(rollNo);
+      }
+
       const sid = generateSID(rollNo);
       const invoiceNo = generateInvoiceNumber(selectedCentreProfile, rollNo);
 
-      let effectiveStudentUid = student?.uid || auth.currentUser?.uid || '';
       const cleanEmail = formData.email.trim().toLowerCase();
+      let effectiveStudentUid = '';
+
+      // Only inherit student.uid or auth.currentUser.uid if their email matches formData.email
+      if (student && student.email && student.email.trim().toLowerCase() === cleanEmail) {
+        effectiveStudentUid = student.uid;
+      } else if (auth.currentUser && auth.currentUser.email && auth.currentUser.email.trim().toLowerCase() === cleanEmail) {
+        effectiveStudentUid = auth.currentUser.uid;
+      }
+
       const defaultPassword = 'Fiitjee@2026';
 
-      // If candidate is not currently logged in, auto-provision their student account in Firebase Auth
+      // If candidate is not currently logged in with this email, auto-provision their student account in Firebase Auth
       if (!effectiveStudentUid && cleanEmail) {
         try {
           const secondaryApp = getApps().find(a => a.name === 'SecondaryStudentRegistrar') 
@@ -282,6 +301,13 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
             await signOut(secondaryAuth);
           } catch (authErr: any) {
             console.log('Student account registration notice:', authErr.code);
+            if (authErr.code === 'auth/email-already-in-use') {
+              try {
+                const existingCred = await signInWithEmailAndPassword(secondaryAuth, cleanEmail, defaultPassword);
+                effectiveStudentUid = existingCred.user.uid;
+                await signOut(secondaryAuth);
+              } catch {}
+            }
           }
         } catch (e) {
           console.warn('Could not initialize secondary auth for online registration:', e);

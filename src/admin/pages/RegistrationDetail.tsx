@@ -22,6 +22,8 @@ import { OfficialHallTicket } from '../../components/OfficialHallTicket';
 import { HallTicketModal } from '../../components/HallTicketModal';
 import { ALL_CENTRES } from '../utils/centreUtils';
 import { ExamRegistration } from '../../types';
+import { ref, get } from 'firebase/database';
+import { db } from '../../firebase';
 
 export const RegistrationDetail: React.FC = () => {
   const { rollNo } = useParams<{ rollNo: string }>();
@@ -35,12 +37,74 @@ export const RegistrationDetail: React.FC = () => {
     deleteRegistration 
   } = useRegistrations(centre?.name, user?.email || undefined);
 
-  const reg = registrations.find(r => (r.rollNo === rollNo || r.id === rollNo));
+  const [directReg, setDirectReg] = useState<ExamRegistration | null>(null);
+  const [searchingDirect, setSearchingDirect] = useState(false);
+
+  // Look in current centre registrations first, or fallback to cross-centre direct search
+  const reg = registrations.find(r => (r.rollNo === rollNo || r.id === rollNo)) || directReg;
 
   const [formData, setFormData] = useState<Partial<ExamRegistration>>({});
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showHallTicketModal, setShowHallTicketModal] = useState(false);
+
+  // If record is not found in the current centre's cache, query across all centres
+  useEffect(() => {
+    if (!rollNo) return;
+    const found = registrations.find(r => (r.rollNo === rollNo || r.id === rollNo));
+    if (found) {
+      setDirectReg(found);
+      return;
+    }
+
+    if (!loading) {
+      setSearchingDirect(true);
+      const cleanKey = rollNo.replace(/\s+/g, '_');
+      const centres = ['bhubaneswar', 'dwarka', 'ranchi', 'hyderabad'];
+
+      (async () => {
+        try {
+          for (const c of centres) {
+            const snap = await get(ref(db, `registrations/big_bang_2026/${c}/${cleanKey}`));
+            if (snap.exists() && snap.val()?.studentName) {
+              setDirectReg({
+                id: cleanKey,
+                ...snap.val(),
+                rollNo: snap.val().rollNo || rollNo,
+                registeredByCentre: c
+              });
+              return;
+            }
+          }
+
+          // Fallback scan across all centres
+          const allSnap = await get(ref(db, 'registrations/big_bang_2026'));
+          if (allSnap.exists()) {
+            for (const [cKey, cData] of Object.entries(allSnap.val())) {
+              if (!cData || typeof cData !== 'object') continue;
+              for (const [k, v] of Object.entries(cData as any)) {
+                if (k === '_init' || !v || typeof v !== 'object') continue;
+                const rec = v as any;
+                if (rec.rollNo === rollNo || k === cleanKey || rec.id === rollNo) {
+                  setDirectReg({
+                    id: k,
+                    ...rec,
+                    rollNo: rec.rollNo || rollNo,
+                    registeredByCentre: cKey
+                  });
+                  return;
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Error finding registration across centres:', e);
+        } finally {
+          setSearchingDirect(false);
+        }
+      })();
+    }
+  }, [rollNo, registrations, loading]);
 
   useEffect(() => {
     if (reg) {
@@ -48,7 +112,7 @@ export const RegistrationDetail: React.FC = () => {
     }
   }, [reg]);
 
-  if (loading) {
+  if (loading || searchingDirect) {
     return (
       <div className="p-12 text-center text-slate-500 text-xs">
         <div className="w-8 h-8 border-3 border-slate-300 border-t-[#ED1C24] rounded-full animate-spin mx-auto mb-3"></div>
@@ -92,9 +156,17 @@ export const RegistrationDetail: React.FC = () => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm(`Permanently delete student ${reg.studentName} (${reg.rollNo})?`)) {
-      await deleteRegistration(reg.rollNo);
-      navigate('/admin/registrations');
+    if (window.confirm(`Permanently delete student ${reg.studentName} (${reg.rollNo}) and their portal authentication?`)) {
+      setSaving(true);
+      try {
+        await deleteRegistration(reg.rollNo);
+        alert(`Student record and portal authentication for ${reg.studentName} (${reg.rollNo}) deleted permanently.`);
+        navigate('/admin/registrations');
+      } catch (err: any) {
+        alert(`Delete failed: ${err.message || 'Unknown error'}`);
+      } finally {
+        setSaving(false);
+      }
     }
   };
 

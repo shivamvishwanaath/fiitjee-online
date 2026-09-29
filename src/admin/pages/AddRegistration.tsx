@@ -81,8 +81,13 @@ export const AddRegistration: React.FC = () => {
         : selectedCentreProfile.testCentreCode;
 
       const seqSuffix = Date.now().toString().slice(-4);
-      const nextSeq = registrations && registrations.length > 0 ? (registrations.length + 1) : Math.floor(1 + Math.random() * 99);
-      const generatedRoll = generateRollNumber(selectedCentreProfile, formData.testDate, nextSeq, effectiveTestCentreCode, formData.currentClass);
+      let candidateSeq = registrations && registrations.length > 0 ? (registrations.length + 1) : 1;
+      let generatedRoll = generateRollNumber(selectedCentreProfile, formData.testDate, candidateSeq, effectiveTestCentreCode, formData.currentClass);
+      const existingRolls = new Set(registrations.map(r => r.rollNo));
+      while (existingRolls.has(generatedRoll)) {
+        candidateSeq++;
+        generatedRoll = generateRollNumber(selectedCentreProfile, formData.testDate, candidateSeq, effectiveTestCentreCode, formData.currentClass);
+      }
       const sid = generateSID(generatedRoll);
       const invoiceNo = generateInvoiceNumber(selectedCentreProfile, generatedRoll);
       const autoPaymentRef = `${selectedCentreProfile.numericCode}/ADM-${seqSuffix}`;
