@@ -84,6 +84,9 @@ export const StudentLogin: React.FC = () => {
     password: ''
   });
 
+  const hasRegisterEmail = registerData.email.trim().length > 0;
+  const hasRegisterPhone = registerData.phone.replace(/\D/g, '').length > 0;
+
   // If already authenticated, redirect
   React.useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -281,7 +284,20 @@ export const StudentLogin: React.FC = () => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (registerData.phone.replace(/\D/g, '').length !== 10) {
+    const cleanEmail = registerData.email.trim();
+    const cleanPhone = registerData.phone.replace(/\D/g, '');
+
+    if (!cleanEmail && !cleanPhone) {
+      setErrorMessage('Please provide either your Email Address or Mobile Number to register.');
+      return;
+    }
+
+    if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setErrorMessage('Please enter a valid email address.');
+      return;
+    }
+
+    if (cleanPhone && cleanPhone.length !== 10) {
       setErrorMessage('Please enter a valid 10-digit mobile number.');
       return;
     }
@@ -302,8 +318,8 @@ export const StudentLogin: React.FC = () => {
       await signup({
         fullName: registerData.fullName,
         parentName: registerData.parentName,
-        email: registerData.email,
-        phone: registerData.phone,
+        email: cleanEmail,
+        phone: cleanPhone,
         currentClass: registerData.currentClass,
         schoolName: registerData.schoolName,
         preferredCentreId: registerData.preferredCentreId
@@ -313,7 +329,11 @@ export const StudentLogin: React.FC = () => {
     } catch (err: any) {
       console.error('Student signup error:', err);
       if (err.code === 'auth/email-already-in-use') {
-        setErrorMessage('An account already exists with this email address. Please click "Sign In".');
+        if (cleanEmail) {
+          setErrorMessage('An account already exists with this email address. Please click "Sign In".');
+        } else {
+          setErrorMessage('An account already exists with this mobile number. Please click "Sign In".');
+        }
       } else {
         setErrorMessage(err.message || 'Failed to create student account.');
       }
@@ -577,23 +597,26 @@ export const StudentLogin: React.FC = () => {
                     </button>
                   </form>
                 ) : (
-                  /* Option B: Standard Email & Password */
+                  /* Option B: Standard Email or Mobile & Password */
                   <form onSubmit={handleLoginSubmit} className="space-y-4">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Student Email Address
+                        Email Address or Registered Mobile
                       </label>
                       <div className="relative">
                         <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                         <input
-                          type="email"
+                          type="text"
                           required
-                          placeholder="e.g. rahul.sharma@gmail.com"
+                          placeholder="e.g. rahul.sharma@gmail.com or 9876543210"
                           value={loginEmail}
                           onChange={(e) => setLoginEmail(e.target.value)}
                           className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
                         />
                       </div>
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        Enter the email address or 10-digit mobile number used when creating your account.
+                      </p>
                     </div>
 
                     <div>
@@ -703,42 +726,113 @@ export const StudentLogin: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Email / Mobile Choice Dynamic Indicator */}
+                <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-3.5 space-y-1.5 transition-all">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2.5 h-2.5 rounded-full ${
+                        hasRegisterEmail && hasRegisterPhone ? 'bg-emerald-500 shadow-xs' :
+                        hasRegisterEmail ? 'bg-blue-500 shadow-xs' :
+                        hasRegisterPhone ? 'bg-purple-500 shadow-xs' :
+                        'bg-amber-400 animate-pulse'
+                      }`} />
+                      <span className="font-bold text-slate-800 text-[11px]">
+                        {hasRegisterEmail && hasRegisterPhone
+                          ? 'Registering with Email & Mobile Number (Full Account Access)'
+                          : hasRegisterEmail
+                          ? 'Registering with Email Address (Mobile Number is optional)'
+                          : hasRegisterPhone
+                          ? 'Registering with Mobile Number (Email Address is optional)'
+                          : 'Enter either Email Address or Mobile Number'}
+                      </span>
+                    </div>
+                    <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border ${
+                      hasRegisterEmail && hasRegisterPhone ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                      hasRegisterEmail ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                      hasRegisterPhone ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                      'bg-amber-50 text-amber-700 border-amber-200'
+                    }`}>
+                      {hasRegisterEmail && hasRegisterPhone ? 'Email + Mobile' :
+                       hasRegisterEmail ? 'Email Mode' :
+                       hasRegisterPhone ? 'Mobile Mode' :
+                       'Either Required'}
+                    </span>
+                  </div>
+                  <p className="text-[10.5px] text-slate-500 leading-normal">
+                    {hasRegisterEmail && hasRegisterPhone
+                      ? 'Great! You can sign in using Phone OTP, Roll Number, or Email & Password.'
+                      : hasRegisterEmail
+                      ? 'You can sign in using your Email & Password. You may optionally add your Mobile Number below.'
+                      : hasRegisterPhone
+                      ? 'You can sign in using your Mobile Number & Password, or via Phone SMS OTP. Email is optional.'
+                      : 'Provide either your Email Address or your 10-Digit Mobile Number to create your student account. Both are not mandatory.'}
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Email */}
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Email Address *
-                    </label>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                        Email Address {hasRegisterPhone ? (
+                          <span className="text-slate-400 font-normal lowercase">(optional)</span>
+                        ) : (
+                          <span className="text-[#ED1C24]">*</span>
+                        )}
+                      </label>
+                      {hasRegisterEmail && (
+                        <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" /> Active
+                        </span>
+                      )}
+                    </div>
                     <div className="relative">
                       <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="email"
-                        required
-                        placeholder="e.g. student@gmail.com"
+                        required={!hasRegisterPhone}
+                        placeholder={hasRegisterPhone ? "e.g. student@gmail.com (optional)" : "e.g. student@gmail.com"}
                         value={registerData.email}
                         onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
                         className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
                       />
                     </div>
+                    {!hasRegisterEmail && hasRegisterPhone && (
+                      <p className="text-[10px] text-slate-400 mt-1">Optional when mobile number is provided.</p>
+                    )}
                   </div>
 
                   {/* Phone */}
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Mobile Number (10 Digits) *
-                    </label>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                        Mobile Number {hasRegisterEmail ? (
+                          <span className="text-slate-400 font-normal lowercase">(optional)</span>
+                        ) : (
+                          <span className="text-[#ED1C24]">*</span>
+                        )}
+                      </label>
+                      {hasRegisterPhone && (
+                        <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" /> Active
+                        </span>
+                      )}
+                    </div>
                     <div className="relative">
                       <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="tel"
-                        required
+                        required={!hasRegisterEmail}
                         maxLength={10}
-                        placeholder="e.g. 9876543210"
+                        placeholder={hasRegisterEmail ? "e.g. 9876543210 (optional)" : "e.g. 9876543210"}
                         value={registerData.phone}
                         onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value.replace(/\D/g, '') })}
                         className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none font-mono"
                       />
                     </div>
+                    {!hasRegisterPhone && hasRegisterEmail && (
+                      <p className="text-[10px] text-slate-400 mt-1">Optional when email address is provided.</p>
+                    )}
                   </div>
                 </div>
 

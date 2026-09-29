@@ -355,7 +355,7 @@ export const StudentDashboard: React.FC = () => {
 
           const mine = all.filter(t => 
             t.studentUid === student.uid || 
-            (t.studentEmail && t.studentEmail.toLowerCase() === student.email.toLowerCase())
+            (t.studentEmail && student?.email && t.studentEmail.toLowerCase() === student.email.toLowerCase())
           );
           mine.sort((a, b) => new Date(b.submittedAt || 0).getTime() - new Date(a.submittedAt || 0).getTime());
           setMyTickets(mine);
@@ -442,8 +442,8 @@ export const StudentDashboard: React.FC = () => {
         ticketId: newTicketRef.key || `TKT-${Date.now()}`,
         studentUid: student.uid,
         studentName: student.fullName,
-        studentEmail: student.email,
-        studentPhone: student.phone,
+        studentEmail: student.email || '',
+        studentPhone: student.phone || '',
         rollNo: registeredList[0]?.rollNo || '',
         category: ticketForm.category,
         subject: ticketForm.subject.trim(),
@@ -594,11 +594,15 @@ export const StudentDashboard: React.FC = () => {
                 {student?.preferredCentreId ? student.preferredCentreId.toUpperCase() : 'CENTRE'}
               </span>
             </div>
-            {student?.email && (
+            {student?.email ? (
               <div className="text-[9px] text-slate-400 font-mono truncate mt-0.5">
                 {student.email}
               </div>
-            )}
+            ) : student?.phone ? (
+              <div className="text-[9px] text-slate-400 font-mono truncate mt-0.5">
+                +91 {student.phone}
+              </div>
+            ) : null}
           </div>
         </div>
 

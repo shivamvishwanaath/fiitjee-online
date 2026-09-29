@@ -10,7 +10,7 @@ import {
   signInWithPhoneNumber,
   ConfirmationResult
 } from 'firebase/auth';
-import { ref, set, update, onValue, remove, get } from 'firebase/database';
+import { ref, set, update, onValue, remove, get, query, orderByChild, equalTo } from 'firebase/database';
 import { auth, db } from '../../firebase';
 import { StudentProfile } from '../../types';
 
@@ -208,28 +208,65 @@ export function useStudentAuth() {
     };
   }, []);
 
-  const login = async (email: string, pass: string): Promise<void> => {
+  const login = async (identifierOrEmail: string, pass: string): Promise<void> => {
     setLoading(true);
     try {
+      const cleanInput = identifierOrEmail.trim();
+      const isDigitsOnly = !cleanInput.includes('@') && cleanInput.replace(/\D/g, '').length >= 10;
+      const cleanPhone = cleanInput.replace(/\D/g, '').slice(-10);
+
+      let authEmail = cleanInput.toLowerCase();
+      if (isDigitsOnly) {
+        authEmail = `cand_${cleanPhone}@candidate.fiitjee.online`;
+      }
+
       try {
-        const cred = await signInWithEmailAndPassword(auth, email.trim(), pass);
+        const cred = await signInWithEmailAndPassword(auth, authEmail, pass);
         if (cred.user) {
           const studentRef = ref(db, `students/${cred.user.uid}`);
           await update(studentRef, { 
             lastLoginAt: new Date().toISOString(),
-            lastLoginMethod: 'email'
+            lastLoginMethod: isDigitsOnly ? 'phone_pass' : 'email'
           });
         }
         return;
       } catch (authErr: any) {
+        // If candidate entered phone, but was registered with email in students table, lookup profile
+        if (isDigitsOnly && (authErr.code === 'auth/invalid-credential' || authErr.code === 'auth/user-not-found')) {
+          try {
+            const studentQuery = query(ref(db, 'students'), orderByChild('phone'), equalTo(cleanPhone));
+            const phoneSnap = await get(studentQuery);
+            if (phoneSnap.exists()) {
+              const studentsObj = phoneSnap.val();
+              const matchedStudent = Object.values(studentsObj)[0] as StudentProfile;
+              if (matchedStudent?.email && matchedStudent.email.includes('@')) {
+                const cred = await signInWithEmailAndPassword(auth, matchedStudent.email.trim(), pass);
+                if (cred.user) {
+                  await update(ref(db, `students/${cred.user.uid}`), {
+                    lastLoginAt: new Date().toISOString(),
+                    lastLoginMethod: 'phone_pass'
+                  });
+                  return;
+                }
+              }
+            }
+          } catch (phoneLookupErr) {
+            console.warn('Phone profile lookup error:', phoneLookupErr);
+          }
+        }
+
         // If invalid credential or user not found, check if a registration exists for this candidate
         if (authErr.code === 'auth/invalid-credential' || authErr.code === 'auth/user-not-found') {
-          const found = await findRegistrationInDatabase(email);
+          const found = await findRegistrationInDatabase(cleanInput);
           if (found) {
             // Candidate registered for an admission test but hasn't created a password yet.
             // Automatically provision their account with this password!
             try {
-              const newCred = await createUserWithEmailAndPassword(auth, email.trim(), pass);
+              const provisionEmail = (found.reg.email && found.reg.email.includes('@'))
+                ? found.reg.email.trim().toLowerCase()
+                : `cand_${(cleanPhone || found.reg.rollNo || 'temp').replace(/\s+/g, '_').toLowerCase()}@candidate.fiitjee.online`;
+
+              const newCred = await createUserWithEmailAndPassword(auth, provisionEmail, pass);
               const uid = newCred.user.uid;
               await updateFirebaseProfile(newCred.user, { displayName: found.reg.studentName });
 
@@ -237,13 +274,14 @@ export function useStudentAuth() {
                 uid,
                 fullName: found.reg.studentName,
                 parentName: found.reg.parentName || '',
-                email: (found.reg.email || email).trim().toLowerCase(),
+                email: found.reg.email || '',
                 phone: found.reg.phone || '',
                 currentClass: found.reg.currentClass || 'Class X',
                 schoolName: found.reg.schoolName || '',
                 preferredCentreId: found.centreId,
                 createdAt: found.reg.registeredAt || new Date().toISOString(),
                 lastLoginAt: new Date().toISOString(),
+                lastLoginMethod: isDigitsOnly ? 'phone_pass' : 'email',
                 registeredExams: {
                   big_bang_2026: {
                     examId: found.reg.examId || 'big_bang_2026',
@@ -367,7 +405,17 @@ export function useStudentAuth() {
   ): Promise<string> => {
     setLoading(true);
     try {
-      const cred = await createUserWithEmailAndPassword(auth, profileData.email.trim(), pass);
+      const cleanEmail = (profileData.email || '').trim().toLowerCase();
+      const cleanPhone = (profileData.phone || '').replace(/\D/g, '');
+
+      if (!cleanEmail && !cleanPhone) {
+        throw new Error('Please provide either your Email Address or Mobile Number to register.');
+      }
+
+      // If email provided, use it; otherwise generate synthetic candidate auth email for mobile
+      const authEmail = cleanEmail || `cand_${cleanPhone.slice(-10)}@candidate.fiitjee.online`;
+
+      const cred = await createUserWithEmailAndPassword(auth, authEmail, pass);
       const uid = cred.user.uid;
 
       await updateFirebaseProfile(cred.user, {
@@ -379,11 +427,12 @@ export function useStudentAuth() {
         ...profileData,
         fullName: profileData.fullName.trim(),
         parentName: profileData.parentName.trim(),
-        email: profileData.email.trim().toLowerCase(),
-        phone: profileData.phone.trim(),
+        email: cleanEmail,
+        phone: cleanPhone,
         schoolName: profileData.schoolName.trim(),
         createdAt: new Date().toISOString(),
-        lastLoginAt: new Date().toISOString()
+        lastLoginAt: new Date().toISOString(),
+        lastLoginMethod: cleanEmail ? 'email' : 'phone_pass'
       };
 
       const studentRef = ref(db, `students/${uid}`);
