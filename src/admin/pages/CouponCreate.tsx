@@ -75,13 +75,13 @@ export const CouponCreate: React.FC = () => {
     try {
       await createCoupon({
         code: cleanCode,
-        description: description.trim() || undefined,
+        description: description.trim() || '',
         centreId: centre?.name || 'Bhubaneswar',
         discountType,
         discountValue: discountType === 'full' ? 100 : Number(discountValue),
         maxUses: Number(maxUses),
         validFrom: new Date().toISOString(),
-        validUntil: validUntil ? new Date(validUntil).toISOString() : undefined,
+        validUntil: validUntil ? new Date(validUntil).toISOString() : '',
         isActive,
         isEmailRestricted,
         allowedEmails: parsedEmails,

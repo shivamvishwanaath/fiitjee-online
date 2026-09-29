@@ -334,3 +334,19 @@ export function getExamScheduleForClass(_className?: string): string {
 }
 
 export { getRegistrationFeeForClass } from '../../data/examsData';
+
+/**
+ * Deep sanitize helper to eliminate any undefined values that crash Firebase RTDB
+ */
+export function sanitizeForFirebase<T>(obj: T): T {
+  if (obj === null || obj === undefined) return null as any;
+  if (typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(sanitizeForFirebase) as any;
+  const clean: Record<string, any> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v !== undefined) {
+      clean[k] = sanitizeForFirebase(v);
+    }
+  }
+  return clean as T;
+}

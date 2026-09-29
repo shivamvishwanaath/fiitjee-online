@@ -1,6 +1,7 @@
 import { ref, get, push, set, update } from 'firebase/database';
 import { db } from '../../firebase';
 import { CouponProfile, CouponRedemption } from '../../types';
+import { sanitizeForFirebase } from './centreUtils';
 
 export interface CouponValidationResult {
   valid: boolean;
@@ -168,7 +169,7 @@ export async function redeemCoupon(
     // Push new redemption
     const redemptionsRef = ref(db, `${fullPath}/redemptions`);
     const newRedemptionRef = push(redemptionsRef);
-    await set(newRedemptionRef, redemption);
+    await set(newRedemptionRef, sanitizeForFirebase(redemption));
 
     // Update used count
     await update(couponRef, {

@@ -3,7 +3,7 @@ import { ref, onValue, push, set, update, remove } from 'firebase/database';
 import { db } from '../../firebase';
 import { CouponProfile } from '../../types';
 import { logActivity } from '../utils/logActivity';
-import { getCentreIdByName } from '../utils/centreUtils';
+import { getCentreIdByName, sanitizeForFirebase } from '../utils/centreUtils';
 
 export function useCoupons(centreName?: string, actorEmail?: string) {
   const [coupons, setCoupons] = useState<CouponProfile[]>([]);
@@ -77,12 +77,14 @@ export function useCoupons(centreName?: string, actorEmail?: string) {
       const payload: CouponProfile = {
         id: newId,
         ...data,
+        description: data.description || '',
+        validUntil: data.validUntil || '',
         centreId: centreName || 'System',
         usedCount: 0,
         createdAt: new Date().toISOString()
       };
 
-      await set(newRef, payload);
+      await set(newRef, sanitizeForFirebase(payload));
 
       await logActivity({
         actorEmail: actorEmail || 'staff@fiitjee.online',
@@ -103,7 +105,7 @@ export function useCoupons(centreName?: string, actorEmail?: string) {
     if (!centreId) throw new Error('No centre authenticated');
     try {
       const couponRef = ref(db, `coupons/${centreId}/${id}`);
-      await update(couponRef, updates);
+      await update(couponRef, sanitizeForFirebase(updates));
 
       await logActivity({
         actorEmail: actorEmail || 'staff@fiitjee.online',
