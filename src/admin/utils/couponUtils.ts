@@ -77,92 +77,103 @@ export async function validateCoupon(
     // Attach discovered path to coupon object for seamless redemption
     (matchedCoupon as any)._dbPath = matchedPath;
 
-    // Check if active
-    if (matchedCoupon.isActive === false) {
-      return { valid: false, error: 'This coupon code has been deactivated.' };
-    }
+    return evaluateCouponRules(matchedCoupon, studentEmail, currentFee, targetCentreId);
+  } catch (err: any) {
+    console.error('Error validating coupon:', err);
+    return { valid: false, error: 'Unable to validate promotional code at this time. Please try again.' };
+  }
+}
 
-    // Check centre isolation
-    if (matchedCoupon.centreId) {
-      const couponCentre = matchedCoupon.centreId.trim().toLowerCase();
-      if (couponCentre !== 'all' && targetCentreId) {
-        const studentCentre = targetCentreId.trim().toLowerCase();
-        const match = couponCentre === studentCentre || 
-                      couponCentre.includes(studentCentre) || 
-                      studentCentre.includes(couponCentre);
-        if (!match) {
-          const formattedCouponCentre = matchedCoupon.centreId;
-          const formattedStudentCentre = targetCentreId.charAt(0).toUpperCase() + targetCentreId.slice(1);
-          return {
-            valid: false,
-            error: `This coupon code is exclusive to FIITJEE ${formattedCouponCentre} Centre and cannot be redeemed for ${formattedStudentCentre} Centre registrations.`
-          };
-        }
-      }
-    }
+/**
+ * Pure evaluation function for coupon business rules (used by validateCoupon & unit tests)
+ */
+export function evaluateCouponRules(
+  matchedCoupon: CouponProfile,
+  studentEmail: string,
+  currentFee: number,
+  targetCentreId?: string
+): CouponValidationResult {
+  // Check if active
+  if (matchedCoupon.isActive === false) {
+    return { valid: false, error: 'This coupon code has been deactivated.' };
+  }
 
-    // Check validity dates
-    const now = new Date();
-    if (matchedCoupon.validFrom && new Date(matchedCoupon.validFrom) > now) {
-      return { valid: false, error: 'This coupon is not active yet.' };
-    }
-    if (matchedCoupon.validUntil && new Date(matchedCoupon.validUntil) < now) {
-      return { valid: false, error: 'This coupon code has expired.' };
-    }
-
-    // Check usage limits
-    const maxUses = matchedCoupon.maxUses || 1;
-    const usedCount = matchedCoupon.usedCount || 0;
-    if (usedCount >= maxUses) {
-      return { valid: false, error: 'This coupon code has reached its maximum usage limit.' };
-    }
-
-    // Check email restriction
-    const cleanEmail = (studentEmail || '').trim().toLowerCase();
-    if (matchedCoupon.isEmailRestricted && matchedCoupon.allowedEmails && matchedCoupon.allowedEmails.length > 0) {
-      const allowed = matchedCoupon.allowedEmails.map(e => e.trim().toLowerCase());
-      if (!cleanEmail || !allowed.includes(cleanEmail)) {
-        return { 
-          valid: false, 
-          error: `This coupon is restricted to pre-authorized candidate email IDs only.` 
+  // Check centre isolation
+  if (matchedCoupon.centreId) {
+    const normalizeCentre = (s: string) => s.toLowerCase().trim().replace(/[\s_-]+/g, '');
+    const couponCentre = normalizeCentre(matchedCoupon.centreId);
+    if (couponCentre !== 'all' && targetCentreId) {
+      const studentCentre = normalizeCentre(targetCentreId);
+      const match = couponCentre === studentCentre;
+      if (!match) {
+        const formattedCouponCentre = matchedCoupon.centreId;
+        const formattedStudentCentre = targetCentreId.charAt(0).toUpperCase() + targetCentreId.slice(1);
+        return {
+          valid: false,
+          error: `This coupon code is exclusive to FIITJEE ${formattedCouponCentre} Centre and cannot be redeemed for ${formattedStudentCentre} Centre registrations.`
         };
       }
     }
-
-    // Check if student already redeemed this code
-    if (cleanEmail && matchedCoupon.redemptions) {
-      const alreadyRedeemed = Object.values(matchedCoupon.redemptions).some(
-        r => (r.email || '').trim().toLowerCase() === cleanEmail
-      );
-      if (alreadyRedeemed) {
-        return { valid: false, error: 'You have already redeemed this coupon code.' };
-      }
-    }
-
-    // Calculate discount
-    let discountAmount = 0;
-    if (matchedCoupon.discountType === 'full') {
-      discountAmount = currentFee;
-    } else if (matchedCoupon.discountType === 'percent') {
-      discountAmount = (currentFee * (matchedCoupon.discountValue || 100)) / 100;
-    } else if (matchedCoupon.discountType === 'flat') {
-      discountAmount = Math.min(currentFee, matchedCoupon.discountValue || currentFee);
-    }
-
-    // Keep 2 decimals
-    discountAmount = Math.round(discountAmount * 100) / 100;
-    const finalAmount = Math.max(0, Math.round((currentFee - discountAmount) * 100) / 100);
-
-    return {
-      valid: true,
-      coupon: matchedCoupon,
-      discountAmount,
-      finalAmount
-    };
-  } catch (err: any) {
-    console.error('Coupon validation error:', err);
-    return { valid: false, error: err.message || 'Failed to validate coupon code' };
   }
+
+  // Check validity dates
+  const now = new Date();
+  if (matchedCoupon.validFrom && new Date(matchedCoupon.validFrom) > now) {
+    return { valid: false, error: 'This coupon is not active yet.' };
+  }
+  if (matchedCoupon.validUntil && new Date(matchedCoupon.validUntil) < now) {
+    return { valid: false, error: 'This coupon code has expired.' };
+  }
+
+  // Check usage limits
+  const maxUses = matchedCoupon.maxUses || 1;
+  const usedCount = matchedCoupon.usedCount || 0;
+  if (usedCount >= maxUses) {
+    return { valid: false, error: 'This coupon code has reached its maximum usage limit.' };
+  }
+
+  // Check email restriction
+  const cleanEmail = (studentEmail || '').trim().toLowerCase();
+  if (matchedCoupon.isEmailRestricted && matchedCoupon.allowedEmails && matchedCoupon.allowedEmails.length > 0) {
+    const allowed = matchedCoupon.allowedEmails.map(e => e.trim().toLowerCase());
+    if (!cleanEmail || !allowed.includes(cleanEmail)) {
+      return { 
+        valid: false, 
+        error: `This coupon is restricted to pre-authorized candidate email IDs only.` 
+      };
+    }
+  }
+
+  // Check if student already redeemed this code
+  if (cleanEmail && matchedCoupon.redemptions) {
+    const alreadyRedeemed = Object.values(matchedCoupon.redemptions).some(
+      r => (r.email || '').trim().toLowerCase() === cleanEmail
+    );
+    if (alreadyRedeemed) {
+      return { valid: false, error: 'You have already redeemed this coupon code.' };
+    }
+  }
+
+  // Calculate discount
+  let discountAmount = 0;
+  if (matchedCoupon.discountType === 'full') {
+    discountAmount = currentFee;
+  } else if (matchedCoupon.discountType === 'percent') {
+    discountAmount = (currentFee * (matchedCoupon.discountValue || 100)) / 100;
+  } else if (matchedCoupon.discountType === 'flat') {
+    discountAmount = Math.min(currentFee, matchedCoupon.discountValue || currentFee);
+  }
+
+  // Keep 2 decimals
+  discountAmount = Math.round(discountAmount * 100) / 100;
+  const finalAmount = Math.max(0, Math.round((currentFee - discountAmount) * 100) / 100);
+
+  return {
+    valid: true,
+    coupon: matchedCoupon,
+    discountAmount,
+    finalAmount
+  };
 }
 
 /**

@@ -32,6 +32,8 @@ export const CRMTickets: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [expandedTicketId, setExpandedTicketId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const PAGE_SIZE = 20;
 
   // Reply state
   const [replyText, setReplyText] = useState<{ [ticketId: string]: string }>({});
@@ -88,6 +90,17 @@ export const CRMTickets: React.FC = () => {
       return true;
     });
   }, [tickets, statusFilter, searchQuery]);
+
+  // Reset to first page when search or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredTickets.length / PAGE_SIZE));
+  const paginatedTickets = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredTickets.slice(start, start + PAGE_SIZE);
+  }, [filteredTickets, currentPage]);
 
   const openCount = useMemo(() => {
     return tickets.filter(t => t.status === 'open').length;
@@ -191,7 +204,7 @@ export const CRMTickets: React.FC = () => {
             </p>
           </div>
         ) : (
-          filteredTickets.map((t) => {
+          paginatedTickets.map((t) => {
             const isExpanded = expandedTicketId === t.ticketId;
             const statusColor = 
               t.status === 'resolved' || t.status === 'closed'
@@ -357,6 +370,35 @@ export const CRMTickets: React.FC = () => {
               </div>
             );
           })
+        )}
+
+        {totalPages > 1 && (
+          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <span className="text-slate-500">
+              Showing {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredTickets.length)} of {filteredTickets.length} tickets
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <span className="font-bold text-slate-800">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                type="button"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>

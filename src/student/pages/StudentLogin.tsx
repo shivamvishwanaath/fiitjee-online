@@ -20,8 +20,7 @@ import {
   KeyRound
 } from 'lucide-react';
 import { sendPasswordResetEmail, ConfirmationResult } from 'firebase/auth';
-import { auth } from '../../firebase';
-import { useStudentAuth } from '../hooks/useStudentAuth';
+import { useStudentAuth, findRegistrationInDatabase } from '../hooks/useStudentAuth';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
 
 export const StudentLogin: React.FC = () => {
@@ -34,12 +33,19 @@ export const StudentLogin: React.FC = () => {
     login, 
     loginWithRollOrPhone, 
     setupRecaptcha, 
+    clearRecaptcha,
     sendPhoneOtp, 
     verifyPhoneOtp, 
     signup, 
     isAuthenticated, 
     loading: authLoading 
   } = useStudentAuth();
+
+  useEffect(() => {
+    return () => {
+      clearRecaptcha();
+    };
+  }, [clearRecaptcha]);
 
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [loginMethod, setLoginMethod] = useState<'phone_otp' | 'roll_phone' | 'email_pass'>('phone_otp');
@@ -176,13 +182,45 @@ export const StudentLogin: React.FC = () => {
     }
   };
 
+  const switchLoginMethod = (method: 'phone_otp' | 'roll_phone' | 'email_pass') => {
+    setLoginMethod(method);
+    setErrorMessage(null);
+    setOtpStep('phone');
+    setConfirmationResult(null);
+    setOtpCode('');
+    clearRecaptcha();
+  };
+
   const handleRollLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
     setSubmitting(true);
 
     try {
-      await loginWithRollOrPhone(identifierInput.trim());
+      const input = identifierInput.trim();
+      const cleanDigits = input.replace(/\D/g, '');
+
+      // If user entered 10-digit mobile number, route directly to Phone OTP
+      if (cleanDigits.length === 10) {
+        setPhoneInput(cleanDigits);
+        switchLoginMethod('phone_otp');
+        setSubmitting(false);
+        return;
+      }
+
+      // Check if registration exists and has registered phone
+      const found = await findRegistrationInDatabase(input);
+      if (found && found.reg && found.reg.phone) {
+        const regDigits = found.reg.phone.replace(/\D/g, '').slice(-10);
+        if (regDigits.length === 10) {
+          setPhoneInput(regDigits);
+          switchLoginMethod('phone_otp');
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      await loginWithRollOrPhone(input);
       navigate(redirectUrl);
     } catch (err: any) {
       setErrorMessage(err.message || 'No candidate record found for this Roll Number or Mobile Number.');
@@ -358,7 +396,7 @@ export const StudentLogin: React.FC = () => {
                 <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 gap-1">
                   <button
                     type="button"
-                    onClick={() => { setLoginMethod('phone_otp'); setErrorMessage(null); setOtpStep('phone'); }}
+                    onClick={() => switchLoginMethod('phone_otp')}
                     className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       loginMethod === 'phone_otp' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                     }`}
@@ -368,7 +406,7 @@ export const StudentLogin: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setLoginMethod('roll_phone'); setErrorMessage(null); }}
+                    onClick={() => switchLoginMethod('roll_phone')}
                     className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       loginMethod === 'roll_phone' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                     }`}
@@ -378,7 +416,7 @@ export const StudentLogin: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setLoginMethod('email_pass'); setErrorMessage(null); }}
+                    onClick={() => switchLoginMethod('email_pass')}
                     className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       loginMethod === 'email_pass' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                     }`}
@@ -419,7 +457,9 @@ export const StudentLogin: React.FC = () => {
                         </div>
 
                         {/* reCAPTCHA container for Phone Auth */}
-                        <div id="recaptcha-phone-container" className="flex justify-center" />
+                        {loginMethod === 'phone_otp' && otpStep === 'phone' && (
+                          <div id="recaptcha-phone-container" className="flex justify-center my-2" />
+                        )}
 
                         <button
                           type="submit"

@@ -36,6 +36,7 @@ import { useNavigate } from 'react-router-dom';
 interface BigBangRegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  examId?: string;
 }
 
 const initialFormData = {
@@ -67,7 +68,8 @@ function sanitizeForFirebase<T>(obj: T): T {
 
 export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> = ({
   isOpen,
-  onClose
+  onClose,
+  examId = 'big-bang-edge-test'
 }) => {
   const navigate = useNavigate();
   const { student, isAuthenticated } = useStudentAuth();
@@ -130,7 +132,7 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
     let isMounted = true;
     setLoadingExamConfig(true);
 
-    getCentreExamById(targetCentreId, 'big-bang-edge-test')
+    getCentreExamById(targetCentreId, examId)
       .then((cfg) => {
         if (isMounted && cfg) {
           setExamConfig(cfg);
@@ -147,7 +149,7 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
       });
 
     return () => { isMounted = false; };
-  }, [isOpen, targetCentreId]);
+  }, [isOpen, targetCentreId, examId]);
 
   if (!isOpen) return null;
 
@@ -219,6 +221,10 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
     if (step === 1) {
       setStep(2);
     } else if (step === 2) {
+      if (examConfig && examConfig.registrationOpen === false) {
+        setErrorMessage(`Registrations for FIITJEE ${formData.selectedCenter} Centre are currently paused.`);
+        return;
+      }
       // Perform duplicate check before showing review screen
       setSubmitState('submitting');
       setDuplicateWarning(null);
@@ -686,6 +692,14 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
           {/* STEP 2: Preferences */}
           {step === 2 && (
             <form onSubmit={handleNextStep} className="space-y-4">
+              {/* Loading Indicator for Exam Config */}
+              {loadingExamConfig && (
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center gap-2 text-xs text-slate-500">
+                  <Loader2 className="w-4 h-4 animate-spin text-[#ED1C24]" />
+                  <span>Loading examination schedule & center particulars...</span>
+                </div>
+              )}
+
               {/* Registration Closed Notice if disabled for this centre */}
               {examConfig && examConfig.registrationOpen === false && (
                 <div className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 text-red-800 text-xs">
@@ -825,10 +839,10 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
                 </button>
                 <button
                   type="submit"
-                  disabled={submitState === 'submitting'}
-                  className="w-2/3 py-2.5 bg-[#ED1C24] hover:bg-[#d6171e] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer uppercase tracking-wider disabled:opacity-50"
+                  disabled={submitState === 'submitting' || loadingExamConfig || (examConfig !== null && examConfig.registrationOpen === false)}
+                  className="w-2/3 py-2.5 bg-[#ED1C24] hover:bg-[#d6171e] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {submitState === 'submitting' ? 'Verifying...' : 'Review details'}
+                  {submitState === 'submitting' ? 'Verifying...' : examConfig?.registrationOpen === false ? 'Registrations Paused' : 'Review details'}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

@@ -35,6 +35,8 @@ export const ExamList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [examToDelete, setExamToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState<boolean>(false);
 
   const loadExams = async () => {
     setLoading(true);
@@ -65,15 +67,21 @@ export const ExamList: React.FC = () => {
     }
   };
 
-  const handleDeleteExam = async (examId: string, examName: string) => {
-    if (!window.confirm(`Are you sure you want to remove "${examName}" from ${centre?.name || 'this'} centre?`)) {
-      return;
-    }
+  const handleDeleteExam = (examId: string, examName: string) => {
+    setExamToDelete({ id: examId, name: examName });
+  };
+
+  const confirmDeleteExam = async () => {
+    if (!examToDelete) return;
+    setDeleting(true);
     try {
-      await deleteCentreExam(activeCentreId, examId);
-      setExams(prev => prev.filter(e => e.id !== examId));
+      await deleteCentreExam(activeCentreId, examToDelete.id);
+      setExams(prev => prev.filter(e => e.id !== examToDelete.id));
+      setExamToDelete(null);
     } catch (err) {
       console.error('Failed to delete exam:', err);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -332,6 +340,41 @@ export const ExamList: React.FC = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {examToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-red-100 text-[#ED1C24] flex items-center justify-center">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-slate-900">Remove Examination Blueprint?</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Are you sure you want to remove <strong className="text-slate-800">"{examToDelete.name}"</strong> from {centre?.name || 'this'} centre? This will take down registration access for this examination.
+              </p>
+            </div>
+            <div className="flex gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setExamToDelete(null)}
+                disabled={deleting}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl cursor-pointer transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteExam}
+                disabled={deleting}
+                className="flex-1 py-2.5 bg-[#ED1C24] hover:bg-[#d6171e] text-white font-bold text-xs rounded-xl cursor-pointer transition-colors shadow-md disabled:opacity-50"
+              >
+                {deleting ? 'Removing...' : 'Confirm Remove'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

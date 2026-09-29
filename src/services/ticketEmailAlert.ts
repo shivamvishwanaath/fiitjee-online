@@ -60,15 +60,35 @@ Note: Any reply composed in the Admin Portal will be instantly accessible by the
     }
   };
 
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/send-crm-email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    return res.ok;
-  } catch (err) {
-    console.warn('Could not dispatch ticket alert email to centre:', err);
-    return false;
+  const apiKey = import.meta.env.VITE_API_SECRET_KEY || '';
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (apiKey) {
+    headers['X-API-Key'] = apiKey;
   }
+
+  // 2-attempt resilient retry
+  const maxAttempts = 2;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/send-crm-email`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        return true;
+      }
+    } catch (err) {
+      if (attempt === maxAttempts) {
+        console.warn(`Ticket alert email dispatch failed on final attempt (${attempt}):`, err);
+      }
+    }
+    if (attempt < maxAttempts) {
+      await new Promise(r => setTimeout(r, 1500));
+    }
+  }
+
+  return false;
 }

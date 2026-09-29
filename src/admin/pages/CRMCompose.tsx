@@ -298,9 +298,13 @@ export const CRMCompose: React.FC = () => {
         }
       };
 
+      const apiKey = import.meta.env.VITE_API_SECRET_KEY || '';
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (apiKey) headers['X-API-Key'] = apiKey;
+
       const res = await fetch(`${API_BASE_URL}/api/send-crm-email`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(payload)
       });
 
@@ -351,9 +355,13 @@ export const CRMCompose: React.FC = () => {
         targetEmail: target
       };
 
+      const apiKey = import.meta.env.VITE_API_SECRET_KEY || '';
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (apiKey) headers['X-API-Key'] = apiKey;
+
       const res = await fetch(`${API_BASE_URL}/api/test-crm-smtp`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(payload)
       });
 

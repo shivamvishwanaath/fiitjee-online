@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Sparkles, 
@@ -13,23 +13,31 @@ import {
   Mail, 
   School,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  Loader2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { FiitjeeLogo } from './FiitjeeLogo';
+import { getCentreExamById, CentreExamConfig } from '../admin/utils/examUtils';
 
 interface FtreRegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
   preselectedProgramId?: string;
+  examId?: string;
+  centreId?: string;
 }
 
 export const FtreRegistrationModal: React.FC<FtreRegistrationModalProps> = ({
   isOpen,
   onClose,
-  preselectedProgramId
+  preselectedProgramId,
+  examId = 'ftre-2026',
+  centreId = 'bhubaneswar'
 }) => {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [examConfig, setExamConfig] = useState<CentreExamConfig | null>(null);
+  const [loadingConfig, setLoadingConfig] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     studentName: '',
     parentName: '',
@@ -43,6 +51,26 @@ export const FtreRegistrationModal: React.FC<FtreRegistrationModalProps> = ({
     centerName: 'FIITJEE South Delhi (Kalu Sarai)',
     couponCode: 'FIITJEE2026'
   });
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let isMounted = true;
+    setLoadingConfig(true);
+    getCentreExamById(centreId, examId)
+      .then((cfg) => {
+        if (isMounted && cfg) {
+          setExamConfig(cfg);
+          if (cfg.testDates && cfg.testDates.length > 0) {
+            setFormData(prev => ({ ...prev, testDate: cfg.testDates[0] }));
+          }
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (isMounted) setLoadingConfig(false);
+      });
+    return () => { isMounted = false; };
+  }, [isOpen, centreId, examId]);
 
   const [generatedAdmitCard, setGeneratedAdmitCard] = useState<{
     rollNo: string;

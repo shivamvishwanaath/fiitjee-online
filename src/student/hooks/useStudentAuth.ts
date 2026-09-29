@@ -15,20 +15,33 @@ import { auth, db } from '../../firebase';
 import { StudentProfile } from '../../types';
 
 /**
- * Searches the Realtime Database registrations across all centres for an email, phone, or roll number
+ * Searches the Realtime Database registrations across centres for an email, phone, or roll number
  */
-async function findRegistrationInDatabase(identifier: string): Promise<{ reg: any; centreId: string } | null> {
+export async function findRegistrationInDatabase(identifier: string): Promise<{ reg: any; centreId: string } | null> {
   const clean = identifier.trim().toLowerCase();
   const cleanDigits = identifier.replace(/\D/g, '');
   const cleanRoll = identifier.replace(/\s+/g, '').toLowerCase();
 
-  try {
-    const snap = await get(ref(db, 'registrations/big_bang_2026'));
-    if (!snap.exists()) return null;
-    const centresData = snap.val();
+  const centreIds = ['bhubaneswar', 'dwarka', 'ranchi', 'hyderabad'];
 
-    for (const [centreId, regs] of Object.entries(centresData)) {
+  try {
+    for (const centreId of centreIds) {
+      // 1. Direct roll number key lookup if identifier looks like roll number
+      if (cleanRoll.length >= 6) {
+        const directSnap = await get(ref(db, `registrations/big_bang_2026/${centreId}/${cleanRoll}`));
+        if (directSnap.exists()) {
+          return { reg: directSnap.val(), centreId };
+        }
+      }
+
+      // 2. Fetch specific centre registrations node
+      const centreRef = ref(db, `registrations/big_bang_2026/${centreId}`);
+      const snap = await get(centreRef);
+      if (!snap.exists()) continue;
+
+      const regs = snap.val();
       if (!regs || typeof regs !== 'object') continue;
+
       for (const reg of Object.values(regs as any)) {
         if (!reg || typeof reg !== 'object') continue;
         const r = reg as any;
@@ -57,6 +70,23 @@ async function findRegistrationInDatabase(identifier: string): Promise<{ reg: an
   return null;
 }
 
+let activeRecaptchaVerifier: RecaptchaVerifier | null = null;
+
+export function clearStudentRecaptcha() {
+  if (activeRecaptchaVerifier) {
+    try {
+      activeRecaptchaVerifier.clear();
+    } catch {}
+    activeRecaptchaVerifier = null;
+  }
+  if (typeof window !== 'undefined' && (window as any).studentRecaptchaVerifier) {
+    try {
+      (window as any).studentRecaptchaVerifier.clear();
+    } catch {}
+    delete (window as any).studentRecaptchaVerifier;
+  }
+}
+
 export function useStudentAuth() {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [student, setStudent] = useState<StudentProfile | null>(null);
@@ -64,9 +94,18 @@ export function useStudentAuth() {
 
   // Fetch or sync student profile from RTDB
   useEffect(() => {
+    let isCancelled = false;
+    let unsubscribeDb: (() => void) | null = null;
+
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      if (isCancelled) return;
       setFirebaseUser(currentUser);
+
       if (!currentUser) {
+        if (unsubscribeDb) {
+          unsubscribeDb();
+          unsubscribeDb = null;
+        }
         setStudent(null);
         setLoading(false);
         return;
@@ -74,6 +113,10 @@ export function useStudentAuth() {
 
       // Check if this is an admin account (do not treat as student)
       if (currentUser.email && currentUser.email.endsWith('@fiitjee.online') && !currentUser.email.includes('@candidate.fiitjee.online')) {
+        if (unsubscribeDb) {
+          unsubscribeDb();
+          unsubscribeDb = null;
+        }
         setStudent(null);
         setLoading(false);
         return;
@@ -81,14 +124,21 @@ export function useStudentAuth() {
 
       try {
         const studentRef = ref(db, `students/${currentUser.uid}`);
+        if (unsubscribeDb) {
+          unsubscribeDb();
+        }
+
         // Subscribe to real-time updates of student profile
-        const unsubscribeDb = onValue(studentRef, async (snapshot) => {
+        unsubscribeDb = onValue(studentRef, async (snapshot) => {
+          if (isCancelled) return;
+
           if (snapshot.exists()) {
             setStudent({ uid: currentUser.uid, ...snapshot.val() });
           } else {
             // If profile does not exist yet, check if there is an existing registration by phone or email
             const phoneOrEmail = currentUser.phoneNumber || currentUser.email || '';
             const found = phoneOrEmail ? await findRegistrationInDatabase(phoneOrEmail) : null;
+            if (isCancelled) return;
 
             let initialProfile: StudentProfile;
             if (found && found.reg) {
@@ -103,6 +153,7 @@ export function useStudentAuth() {
                 preferredCentreId: found.centreId,
                 createdAt: found.reg.registeredAt || new Date().toISOString(),
                 lastLoginAt: new Date().toISOString(),
+                lastLoginMethod: currentUser.phoneNumber ? 'phone_otp' : 'email',
                 registeredExams: {
                   big_bang_2026: {
                     examId: found.reg.examId || 'big_bang_2026',
@@ -131,23 +182,30 @@ export function useStudentAuth() {
                 currentClass: 'Class X',
                 schoolName: '',
                 createdAt: new Date().toISOString(),
-                lastLoginAt: new Date().toISOString()
+                lastLoginAt: new Date().toISOString(),
+                lastLoginMethod: currentUser.phoneNumber ? 'phone_otp' : 'email'
               };
             }
             await set(studentRef, initialProfile);
-            setStudent(initialProfile);
+            if (!isCancelled) {
+              setStudent(initialProfile);
+            }
           }
-          setLoading(false);
+          if (!isCancelled) {
+            setLoading(false);
+          }
         });
-
-        return () => unsubscribeDb();
       } catch (err) {
         console.error('Error fetching student profile:', err);
-        setLoading(false);
+        if (!isCancelled) setLoading(false);
       }
     });
 
-    return () => unsubscribeAuth();
+    return () => {
+      isCancelled = true;
+      if (unsubscribeDb) unsubscribeDb();
+      unsubscribeAuth();
+    };
   }, []);
 
   const login = async (email: string, pass: string): Promise<void> => {
@@ -157,7 +215,10 @@ export function useStudentAuth() {
         const cred = await signInWithEmailAndPassword(auth, email.trim(), pass);
         if (cred.user) {
           const studentRef = ref(db, `students/${cred.user.uid}`);
-          await update(studentRef, { lastLoginAt: new Date().toISOString() });
+          await update(studentRef, { 
+            lastLoginAt: new Date().toISOString(),
+            lastLoginMethod: 'email'
+          });
         }
         return;
       } catch (authErr: any) {
@@ -241,45 +302,60 @@ export function useStudentAuth() {
       try {
         const cred = await signInWithEmailAndPassword(auth, authEmail, authPass);
         userUid = cred.user.uid;
-      } catch {
-        // First-time candidate login - create the deterministic Firebase Auth account
-        const cred = await createUserWithEmailAndPassword(auth, authEmail, authPass);
-        userUid = cred.user.uid;
-        await updateFirebaseProfile(cred.user, { displayName: found.reg.studentName });
+      } catch (authErr: any) {
+        // Only provision account if user not found or invalid credentials
+        if (authErr.code === 'auth/user-not-found' || authErr.code === 'auth/invalid-credential') {
+          const cred = await createUserWithEmailAndPassword(auth, authEmail, authPass);
+          userUid = cred.user.uid;
+          await updateFirebaseProfile(cred.user, { displayName: found.reg.studentName });
+        } else {
+          throw authErr;
+        }
       }
 
-      const fullProfile: StudentProfile = {
-        uid: userUid,
-        fullName: found.reg.studentName,
-        parentName: found.reg.parentName || '',
-        email: found.reg.email || '',
-        phone: found.reg.phone || '',
-        currentClass: found.reg.currentClass || 'Class X',
-        schoolName: found.reg.schoolName || '',
-        preferredCentreId: found.centreId,
-        createdAt: found.reg.registeredAt || new Date().toISOString(),
-        lastLoginAt: new Date().toISOString(),
-        registeredExams: {
-          big_bang_2026: {
-            examId: found.reg.examId || 'big_bang_2026',
-            examName: 'Big Bang Edge Test 2026',
-            rollNo: found.reg.rollNo,
-            centreId: found.centreId,
-            selectedCenter: found.reg.selectedCenter,
-            testDate: found.reg.testDate,
-            testMode: found.reg.testMode,
-            registeredAt: found.reg.registeredAt,
-            paymentStatus: found.reg.paymentStatus,
-            paymentAmount: found.reg.paymentAmount,
-            paymentRef: found.reg.paymentRef,
-            invoiceNo: found.reg.invoiceNo,
-            sid: found.reg.sid
+      // Check if student profile already exists in RTDB (Phase 2.1)
+      const studentSnap = await get(ref(db, `students/${userUid}`));
+      if (studentSnap.exists()) {
+        await update(ref(db, `students/${userUid}`), {
+          lastLoginAt: new Date().toISOString(),
+          lastLoginMethod: 'roll_phone'
+        });
+        setStudent({ uid: userUid, ...studentSnap.val(), lastLoginAt: new Date().toISOString(), lastLoginMethod: 'roll_phone' });
+      } else {
+        const fullProfile: StudentProfile = {
+          uid: userUid,
+          fullName: found.reg.studentName,
+          parentName: found.reg.parentName || '',
+          email: found.reg.email || '',
+          phone: found.reg.phone || '',
+          currentClass: found.reg.currentClass || 'Class X',
+          schoolName: found.reg.schoolName || '',
+          preferredCentreId: found.centreId,
+          createdAt: found.reg.registeredAt || new Date().toISOString(),
+          lastLoginAt: new Date().toISOString(),
+          lastLoginMethod: 'roll_phone',
+          registeredExams: {
+            big_bang_2026: {
+              examId: found.reg.examId || 'big_bang_2026',
+              examName: 'Big Bang Edge Test 2026',
+              rollNo: found.reg.rollNo,
+              centreId: found.centreId,
+              selectedCenter: found.reg.selectedCenter,
+              testDate: found.reg.testDate,
+              testMode: found.reg.testMode,
+              registeredAt: found.reg.registeredAt,
+              paymentStatus: found.reg.paymentStatus,
+              paymentAmount: found.reg.paymentAmount,
+              paymentRef: found.reg.paymentRef,
+              invoiceNo: found.reg.invoiceNo,
+              sid: found.reg.sid
+            }
           }
-        }
-      };
+        };
 
-      await set(ref(db, `students/${userUid}`), fullProfile);
-      setStudent(fullProfile);
+        await set(ref(db, `students/${userUid}`), fullProfile);
+        setStudent(fullProfile);
+      }
     } finally {
       setLoading(false);
     }
@@ -356,14 +432,7 @@ export function useStudentAuth() {
    * Initializes invisible or normal reCAPTCHA for phone number verification
    */
   const setupRecaptcha = (containerId: string, size: 'invisible' | 'normal' = 'invisible'): RecaptchaVerifier => {
-    // Clear any previous verifier instance to prevent duplicate widget errors
-    if ((window as any).studentRecaptchaVerifier) {
-      try {
-        (window as any).studentRecaptchaVerifier.clear();
-      } catch (e) {
-        console.warn('Error clearing previous recaptcha verifier:', e);
-      }
-    }
+    clearStudentRecaptcha();
     const verifier = new RecaptchaVerifier(auth, containerId, {
       size,
       callback: () => {
@@ -373,7 +442,10 @@ export function useStudentAuth() {
         console.warn('Phone auth reCAPTCHA expired. User should try again.');
       }
     });
-    (window as any).studentRecaptchaVerifier = verifier;
+    activeRecaptchaVerifier = verifier;
+    if (typeof window !== 'undefined') {
+      (window as any).studentRecaptchaVerifier = verifier;
+    }
     return verifier;
   };
 
@@ -401,6 +473,12 @@ export function useStudentAuth() {
     setLoading(true);
     try {
       const cred = await confirmationResult.confirm(verificationCode.trim());
+      try {
+        await update(ref(db, `students/${cred.user.uid}`), {
+          lastLoginAt: new Date().toISOString(),
+          lastLoginMethod: 'phone_otp'
+        });
+      } catch {}
       return cred.user;
     } finally {
       setLoading(false);
@@ -415,6 +493,7 @@ export function useStudentAuth() {
     login,
     loginWithRollOrPhone,
     setupRecaptcha,
+    clearRecaptcha: clearStudentRecaptcha,
     sendPhoneOtp,
     verifyPhoneOtp,
     signup,

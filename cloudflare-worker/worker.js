@@ -12,16 +12,32 @@ const API_VERSION = '2023-08-01';
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-client-id',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-client-id, X-API-Key',
   'Access-Control-Max-Age': '86400',
 };
 
-const DEFAULT_PASSWORDS = {
-  'fiitjee.dwarka@fiitjee.online': 'Fiitjee@dwarka2026!',
-  'fiitjee.bhubaneswar@fiitjee.online': 'password123',
-  'fiitjee.ranchi@fiitjee.online': 'password123',
-  'fiitjee.hyderabad@fiitjee.online': 'password123',
-};
+function getCentrePassword(cleanSender, env) {
+  if (!cleanSender || !env) return env?.SMTP_DEFAULT_PASS || '';
+  const domainPrefix = cleanSender.split('@')[0] || '';
+  const branchKey = domainPrefix.replace(/^fiitjee\./i, '').toUpperCase();
+  const secretKey = `ADMIN_PASS_${branchKey}`;
+  if (env[secretKey]) return env[secretKey];
+  const fullKey = `SMTP_PASS_${cleanSender.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}`;
+  if (env[fullKey]) return env[fullKey];
+  if (env.DEFAULT_PASSWORDS) {
+    try {
+      const parsed = typeof env.DEFAULT_PASSWORDS === 'string' ? JSON.parse(env.DEFAULT_PASSWORDS) : env.DEFAULT_PASSWORDS;
+      if (parsed && parsed[cleanSender]) return parsed[cleanSender];
+    } catch {}
+  }
+  return env.SMTP_DEFAULT_PASS || '';
+}
+
+function isAuthorizedRequest(request, env) {
+  if (!env || !env.API_SECRET_KEY) return true; // Optional during transition
+  const apiKey = request.headers.get('X-API-Key');
+  return apiKey === env.API_SECRET_KEY;
+}
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -391,6 +407,10 @@ export default {
     // 3. Test Centre SMTP Connection
     if (path.endsWith('/api/test-crm-smtp') && request.method === 'POST') {
       try {
+        if (!isAuthorizedRequest(request, env)) {
+          return jsonResponse({ error: 'Unauthorized request: Invalid or missing API Key' }, 401);
+        }
+
         const body = await request.json().catch(() => ({}));
         const { senderEmail, senderName, customPassword, targetEmail } = body;
 
@@ -399,7 +419,7 @@ export default {
           return jsonResponse({ error: 'senderEmail is required' }, 400);
         }
 
-        const pass = customPassword || DEFAULT_PASSWORDS[cleanSender] || env.SMTP_DEFAULT_PASS || 'password123';
+        const pass = customPassword || getCentrePassword(cleanSender, env);
         const target = (targetEmail || cleanSender).trim();
 
         const result = await sendSmtpEmailOverSocket({
@@ -445,6 +465,10 @@ export default {
     // 4. Dispatch CRM Campaign Emails
     if (path.endsWith('/api/send-crm-email') && request.method === 'POST') {
       try {
+        if (!isAuthorizedRequest(request, env)) {
+          return jsonResponse({ error: 'Unauthorized request: Invalid or missing API Key' }, 401);
+        }
+
         const body = await request.json().catch(() => ({}));
         const {
           senderEmail,
@@ -462,7 +486,7 @@ export default {
           return jsonResponse({ error: 'Missing required parameters (senderEmail, recipients, subject, bodyTemplate)' }, 400);
         }
 
-        const pass = customPassword || DEFAULT_PASSWORDS[cleanSender] || env.SMTP_DEFAULT_PASS || 'password123';
+        const pass = customPassword || getCentrePassword(cleanSender, env);
         const host = env.SMTP_HOST || 'smtp.fiitjee.online';
         const port = parseInt(env.SMTP_PORT || '465', 10);
 

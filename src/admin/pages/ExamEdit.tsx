@@ -173,8 +173,15 @@ export const ExamEdit: React.FC<ExamEditProps> = ({ isNew = false }) => {
     setSaving(true);
 
     try {
-      if (isNew && !form.id.trim()) {
+      const cleanId = form.id.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+      if (!cleanId) {
         throw new Error('Please specify an Exam Identification Code.');
+      }
+      if (isNew) {
+        const existing = await getCentreExamById(activeCentreId, cleanId);
+        if (existing) {
+          throw new Error(`An exam blueprint with ID "${cleanId}" already exists for ${centre?.name || 'this'} centre. Please use a unique ID.`);
+        }
       }
       if (form.testDates.length === 0) {
         throw new Error('Please add at least one examination test date.');
@@ -182,6 +189,7 @@ export const ExamEdit: React.FC<ExamEditProps> = ({ isNew = false }) => {
 
       await saveCentreExam({
         ...form,
+        id: cleanId,
         centreId: activeCentreId,
         lastUpdatedBy: user?.email || 'admin@fiitjee.online'
       });
@@ -270,6 +278,22 @@ export const ExamEdit: React.FC<ExamEditProps> = ({ isNew = false }) => {
 
           {/* Basic Fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="sm:col-span-2">
+              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Exam Identification Code (URL Key) * {!isNew && <span className="text-slate-400 font-normal lowercase">(Locked for existing exam)</span>}
+              </label>
+              <input
+                type="text"
+                required
+                disabled={!isNew}
+                value={form.id}
+                onChange={(e) => setForm({ ...form, id: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '-') })}
+                placeholder="e.g. big-bang-edge-test or ftre-2026"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 outline-none focus:ring-2 focus:ring-[#002147] disabled:bg-slate-100 disabled:text-slate-500"
+              />
+              <p className="text-[10px] text-slate-400 mt-1">Unique alphanumeric identifier (e.g. big-bang-edge-test) used for registrations.</p>
+            </div>
+
             <div>
               <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Exam Title *
