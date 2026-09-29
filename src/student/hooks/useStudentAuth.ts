@@ -571,6 +571,51 @@ export function useStudentAuth() {
     }
   };
 
+  /**
+   * Registers a student profile following successful phone OTP confirmation
+   */
+  const completePhoneSignup = async (
+    user: User,
+    profileData: Omit<StudentProfile, 'uid' | 'createdAt'>
+  ): Promise<string> => {
+    setLoading(true);
+    try {
+      const uid = user.uid;
+      const cleanPhone = (profileData.phone || user.phoneNumber || '').replace(/\D/g, '');
+      const cleanEmail = (profileData.email || user.email || '').trim().toLowerCase();
+
+      await updateFirebaseProfile(user, {
+        displayName: profileData.fullName.trim()
+      });
+
+      const fullProfile: StudentProfile = {
+        uid,
+        ...profileData,
+        fullName: profileData.fullName.trim(),
+        parentName: profileData.parentName.trim(),
+        email: cleanEmail,
+        phone: cleanPhone,
+        schoolName: profileData.schoolName.trim(),
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+        lastLoginMethod: 'phone_otp'
+      };
+
+      const studentRef = ref(db, `students/${uid}`);
+      await set(studentRef, fullProfile);
+
+      if (fullProfile.preferredCentreId) {
+        const indexRef = ref(db, `student_centre_index/${fullProfile.preferredCentreId}/${uid}`);
+        await set(indexRef, true);
+      }
+
+      setStudent(fullProfile);
+      return uid;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     firebaseUser,
     student,
@@ -582,6 +627,7 @@ export function useStudentAuth() {
     clearRecaptcha: clearStudentRecaptcha,
     sendPhoneOtp,
     verifyPhoneOtp,
+    completePhoneSignup,
     signup,
     logout,
     updateStudentProfile
