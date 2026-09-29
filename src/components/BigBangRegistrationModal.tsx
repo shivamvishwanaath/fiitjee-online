@@ -16,8 +16,10 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { ref, push, set, get, query, orderByChild, equalTo } from 'firebase/database';
-import { db } from '../firebase';
+import { ref, push, set, get, query, orderByChild, equalTo, update } from 'firebase/database';
+import { db, auth, firebaseConfig } from '../firebase';
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { BIG_BANG_EXAM, getRegistrationFeeForClass } from '../data/examsData';
 import { ExamRegistration } from '../types';
 import { FiitjeeLogo } from './FiitjeeLogo';
@@ -258,10 +260,33 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
       }
 
       const effectiveTestCentreCode = (centreId === 'ranchi' && formData.testCentreCode) ? formData.testCentreCode : selectedCentreProfile.testCentreCode;
+      const seqSuffix = Date.now().toString().slice(-4);
       const rollNo = assignedRollNo || generateRollNumber(selectedCentreProfile, formData.testDate, nextSeq, effectiveTestCentreCode, formData.currentClass);
       if (!assignedRollNo) setAssignedRollNo(rollNo);
       const sid = generateSID(rollNo);
       const invoiceNo = generateInvoiceNumber(selectedCentreProfile, rollNo);
+
+      let effectiveStudentUid = student?.uid || auth.currentUser?.uid || '';
+      const cleanEmail = formData.email.trim().toLowerCase();
+      const defaultPassword = 'Fiitjee@2026';
+
+      // If candidate is not currently logged in, auto-provision their student account in Firebase Auth
+      if (!effectiveStudentUid && cleanEmail) {
+        try {
+          const secondaryApp = getApps().find(a => a.name === 'SecondaryStudentRegistrar') 
+            || initializeApp(firebaseConfig, 'SecondaryStudentRegistrar');
+          const secondaryAuth = getAuth(secondaryApp);
+          try {
+            const userCred = await createUserWithEmailAndPassword(secondaryAuth, cleanEmail, defaultPassword);
+            effectiveStudentUid = userCred.user.uid;
+            await signOut(secondaryAuth);
+          } catch (authErr: any) {
+            console.log('Student account registration notice:', authErr.code);
+          }
+        } catch (e) {
+          console.warn('Could not initialize secondary auth for online registration:', e);
+        }
+      }
 
       const payload: ExamRegistration = {
         examId: BIG_BANG_EXAM.id,
@@ -287,17 +312,33 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
         cashfreePaymentId: paymentData.cashfreePaymentId || '',
         couponCodeApplied: paymentData.couponCodeApplied || '',
         discountAmount: Number(paymentData.discountAmount) || 0,
-        paymentRef: paymentData.cashfreePaymentId ? `CF-${paymentData.cashfreePaymentId}` : `${selectedCentreProfile.numericCode}/ADM-${seqSuffix}`
+        paymentRef: paymentData.paymentRef || (paymentData.cashfreePaymentId ? `CF-${paymentData.cashfreePaymentId}` : `${selectedCentreProfile.numericCode}/ADM-${seqSuffix}`),
+        studentUid: effectiveStudentUid || undefined
       };
 
       const cleanRollKey = rollNo.replace(/\s+/g, '_');
       const dbRef = ref(db, `${BIG_BANG_EXAM.registrationDbPath}/${centreId}/${cleanRollKey}`);
       await set(dbRef, sanitizeForFirebase(payload));
 
-      // Link registration to authenticated student profile
-      if (student?.uid) {
+      // Link registration to authenticated or newly provisioned student profile
+      if (effectiveStudentUid) {
         try {
-          const studentExamLinkRef = ref(db, `students/${student.uid}/registeredExams/big_bang_2026`);
+          const studentProfileRef = ref(db, `students/${effectiveStudentUid}`);
+          await update(studentProfileRef, sanitizeForFirebase({
+            uid: effectiveStudentUid,
+            fullName: formData.studentName.trim(),
+            parentName: formData.parentName.trim(),
+            email: cleanEmail,
+            phone: formData.phone.trim(),
+            currentClass: formData.currentClass,
+            schoolName: formData.schoolName.trim(),
+            city: selectedCentreProfile.name,
+            preferredCentreId: centreId,
+            profileStatus: 'Official candidate profile. Logon to www.fiitjee.online to update details',
+            registeredAt: new Date().toISOString()
+          }));
+
+          const studentExamLinkRef = ref(db, `students/${effectiveStudentUid}/registeredExams/big_bang_2026`);
           await set(studentExamLinkRef, sanitizeForFirebase({
             examId: BIG_BANG_EXAM.id,
             examName: BIG_BANG_EXAM.name,
@@ -315,9 +356,18 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
           }));
 
           // Ensure student is also indexed under this centre in CRM
-          await set(ref(db, `student_centre_index/${centreId}/${student.uid}`), true);
+          await set(ref(db, `student_centre_index/${centreId}/${effectiveStudentUid}`), true);
         } catch (linkErr) {
           console.error("Error linking exam to student profile:", linkErr);
+        }
+
+        // If no user is logged in on primary auth, automatically sign them in
+        if (!auth.currentUser && cleanEmail) {
+          try {
+            await signInWithEmailAndPassword(auth, cleanEmail, defaultPassword);
+          } catch {
+            // Safe ignore if password differs
+          }
         }
       }
 
@@ -777,6 +827,20 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
           {/* STEP 5: Official Authentic Hall Ticket & Tax Invoice */}
           {step === 5 && registration && (
             <div className="space-y-4 animate-in zoom-in-95 duration-300 flex flex-col flex-1 overflow-hidden">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shrink-0">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-emerald-900">Student Portal Account Active</div>
+                    <div className="text-emerald-700 text-[11px]">
+                      Access your dashboard using Roll No <strong className="font-mono text-emerald-950">{registration.rollNo}</strong> or Email with default password <strong className="font-mono text-emerald-950">Fiitjee@2026</strong>.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="overflow-y-auto max-h-[70vh] border border-slate-300 rounded-xl p-2 sm:p-4 bg-slate-100">
                 <OfficialHallTicket registration={registration} />
               </div>

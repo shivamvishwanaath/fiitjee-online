@@ -95,7 +95,7 @@ export const AddRegistration: React.FC = () => {
           const secondaryApp = getApps().find(a => a.name === 'SecondaryStudentRegistrar') 
             || initializeApp(firebaseConfig, 'SecondaryStudentRegistrar');
           const secondaryAuth = getAuth(secondaryApp);
-          const tempPassword = 'Fiitjee@' + Math.random().toString(36).slice(-8) + '2026';
+          const tempPassword = 'Fiitjee@2026';
           try {
             const userCred = await createUserWithEmailAndPassword(secondaryAuth, cleanEmail, tempPassword);
             studentUid = userCred.user.uid;

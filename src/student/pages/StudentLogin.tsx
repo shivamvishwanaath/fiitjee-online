@@ -362,6 +362,9 @@ export const StudentLogin: React.FC = () => {
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
+                      <p className="text-[10px] text-slate-500 mt-1.5">
+                        Default password for test registrations: <strong className="font-mono text-slate-800">Fiitjee@2026</strong>. Or use "Roll No / Mobile" above.
+                      </p>
                     </div>
 
                     <button
