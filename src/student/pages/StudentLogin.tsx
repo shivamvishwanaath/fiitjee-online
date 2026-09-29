@@ -17,7 +17,8 @@ import {
   ChevronLeft,
   Hash,
   X,
-  KeyRound
+  KeyRound,
+  AlertCircle
 } from 'lucide-react';
 import { sendPasswordResetEmail, ConfirmationResult } from 'firebase/auth';
 import { auth } from '../../firebase';
@@ -86,6 +87,8 @@ export const StudentLogin: React.FC = () => {
 
   const hasRegisterEmail = registerData.email.trim().length > 0;
   const hasRegisterPhone = registerData.phone.replace(/\D/g, '').length > 0;
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [updatesOptIn, setUpdatesOptIn] = useState(false);
 
   // If already authenticated, redirect
   React.useEffect(() => {
@@ -312,6 +315,11 @@ export const StudentLogin: React.FC = () => {
       return;
     }
 
+    if (!termsAccepted || !updatesOptIn) {
+      setErrorMessage('You must accept the Terms & Conditions and opt in for examination notifications to complete your registration.');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -377,6 +385,32 @@ export const StudentLogin: React.FC = () => {
             <p className="text-xs text-slate-300 mt-1 max-w-md mx-auto">
               Sign in to manage admission tests, register for Big Bang Edge Test 2026, and access your Official Hall Ticket.
             </p>
+
+            {/* Purpose & Privileges of Registering a Student Account */}
+            <div className="mt-4 p-3.5 bg-slate-900/75 border border-slate-700/80 rounded-2xl text-left max-w-lg mx-auto shadow-inner">
+              <div className="text-[11px] font-black uppercase tracking-wider text-amber-400 mb-2 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span>Purpose & Key Privileges of Student Portal Registration</span>
+              </div>
+              <ul className="space-y-1.5 text-[11px] text-slate-200 leading-snug">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>1-Click Future Registrations:</strong> Apply for all upcoming FIITJEE admission tests & diagnostic exams without filling personal credentials again.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>Instant Results & AIR Analytics:</strong> View All India Ranks (AIR), state percentiles, subject breakdowns, and download scholarship qualification certificates.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>Real-Time Exam & Admission Alerts:</strong> Receive automatic notifications via SMS and Email regarding test dates, syllabus revisions, test centers, and counselling sessions.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>Digital Hall Ticket Vault:</strong> Permanent, secure student dashboard to retrieve, reprint, and verify your Official Hall Tickets and GST tax receipts anytime.</span>
+                </li>
+              </ul>
+            </div>
 
             {/* Mode Switcher Tabs */}
             <div className="flex bg-slate-900/60 p-1 rounded-xl max-w-xs mx-auto mt-6 border border-slate-700">
@@ -726,6 +760,19 @@ export const StudentLogin: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Prominent Mandatory Choice Directive */}
+                <div className="p-3.5 sm:p-4 bg-amber-50/90 border-2 border-amber-300/90 rounded-2xl flex items-start gap-3 text-amber-900 shadow-xs">
+                  <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <div className="font-black text-amber-950 uppercase tracking-wider text-[11px] sm:text-xs">
+                      Mandatory Registration Requirement: Email OR Mobile Number
+                    </div>
+                    <p className="text-xs text-amber-900 font-medium leading-relaxed">
+                      Please enter <strong>either your Email Address OR your 10-Digit Mobile Number</strong>. Exactly one of them is mandatory for registration. You do not need both (although entering both provides full login access).
+                    </p>
+                  </div>
+                </div>
+
                 {/* Email / Mobile Choice Dynamic Indicator */}
                 <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-3.5 space-y-1.5 transition-all">
                   <div className="flex items-center justify-between text-xs">
@@ -789,8 +836,7 @@ export const StudentLogin: React.FC = () => {
                     <div className="relative">
                       <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
-                        type="email"
-                        required={!hasRegisterPhone}
+                        type="text"
                         placeholder={hasRegisterPhone ? "e.g. student@gmail.com (optional)" : "e.g. student@gmail.com"}
                         value={registerData.email}
                         onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
@@ -822,7 +868,6 @@ export const StudentLogin: React.FC = () => {
                       <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="tel"
-                        required={!hasRegisterEmail}
                         maxLength={10}
                         placeholder={hasRegisterEmail ? "e.g. 9876543210 (optional)" : "e.g. 9876543210"}
                         value={registerData.phone}
@@ -927,10 +972,52 @@ export const StudentLogin: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Mandatory Consent & Agreement Checkboxes */}
+                <div className="space-y-3 pt-3 border-t border-slate-200">
+                  <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 select-none">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded border-slate-300 text-[#ED1C24] focus:ring-[#ED1C24] cursor-pointer shrink-0"
+                    />
+                    <span className="leading-snug">
+                      I have read, understood, and unconditionally agree to the{' '}
+                      <a href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="text-[#002147] font-bold underline hover:text-[#ED1C24]">
+                        Terms & Conditions
+                      </a>
+                      ,{' '}
+                      <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[#002147] font-bold underline hover:text-[#ED1C24]">
+                        Privacy Policy
+                      </a>
+                      , and candidate testing covenants. <span className="text-[#ED1C24] font-bold">*</span>
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 select-none">
+                    <input
+                      type="checkbox"
+                      checked={updatesOptIn}
+                      onChange={(e) => setUpdatesOptIn(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded border-slate-300 text-[#ED1C24] focus:ring-[#ED1C24] cursor-pointer shrink-0"
+                    />
+                    <span className="leading-snug">
+                      I expressly opt in and consent to receive critical examination alerts, Hall Ticket issuances, scorecards, scholarship results, and admission notifications via Email and SMS / WhatsApp carrier dispatch. <span className="text-[#ED1C24] font-bold">*</span>
+                    </span>
+                  </label>
+
+                  {(!termsAccepted || !updatesOptIn) && (
+                    <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2 text-[11px] text-amber-800 font-semibold">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>Both checkboxes above are mandatory to complete registration.</span>
+                    </div>
+                  )}
+                </div>
+
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 mt-2"
+                  disabled={submitting || !termsAccepted || !updatesOptIn}
+                  className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                 >
                   {submitting ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
