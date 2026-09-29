@@ -5,7 +5,10 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut,
-  updateProfile as updateFirebaseProfile
+  updateProfile as updateFirebaseProfile,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  ConfirmationResult
 } from 'firebase/auth';
 import { ref, set, update, onValue, remove, get } from 'firebase/database';
 import { auth, db } from '../../firebase';
@@ -79,22 +82,60 @@ export function useStudentAuth() {
       try {
         const studentRef = ref(db, `students/${currentUser.uid}`);
         // Subscribe to real-time updates of student profile
-        const unsubscribeDb = onValue(studentRef, (snapshot) => {
+        const unsubscribeDb = onValue(studentRef, async (snapshot) => {
           if (snapshot.exists()) {
             setStudent({ uid: currentUser.uid, ...snapshot.val() });
           } else {
-            // If profile does not exist yet, create a minimal profile
-            const minimal: StudentProfile = {
-              uid: currentUser.uid,
-              fullName: currentUser.displayName || 'Candidate',
-              parentName: '',
-              email: currentUser.email || '',
-              phone: currentUser.phoneNumber || '',
-              currentClass: 'Class X',
-              schoolName: '',
-              createdAt: new Date().toISOString()
-            };
-            set(studentRef, minimal).then(() => setStudent(minimal));
+            // If profile does not exist yet, check if there is an existing registration by phone or email
+            const phoneOrEmail = currentUser.phoneNumber || currentUser.email || '';
+            const found = phoneOrEmail ? await findRegistrationInDatabase(phoneOrEmail) : null;
+
+            let initialProfile: StudentProfile;
+            if (found && found.reg) {
+              initialProfile = {
+                uid: currentUser.uid,
+                fullName: found.reg.studentName || currentUser.displayName || 'Candidate',
+                parentName: found.reg.parentName || '',
+                email: (found.reg.email || currentUser.email || '').trim().toLowerCase(),
+                phone: found.reg.phone || currentUser.phoneNumber || '',
+                currentClass: found.reg.currentClass || 'Class X',
+                schoolName: found.reg.schoolName || '',
+                preferredCentreId: found.centreId,
+                createdAt: found.reg.registeredAt || new Date().toISOString(),
+                lastLoginAt: new Date().toISOString(),
+                registeredExams: {
+                  big_bang_2026: {
+                    examId: found.reg.examId || 'big_bang_2026',
+                    examName: 'Big Bang Edge Test 2026',
+                    rollNo: found.reg.rollNo,
+                    centreId: found.centreId,
+                    selectedCenter: found.reg.selectedCenter,
+                    testDate: found.reg.testDate,
+                    testMode: found.reg.testMode,
+                    registeredAt: found.reg.registeredAt,
+                    paymentStatus: found.reg.paymentStatus,
+                    paymentAmount: found.reg.paymentAmount,
+                    paymentRef: found.reg.paymentRef,
+                    invoiceNo: found.reg.invoiceNo,
+                    sid: found.reg.sid
+                  }
+                }
+              };
+            } else {
+              initialProfile = {
+                uid: currentUser.uid,
+                fullName: currentUser.displayName || 'Candidate',
+                parentName: '',
+                email: currentUser.email || '',
+                phone: currentUser.phoneNumber || '',
+                currentClass: 'Class X',
+                schoolName: '',
+                createdAt: new Date().toISOString(),
+                lastLoginAt: new Date().toISOString()
+              };
+            }
+            await set(studentRef, initialProfile);
+            setStudent(initialProfile);
           }
           setLoading(false);
         });
@@ -311,6 +352,61 @@ export function useStudentAuth() {
     }
   };
 
+  /**
+   * Initializes invisible or normal reCAPTCHA for phone number verification
+   */
+  const setupRecaptcha = (containerId: string, size: 'invisible' | 'normal' = 'invisible'): RecaptchaVerifier => {
+    // Clear any previous verifier instance to prevent duplicate widget errors
+    if ((window as any).studentRecaptchaVerifier) {
+      try {
+        (window as any).studentRecaptchaVerifier.clear();
+      } catch (e) {
+        console.warn('Error clearing previous recaptcha verifier:', e);
+      }
+    }
+    const verifier = new RecaptchaVerifier(auth, containerId, {
+      size,
+      callback: () => {
+        // reCAPTCHA solved - allow signInWithPhoneNumber
+      },
+      'expired-callback': () => {
+        console.warn('Phone auth reCAPTCHA expired. User should try again.');
+      }
+    });
+    (window as any).studentRecaptchaVerifier = verifier;
+    return verifier;
+  };
+
+  /**
+   * Dispatches SMS OTP to student's mobile number via native Firebase Authentication
+   */
+  const sendPhoneOtp = async (phone: string, appVerifier: RecaptchaVerifier): Promise<ConfirmationResult> => {
+    setLoading(true);
+    try {
+      const cleanDigits = phone.replace(/\D/g, '');
+      const e164 = cleanDigits.startsWith('91') && cleanDigits.length === 12
+        ? `+${cleanDigits}`
+        : `+91${cleanDigits.slice(-10)}`;
+      const confirmationResult = await signInWithPhoneNumber(auth, e164, appVerifier);
+      return confirmationResult;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Verifies the 6-digit SMS OTP code and completes authentication
+   */
+  const verifyPhoneOtp = async (confirmationResult: ConfirmationResult, verificationCode: string): Promise<User> => {
+    setLoading(true);
+    try {
+      const cred = await confirmationResult.confirm(verificationCode.trim());
+      return cred.user;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     firebaseUser,
     student,
@@ -318,6 +414,9 @@ export function useStudentAuth() {
     isAuthenticated: !!firebaseUser && !!student,
     login,
     loginWithRollOrPhone,
+    setupRecaptcha,
+    sendPhoneOtp,
+    verifyPhoneOtp,
     signup,
     logout,
     updateStudentProfile

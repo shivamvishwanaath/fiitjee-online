@@ -19,7 +19,7 @@ import {
   X,
   KeyRound
 } from 'lucide-react';
-import { sendPasswordResetEmail } from 'firebase/auth';
+import { sendPasswordResetEmail, ConfirmationResult } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { useStudentAuth } from '../hooks/useStudentAuth';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
@@ -30,13 +30,29 @@ export const StudentLogin: React.FC = () => {
   const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login';
   const redirectUrl = searchParams.get('redirect') || '/student/dashboard';
 
-  const { login, loginWithRollOrPhone, signup, isAuthenticated, loading: authLoading } = useStudentAuth();
+  const { 
+    login, 
+    loginWithRollOrPhone, 
+    setupRecaptcha, 
+    sendPhoneOtp, 
+    verifyPhoneOtp, 
+    signup, 
+    isAuthenticated, 
+    loading: authLoading 
+  } = useStudentAuth();
 
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
-  const [loginMethod, setLoginMethod] = useState<'roll_phone' | 'email_pass'>('roll_phone');
+  const [loginMethod, setLoginMethod] = useState<'phone_otp' | 'roll_phone' | 'email_pass'>('phone_otp');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Phone OTP state
+  const [phoneInput, setPhoneInput] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [otpStep, setOtpStep] = useState<'phone' | 'verify'>('phone');
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   // Form states
   const [identifierInput, setIdentifierInput] = useState('');
@@ -67,6 +83,98 @@ export const StudentLogin: React.FC = () => {
       navigate(redirectUrl, { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate, redirectUrl]);
+
+  // Resend OTP countdown timer
+  React.useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
+
+  const handleSendPhoneOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+
+    const cleanPhone = phoneInput.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      setErrorMessage('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const verifier = setupRecaptcha('recaptcha-phone-container', 'invisible');
+      const confirmation = await sendPhoneOtp(cleanPhone, verifier);
+      setConfirmationResult(confirmation);
+      setOtpStep('verify');
+      setResendCooldown(30);
+    } catch (err: any) {
+      console.error('Phone OTP dispatch error:', err);
+      if (err.code === 'auth/invalid-phone-number') {
+        setErrorMessage('Invalid phone number format. Please enter a valid 10-digit mobile number.');
+      } else if (err.code === 'auth/quota-exceeded') {
+        setErrorMessage('SMS verification quota reached for now. Please switch to "Roll No / Fast Access" for instant sign in.');
+      } else if (err.code === 'auth/captcha-check-failed') {
+        setErrorMessage('reCAPTCHA verification failed. Please try again.');
+      } else {
+        setErrorMessage(err.message || 'Unable to send SMS OTP. You can also sign in via "Roll No / Fast Access".');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleVerifyPhoneOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+
+    const cleanCode = otpCode.trim();
+    if (cleanCode.length !== 6) {
+      setErrorMessage('Please enter the 6-digit OTP received via SMS.');
+      return;
+    }
+
+    if (!confirmationResult) {
+      setErrorMessage('Verification session expired. Please request a new OTP.');
+      setOtpStep('phone');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await verifyPhoneOtp(confirmationResult, cleanCode);
+      navigate(redirectUrl);
+    } catch (err: any) {
+      console.error('Phone OTP verification error:', err);
+      if (err.code === 'auth/invalid-verification-code') {
+        setErrorMessage('Incorrect 6-digit SMS OTP code. Please check and re-enter.');
+      } else if (err.code === 'auth/code-expired') {
+        setErrorMessage('SMS OTP code has expired. Please click "Resend OTP".');
+      } else {
+        setErrorMessage(err.message || 'Verification failed. Please try again.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0) return;
+    setErrorMessage(null);
+    setSubmitting(true);
+    try {
+      const verifier = setupRecaptcha('recaptcha-phone-container', 'invisible');
+      const confirmation = await sendPhoneOtp(phoneInput, verifier);
+      setConfirmationResult(confirmation);
+      setResendCooldown(30);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to resend SMS OTP.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleRollLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -247,29 +355,150 @@ export const StudentLogin: React.FC = () => {
               /* --- SIGN IN OPTIONS --- */
               <div className="space-y-4">
                 {/* Login Method Sub-Tabs */}
-                <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 gap-1">
+                  <button
+                    type="button"
+                    onClick={() => { setLoginMethod('phone_otp'); setErrorMessage(null); setOtpStep('phone'); }}
+                    className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      loginMethod === 'phone_otp' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Mobile SMS OTP</span>
+                  </button>
                   <button
                     type="button"
                     onClick={() => { setLoginMethod('roll_phone'); setErrorMessage(null); }}
-                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       loginMethod === 'roll_phone' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    Roll No / Mobile (Fast Access)
+                    <Hash className="w-3.5 h-3.5" />
+                    <span>Roll No / Fast</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => { setLoginMethod('email_pass'); setErrorMessage(null); }}
-                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       loginMethod === 'email_pass' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    Email & Password
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Email & Pass</span>
                   </button>
                 </div>
 
-                {loginMethod === 'roll_phone' ? (
-                  /* Option A: Fast Access via Roll Number or Mobile */
+                {loginMethod === 'phone_otp' ? (
+                  /* Option 1: Native Firebase Phone OTP Authentication */
+                  <div className="space-y-4">
+                    {otpStep === 'phone' ? (
+                      <form onSubmit={handleSendPhoneOtp} className="space-y-4">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Candidate Mobile Number
+                          </label>
+                          <div className="flex rounded-xl overflow-hidden border border-slate-200 bg-slate-50 focus-within:ring-2 focus-within:ring-[#002147] focus-within:bg-white transition-all">
+                            <span className="inline-flex items-center px-3.5 bg-slate-100 text-xs font-bold text-slate-600 border-r border-slate-200 select-none">
+                              🇮🇳 +91
+                            </span>
+                            <div className="relative flex-1">
+                              <input
+                                type="tel"
+                                required
+                                maxLength={10}
+                                placeholder="Enter 10-digit mobile number"
+                                value={phoneInput}
+                                onChange={(e) => setPhoneInput(e.target.value.replace(/\D/g, ''))}
+                                className="w-full px-3.5 py-2.5 bg-transparent text-xs font-mono font-medium outline-none text-slate-900"
+                              />
+                            </div>
+                          </div>
+                          <p className="text-[10px] text-slate-500 mt-1.5">
+                            We will send a 6-digit verification code via SMS to this number.
+                          </p>
+                        </div>
+
+                        {/* reCAPTCHA container for Phone Auth */}
+                        <div id="recaptcha-phone-container" className="flex justify-center" />
+
+                        <button
+                          type="submit"
+                          disabled={submitting || phoneInput.length < 10}
+                          className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 mt-2"
+                        >
+                          {submitting ? (
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <>
+                              <span>Send Verification OTP</span>
+                              <ArrowRight className="w-4 h-4" />
+                            </>
+                          )}
+                        </button>
+                      </form>
+                    ) : (
+                      <form onSubmit={handleVerifyPhoneOtp} className="space-y-4">
+                        <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between text-xs">
+                          <div>
+                            <span className="text-[10px] uppercase font-bold text-blue-600 block">OTP Sent to Mobile</span>
+                            <span className="font-mono font-bold text-slate-900">+91 {phoneInput}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => { setOtpStep('phone'); setOtpCode(''); setErrorMessage(null); }}
+                            className="text-[11px] font-bold text-[#ED1C24] hover:underline cursor-pointer"
+                          >
+                            Change Number
+                          </button>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5 text-center">
+                            Enter 6-Digit SMS Verification Code
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            maxLength={6}
+                            autoFocus
+                            placeholder="• • • • • •"
+                            value={otpCode}
+                            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                            className="w-full py-3 text-center text-xl tracking-[0.5em] font-mono font-bold bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between text-xs pt-1">
+                          <span className="text-[11px] text-slate-500">Didn't receive code?</span>
+                          <button
+                            type="button"
+                            disabled={submitting || resendCooldown > 0}
+                            onClick={handleResendOtp}
+                            className="text-[11px] font-bold text-[#002147] hover:underline disabled:text-slate-400 cursor-pointer disabled:cursor-not-allowed"
+                          >
+                            {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : 'Resend SMS OTP'}
+                          </button>
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={submitting || otpCode.length !== 6}
+                          className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 mt-2"
+                        >
+                          {submitting ? (
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <>
+                              <span>Verify & Access Portal</span>
+                              <ArrowRight className="w-4 h-4" />
+                            </>
+                          )}
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                ) : loginMethod === 'roll_phone' ? (
+                  /* Option 2: Fast Access via Roll Number or Mobile */
                   <form onSubmit={handleRollLoginSubmit} className="space-y-4">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">

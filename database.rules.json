@@ -50,6 +50,10 @@
     "admins": {
       ".read": true,
       ".write": true
+    },
+    "centre_exams": {
+      ".read": true,
+      ".write": true
     }
   }
 }

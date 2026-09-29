@@ -28,6 +28,7 @@ import { OfficialHallTicket } from './OfficialHallTicket';
 import { PaymentStep, PaymentCompletionData } from './PaymentStep';
 import { getCentreByName, generateSID, generateInvoiceNumber, generateRollNumber } from '../admin/utils/centreUtils';
 import { redeemCoupon } from '../admin/utils/couponUtils';
+import { getCentreExamById, calculateExamFeeForClass, CentreExamConfig } from '../admin/utils/examUtils';
 import { printElementById } from '../utils/printUtils';
 import { useStudentAuth } from '../student/hooks/useStudentAuth';
 import { useNavigate } from 'react-router-dom';
@@ -79,6 +80,11 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
   const [formData, setFormData] = useState({ ...initialFormData });
   const [lastPaymentData, setLastPaymentData] = useState<PaymentCompletionData | null>(null);
   const [assignedRollNo, setAssignedRollNo] = useState<string | null>(null);
+  const [examConfig, setExamConfig] = useState<CentreExamConfig | null>(null);
+  const [loadingExamConfig, setLoadingExamConfig] = useState<boolean>(false);
+
+  const targetCentreProfile = getCentreByName(formData.selectedCenter);
+  const targetCentreId = targetCentreProfile?.id || 'bhubaneswar';
 
   // Reset form when modal opens and populate with authenticated student's profile
   useEffect(() => {
@@ -117,6 +123,31 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
       }
     }
   }, [isOpen, student]);
+
+  // Synchronize dynamic exam configuration for the selected centre
+  useEffect(() => {
+    if (!isOpen) return;
+    let isMounted = true;
+    setLoadingExamConfig(true);
+
+    getCentreExamById(targetCentreId, 'big-bang-edge-test')
+      .then((cfg) => {
+        if (isMounted && cfg) {
+          setExamConfig(cfg);
+          if (cfg.testDates && cfg.testDates.length > 0 && !cfg.testDates.includes(formData.testDate)) {
+            setFormData(prev => ({ ...prev, testDate: cfg.testDates[0] }));
+          }
+          if (cfg.modes && cfg.modes.length > 0 && !cfg.modes.includes(formData.testMode as any)) {
+            setFormData(prev => ({ ...prev, testMode: cfg.modes[0] }));
+          }
+        }
+      })
+      .finally(() => {
+        if (isMounted) setLoadingExamConfig(false);
+      });
+
+    return () => { isMounted = false; };
+  }, [isOpen, targetCentreId]);
 
   if (!isOpen) return null;
 
@@ -655,10 +686,23 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
           {/* STEP 2: Preferences */}
           {step === 2 && (
             <form onSubmit={handleNextStep} className="space-y-4">
+              {/* Registration Closed Notice if disabled for this centre */}
+              {examConfig && examConfig.registrationOpen === false && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 text-red-800 text-xs">
+                  <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-sm">Registrations Temporarily Closed for {formData.selectedCenter}</h4>
+                    <p className="mt-1 text-slate-600">
+                      Admission test registrations for FIITJEE {formData.selectedCenter} Centre are currently paused by the centre administration. Please choose another center or contact the admissions desk.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-2">Select Examination Date *</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {BIG_BANG_EXAM.testDates.map((date) => (
+                  {(examConfig?.testDates && examConfig.testDates.length > 0 ? examConfig.testDates : BIG_BANG_EXAM.testDates).map((date) => (
                     <button
                       key={date}
                       type="button"
@@ -679,7 +723,7 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-2">Choose Examination Mode *</label>
                 <div className="grid grid-cols-2 gap-3">
-                  {BIG_BANG_EXAM.modes.map((mode) => (
+                  {(examConfig?.modes && examConfig.modes.length > 0 ? examConfig.modes : BIG_BANG_EXAM.modes).map((mode) => (
                     <button
                       key={mode}
                       type="button"
@@ -841,10 +885,11 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
           {/* STEP 4: Payment & Coupon Code Step */}
           {step === 4 && (
             <PaymentStep
-              baseFee={getRegistrationFeeForClass(formData.currentClass)}
+              baseFee={calculateExamFeeForClass(examConfig, formData.currentClass)}
               studentName={formData.studentName}
               studentEmail={formData.email}
               studentPhone={formData.phone}
+              centreId={targetCentreId}
               onBack={() => setStep(3)}
               onSuccess={handlePaymentComplete}
             />

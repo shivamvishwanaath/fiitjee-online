@@ -51,6 +51,7 @@ import { BIG_BANG_EXAM } from '../../data/examsData';
 import { getExamScheduleForClass, CENTRES_CONFIG, getRegistrationFeeForClass } from '../../admin/utils/centreUtils';
 import { ref, onValue, get, push, set } from 'firebase/database';
 import { db } from '../../firebase';
+import { sendTicketEmailAlertToCentre } from '../../services/ticketEmailAlert';
 
 export type StudentDashboardTab = 
   | 'overview'
@@ -455,6 +456,12 @@ export const StudentDashboard: React.FC = () => {
       };
 
       await set(newTicketRef, payload);
+
+      // Automatically dispatch email notification to the centre's official mailbox
+      sendTicketEmailAlertToCentre(payload).catch((err) => {
+        console.warn('Background ticket email dispatch warning:', err);
+      });
+
       setTicketForm({ category: '', subject: '', description: '' });
       setTicketSuccess(true);
       setTimeout(() => setTicketSuccess(false), 5000);

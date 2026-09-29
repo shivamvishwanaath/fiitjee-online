@@ -30,7 +30,8 @@ export function generateCouponCode(prefix: string = 'BBET26'): string {
 export async function validateCoupon(
   rawCode: string,
   studentEmail: string,
-  currentFee: number
+  currentFee: number,
+  targetCentreId?: string
 ): Promise<CouponValidationResult> {
   const code = rawCode.trim().toUpperCase();
   if (!code) {
@@ -79,6 +80,25 @@ export async function validateCoupon(
     // Check if active
     if (matchedCoupon.isActive === false) {
       return { valid: false, error: 'This coupon code has been deactivated.' };
+    }
+
+    // Check centre isolation
+    if (matchedCoupon.centreId) {
+      const couponCentre = matchedCoupon.centreId.trim().toLowerCase();
+      if (couponCentre !== 'all' && targetCentreId) {
+        const studentCentre = targetCentreId.trim().toLowerCase();
+        const match = couponCentre === studentCentre || 
+                      couponCentre.includes(studentCentre) || 
+                      studentCentre.includes(couponCentre);
+        if (!match) {
+          const formattedCouponCentre = matchedCoupon.centreId;
+          const formattedStudentCentre = targetCentreId.charAt(0).toUpperCase() + targetCentreId.slice(1);
+          return {
+            valid: false,
+            error: `This coupon code is exclusive to FIITJEE ${formattedCouponCentre} Centre and cannot be redeemed for ${formattedStudentCentre} Centre registrations.`
+          };
+        }
+      }
     }
 
     // Check validity dates

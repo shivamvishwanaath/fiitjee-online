@@ -30,6 +30,7 @@ interface PaymentStepProps {
   studentName: string;
   studentEmail: string;
   studentPhone: string;
+  centreId?: string;
   onBack: () => void;
   onSuccess: (paymentData: PaymentCompletionData) => Promise<void>;
 }
@@ -39,6 +40,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
   studentName,
   studentEmail,
   studentPhone,
+  centreId,
   onBack,
   onSuccess
 }) => {
@@ -62,7 +64,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
 
     setValidatingCoupon(true);
     try {
-      const res = await validateCoupon(couponCodeInput, studentEmail, baseFee);
+      const res = await validateCoupon(couponCodeInput, studentEmail, baseFee, centreId);
       if (!res.valid || !res.coupon) {
         setCouponError(res.error || 'Invalid coupon code');
         setAppliedCoupon(null);

@@ -14,6 +14,8 @@ import { CRMCompose } from './pages/CRMCompose';
 import { CRMCampaigns } from './pages/CRMCampaigns';
 import { CRMFollowUps } from './pages/CRMFollowUps';
 import { CRMTickets } from './pages/CRMTickets';
+import { ExamList } from './pages/ExamList';
+import { ExamEdit } from './pages/ExamEdit';
 import { AdminLayout } from './components/AdminLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AdminAuthProvider } from './context/AdminAuthContext';
@@ -65,6 +67,40 @@ export const AdminApp: React.FC = () => {
           <ProtectedRoute>
             <AdminLayout>
               <AddRegistration />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Multi-Centre Exam Configuration Engine Routes */}
+      <Route
+        path="exams"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <ExamList />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="exams/create"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <ExamEdit isNew={true} />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="exams/edit/:examId"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <ExamEdit isNew={false} />
             </AdminLayout>
           </ProtectedRoute>
         }
@@ -162,6 +198,18 @@ export const AdminApp: React.FC = () => {
 
       <Route
         path="crm/tickets"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <CRMTickets />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Dedicated Centre Support & Grievances Desk */}
+      <Route
+        path="tickets"
         element={
           <ProtectedRoute>
             <AdminLayout>

@@ -17,7 +17,9 @@ import {
   ShieldCheck,
   X,
   Sparkles,
-  Lock
+  Lock,
+  Award,
+  HelpCircle
 } from 'lucide-react';
 import { CentreProfile } from '../utils/centreUtils';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
@@ -62,12 +64,19 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       items: [
         { to: '/admin/registrations', label: 'All Registrations', icon: Users, end: true },
         { to: '/admin/registrations/add', label: 'Register Student', icon: UserPlus, end: true },
+        { to: '/admin/exams', label: 'Exam Configuration', icon: Award, end: false },
       ]
     },
     {
       group: 'Promotions',
       items: [
         { to: '/admin/coupons', label: 'Coupon Codes', icon: Tag, end: false },
+      ]
+    },
+    {
+      group: 'Student Support',
+      items: [
+        { to: '/admin/tickets', label: 'Support Tickets', icon: HelpCircle, end: false },
       ]
     },
     {
