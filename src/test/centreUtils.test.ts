@@ -3,7 +3,9 @@ import {
   isSuperAdminEmail, 
   isValidAdminEmail, 
   getCentreByEmail,
-  CENTRES_CONFIG 
+  CENTRES_CONFIG,
+  resolveCanonicalCentreId,
+  isCentreMatch
 } from '../admin/utils/centreUtils';
 
 describe('Admin Centre and Email Authorization Logic', () => {
@@ -39,5 +41,35 @@ describe('Admin Centre and Email Authorization Logic', () => {
 
     const hyd = getCentreByEmail('fiitjee.hyderabad@fiitjee.online');
     expect(hyd?.id).toBe('hyderabad');
+  });
+
+  it('resolves canonical centre IDs consistently regardless of casing or formatting', () => {
+    expect(resolveCanonicalCentreId('Hyderabad (Madhapur)')).toBe('hyderabad');
+    expect(resolveCanonicalCentreId('hyderabad')).toBe('hyderabad');
+    expect(resolveCanonicalCentreId('Hyderabad')).toBe('hyderabad');
+    expect(resolveCanonicalCentreId('Madhapur')).toBe('hyderabad');
+    expect(resolveCanonicalCentreId('Dwarka')).toBe('dwarka');
+    expect(resolveCanonicalCentreId('dwarka')).toBe('dwarka');
+    expect(resolveCanonicalCentreId('Ranchi')).toBe('ranchi');
+    expect(resolveCanonicalCentreId('Ranchi-Lalpur')).toBe('ranchi');
+    expect(resolveCanonicalCentreId('Bhubaneswar')).toBe('bhubaneswar');
+    expect(resolveCanonicalCentreId('ALL')).toBe('all');
+    expect(resolveCanonicalCentreId('All Centres')).toBe('all');
+  });
+
+  it('accurately verifies centre matching for coupons', () => {
+    // Hyderabad matches
+    expect(isCentreMatch('Hyderabad (Madhapur)', 'hyderabad')).toBe(true);
+    expect(isCentreMatch('hyderabad', 'Hyderabad (Madhapur)')).toBe(true);
+    expect(isCentreMatch('Hyderabad', 'Hyderabad')).toBe(true);
+
+    // Cross-centre mismatches
+    expect(isCentreMatch('Bhubaneswar', 'hyderabad')).toBe(false);
+    expect(isCentreMatch('Dwarka', 'ranchi')).toBe(false);
+
+    // Global / All coupons match anything
+    expect(isCentreMatch('ALL', 'hyderabad')).toBe(true);
+    expect(isCentreMatch('all', 'bhubaneswar')).toBe(true);
+    expect(isCentreMatch(undefined, 'dwarka')).toBe(true);
   });
 });

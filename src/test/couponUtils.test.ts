@@ -87,4 +87,40 @@ describe('Coupon Validation & Centre Isolation Engine', () => {
     expect(res.valid).toBe(false);
     expect(res.error).toContain('already redeemed');
   });
+
+  it('allows Hyderabad coupon BBE-HYD-SNR for Hyderabad centre registrations seamlessly', () => {
+    const hyderabadCoupon: CouponProfile = {
+      ...baseCoupon,
+      code: 'BBE-HYD-SNR',
+      centreId: 'Hyderabad (Madhapur)'
+    };
+
+    // When student registration passes 'hyderabad'
+    const res1 = evaluateCouponRules(hyderabadCoupon, 'student@gmail.com', 200, 'hyderabad');
+    expect(res1.valid).toBe(true);
+    expect(res1.discountAmount).toBe(200);
+    expect(res1.finalAmount).toBe(0);
+
+    // When student registration passes 'Hyderabad (Madhapur)'
+    const res2 = evaluateCouponRules(hyderabadCoupon, 'student@gmail.com', 200, 'Hyderabad (Madhapur)');
+    expect(res2.valid).toBe(true);
+
+    // When student registration passes 'Hyderabad'
+    const res3 = evaluateCouponRules(hyderabadCoupon, 'student@gmail.com', 200, 'Hyderabad');
+    expect(res3.valid).toBe(true);
+  });
+
+  it('allows global / all-centres coupons to be redeemed anywhere', () => {
+    const globalCoupon: CouponProfile = {
+      ...baseCoupon,
+      code: 'GLOBAL-WAIVER',
+      centreId: 'ALL'
+    };
+
+    const resBhub = evaluateCouponRules(globalCoupon, 'student@gmail.com', 200, 'bhubaneswar');
+    expect(resBhub.valid).toBe(true);
+
+    const resHyd = evaluateCouponRules(globalCoupon, 'student@gmail.com', 200, 'hyderabad');
+    expect(resHyd.valid).toBe(true);
+  });
 });

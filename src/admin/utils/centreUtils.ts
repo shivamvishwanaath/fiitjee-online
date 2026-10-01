@@ -187,6 +187,35 @@ export function getCentreIdByName(name?: string | null): string {
   return 'bhubaneswar';
 }
 
+/**
+ * Resolves any centre identifier, name, city string, or branch abbreviation
+ * into a canonical centre ID ('bhubaneswar', 'dwarka', 'ranchi', 'hyderabad', or 'all').
+ */
+export function resolveCanonicalCentreId(input?: string | null): string {
+  if (!input) return '';
+  const clean = input.trim().toLowerCase().replace(/[\s_\-()]+/g, '');
+  if (!clean || clean === 'all' || clean === 'global' || clean === 'allcentres' || clean === 'allbranches' || clean === 'system') {
+    return 'all';
+  }
+  if (clean.includes('dwarka') || clean.includes('delhi')) return 'dwarka';
+  if (clean.includes('ranchi') || clean.includes('lalpur') || clean.includes('doranda')) return 'ranchi';
+  if (clean.includes('hyderabad') || clean.includes('madhapur') || clean.includes('hyd')) return 'hyderabad';
+  if (clean.includes('bhubaneswar') || clean.includes('infocity') || clean.includes('odisha') || clean.includes('bbsr')) return 'bhubaneswar';
+  return clean;
+}
+
+/**
+ * Checks whether a coupon's centre restriction matches the student's registration centre.
+ */
+export function isCentreMatch(couponCentreId?: string | null, targetCentreId?: string | null): boolean {
+  if (!couponCentreId) return true;
+  const couponCanonical = resolveCanonicalCentreId(couponCentreId);
+  if (couponCanonical === 'all' || !couponCanonical) return true;
+  if (!targetCentreId) return true;
+  const targetCanonical = resolveCanonicalCentreId(targetCentreId);
+  return couponCanonical === targetCanonical;
+}
+
 export function formatRegistrationNumber(rollNo?: string): string {
   if (!rollNo) return '';
   // Strip non-alphanumerics

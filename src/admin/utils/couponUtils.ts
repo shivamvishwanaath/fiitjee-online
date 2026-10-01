@@ -1,7 +1,7 @@
 import { ref, get, push, set, update } from 'firebase/database';
 import { db } from '../../firebase';
 import { CouponProfile, CouponRedemption } from '../../types';
-import { sanitizeForFirebase } from './centreUtils';
+import { sanitizeForFirebase, isCentreMatch, resolveCanonicalCentreId, CENTRES_CONFIG } from './centreUtils';
 
 export interface CouponValidationResult {
   valid: boolean;
@@ -99,21 +99,18 @@ export function evaluateCouponRules(
   }
 
   // Check centre isolation
-  if (matchedCoupon.centreId) {
-    const normalizeCentre = (s: string) => s.toLowerCase().trim().replace(/[\s_-]+/g, '');
-    const couponCentre = normalizeCentre(matchedCoupon.centreId);
-    if (couponCentre !== 'all' && targetCentreId) {
-      const studentCentre = normalizeCentre(targetCentreId);
-      const match = couponCentre === studentCentre;
-      if (!match) {
-        const formattedCouponCentre = matchedCoupon.centreId;
-        const formattedStudentCentre = targetCentreId.charAt(0).toUpperCase() + targetCentreId.slice(1);
-        return {
-          valid: false,
-          error: `This coupon code is exclusive to FIITJEE ${formattedCouponCentre} Centre and cannot be redeemed for ${formattedStudentCentre} Centre registrations.`
-        };
-      }
-    }
+  if (!isCentreMatch(matchedCoupon.centreId, targetCentreId)) {
+    const formattedCouponCentre = matchedCoupon.centreId || 'another';
+    const targetCanonical = resolveCanonicalCentreId(targetCentreId);
+    const targetProfile = targetCanonical ? CENTRES_CONFIG[targetCanonical] : null;
+    const formattedStudentCentre = targetProfile 
+      ? targetProfile.name 
+      : (targetCentreId ? targetCentreId.charAt(0).toUpperCase() + targetCentreId.slice(1) : 'other');
+
+    return {
+      valid: false,
+      error: `This coupon code is exclusive to FIITJEE ${formattedCouponCentre} Centre and cannot be redeemed for ${formattedStudentCentre} Centre registrations.`
+    };
   }
 
   // Check validity dates
