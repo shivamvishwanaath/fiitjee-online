@@ -16,6 +16,7 @@ import { CRMFollowUps } from './pages/CRMFollowUps';
 import { CRMTickets } from './pages/CRMTickets';
 import { ExamList } from './pages/ExamList';
 import { ExamEdit } from './pages/ExamEdit';
+import { DeveloperTools } from './pages/DeveloperTools';
 import { AdminLayout } from './components/AdminLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AdminAuthProvider } from './context/AdminAuthContext';
@@ -214,6 +215,18 @@ export const AdminApp: React.FC = () => {
           <ProtectedRoute>
             <AdminLayout>
               <CRMTickets />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Developer Control Station & RTDB Operations Hub (Developer Only) */}
+      <Route
+        path="dev-tools"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <DeveloperTools />
             </AdminLayout>
           </ProtectedRoute>
         }

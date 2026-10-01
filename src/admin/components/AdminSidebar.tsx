@@ -20,7 +20,8 @@ import {
   Lock,
   Award,
   HelpCircle,
-  RefreshCw
+  RefreshCw,
+  Terminal
 } from 'lucide-react';
 import { CentreProfile } from '../utils/centreUtils';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
@@ -46,7 +47,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   onLogout
 }) => {
   const navigate = useNavigate();
-  const { switchCentre, cycleNextCentre, availableCentres, canSwitchCentres } = useAdminAuth();
+  const { switchCentre, cycleNextCentre, availableCentres, canSwitchCentres, isDeveloper } = useAdminAuth();
 
   const handleSignOut = async () => {
     await onLogout();
@@ -88,7 +89,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { to: '/admin/crm/compose', label: 'Compose Outreach', icon: Send, end: true },
         { to: '/admin/crm/followups', label: 'Follow-ups', icon: Clock, end: true },
       ]
-    }
+    },
+    ...(isDeveloper ? [{
+      group: 'Developer Sandbox',
+      items: [
+        { to: '/admin/dev-tools', label: 'Developer Tools & CRUD', icon: Terminal, end: true }
+      ]
+    }] : [])
   ];
 
   const sidebarContent = (

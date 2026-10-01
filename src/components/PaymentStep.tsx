@@ -13,6 +13,8 @@ import {
   Loader2
 } from 'lucide-react';
 import { validateCoupon, redeemCoupon } from '../admin/utils/couponUtils';
+import { isDeveloperEmail } from '../admin/utils/centreUtils';
+import { auth } from '../firebase';
 import { CouponProfile } from '../types';
 import { load as loadCashfree } from '@cashfreepayments/cashfree-js';
 
@@ -57,6 +59,9 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
 
   const payableFee = Math.max(0, Math.round((baseFee - discountAmount) * 100) / 100);
   const isFullyWaived = payableFee === 0;
+
+  // Strictly enforce developer privileges for simulation / bypass mode
+  const isDeveloper = isDeveloperEmail(auth.currentUser?.email) || isDeveloperEmail(studentEmail);
 
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,7 +120,15 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
     const orderId = `ORD_BBET_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
 
     if (simulate) {
-      // Instant simulation for testing without debiting real money
+      // Doubly secure check: Strictly restricted to verified developer account
+      if (!isDeveloper) {
+        console.error('Security alert: Unauthorized user attempted to trigger Test Mode Pay');
+        setPaymentError('Access Denied: Test Mode payment is strictly restricted to verified developer accounts (shivam.strive@gmail.com).');
+        setProcessingPayment(false);
+        return;
+      }
+
+      // Instant simulation for developer testing without debiting real money
       try {
         await new Promise(r => setTimeout(r, 600));
         const simPayload: PaymentCompletionData = {
@@ -396,15 +409,18 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
           </div>
         ) : (
           <div className="flex items-center gap-2 flex-1 justify-end">
-            <button
-              type="button"
-              onClick={() => handleProceedCashfree(true)}
-              disabled={processingPayment}
-              className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[11px] font-bold transition-all border border-slate-300 cursor-pointer"
-              title="Verify flow immediately without card payment"
-            >
-              Test Mode Pay (₹{payableFee.toFixed(2)})
-            </button>
+            {isDeveloper && (
+              <button
+                type="button"
+                onClick={() => handleProceedCashfree(true)}
+                disabled={processingPayment}
+                className="px-3 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl text-[11px] font-black transition-all border border-amber-500 cursor-pointer shadow-xs flex items-center gap-1.5"
+                title="Developer Test Mode: Simulate payment verification (Strictly developer only)"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Dev Test Pay (₹{payableFee.toFixed(2)})</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => handleProceedCashfree(false)}

@@ -228,6 +228,7 @@ export interface StudentProfile {
   lastLoginAt?: string;
   lastLoginMethod?: 'email' | 'phone_otp' | 'roll_phone' | string;
   registeredExams?: Record<string, StudentExamLink>;
+  profileStatus?: string;
 }
 
 export interface SupportTicket {

@@ -40,13 +40,16 @@ import {
   CheckCircle,
   Compass,
   ArrowUpRight,
-  FileCheck
+  FileCheck,
+  Trash2,
+  Terminal
 } from 'lucide-react';
 import { useStudentAuth } from '../hooks/useStudentAuth';
 import { HallTicketModal } from '../../components/HallTicketModal';
 import { BigBangRegistrationModal } from '../../components/BigBangRegistrationModal';
 import { FtreRegistrationModal } from '../../components/FtreRegistrationModal';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
+import { deregisterCandidateExam } from '../../admin/utils/developerUtils';
 import { ExamRegistration, StudentExamLink, SupportTicket, ExamResult } from '../../types';
 import { BIG_BANG_EXAM } from '../../data/examsData';
 import { getExamScheduleForClass, CENTRES_CONFIG, getRegistrationFeeForClass } from '../../admin/utils/centreUtils';
@@ -94,7 +97,35 @@ export const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { student, logout, updateStudentProfile } = useStudentAuth();
+  const { student, firebaseUser, logout, updateStudentProfile, isDeveloper } = useStudentAuth();
+
+  // Developer mode de-register action
+  const [devActionRoll, setDevActionRoll] = useState<string | null>(null);
+
+  const handleDevDeregisterExam = async (reg: ExamRegistration) => {
+    if (!isDeveloper) return;
+    const confirmed = window.confirm(
+      `[DEVELOPER MODE: RESET REGISTRATION]\n\nDe-register candidate ${reg.studentName || student?.fullName} (${reg.rollNo}) from ${reg.examId || 'Big Bang Edge Test 2026'}?\n\nThis will purge the registration node from RTDB and remove it from your student account, allowing you to test the complete registration wizard again from scratch.`
+    );
+    if (!confirmed) return;
+
+    setDevActionRoll(reg.rollNo);
+    try {
+      const res = await deregisterCandidateExam({
+        rollNo: reg.rollNo,
+        centreId: reg.registeredByCentre,
+        studentUid: student?.uid || reg.studentUid,
+        examId: reg.examId || 'big_bang_2026',
+        actorEmail: firebaseUser?.email || student?.email || 'shivam.strive@gmail.com'
+      });
+      alert(res.message);
+      setRegisteredList(prev => prev.filter(r => r.rollNo !== reg.rollNo));
+    } catch (err: any) {
+      alert(`Developer De-registration failed: ${err.message || 'Unknown error'}`);
+    } finally {
+      setDevActionRoll(null);
+    }
+  };
 
   // Determine active tab from URL path or search parameter
   const activeTab: StudentDashboardTab = useMemo(() => {
@@ -881,6 +912,40 @@ export const StudentDashboard: React.FC = () => {
         {/* Tab Content Container */}
         <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto overflow-x-hidden">
 
+          {/* Developer Testing Bar (Strictly Rendered for Developer Account Only) */}
+          {isDeveloper && (
+            <div className="bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-slate-950 p-4 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-amber-300">
+              <div className="flex items-center gap-2.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-950 animate-ping shrink-0" />
+                <div>
+                  <div className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
+                    <Terminal className="w-3.5 h-3.5" />
+                    <span>Developer Sandbox Mode Active ({firebaseUser?.email || student?.email})</span>
+                  </div>
+                  <p className="text-[11px] font-semibold text-slate-900/90">
+                    Direct test pay, instant de-registration, and unrestricted CRUD are enabled on your account.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setIsBigBangModalOpen(true)}
+                  className="px-3.5 py-1.5 bg-slate-950 text-amber-300 hover:bg-slate-900 rounded-xl text-xs font-black uppercase tracking-wide cursor-pointer transition-all flex items-center gap-1.5 shadow-sm"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Open Registration Wizard</span>
+                </button>
+                <Link
+                  to="/admin/dev-tools"
+                  className="px-3.5 py-1.5 bg-white/20 hover:bg-white/30 text-slate-950 rounded-xl text-xs font-black uppercase tracking-wide cursor-pointer transition-all flex items-center gap-1 border border-black/10"
+                >
+                  <span>Dev Station</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* ========================================================================= */}
           {/* TAB 1: OVERVIEW DASHBOARD (Quick stats, actions, desk details)             */}
           {/* ========================================================================= */}
@@ -1053,48 +1118,70 @@ export const StudentDashboard: React.FC = () => {
                   ) : (
                     <div className="space-y-3">
                       {registeredList.slice(0, 2).map((reg) => (
-                        <div key={reg.rollNo} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 border-l-4 border-l-[#ED1C24] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
-                          <div className="space-y-1">
+                        <div key={reg.rollNo} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 border-l-4 border-l-[#ED1C24] space-y-3 shadow-2xs">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-wider text-[#ED1C24] bg-red-50 px-2.5 py-0.5 rounded-full border border-red-200">
+                                  {reg.examId === 'ftre_2026' ? 'FIITJEE FTRE' : 'Big Bang Edge Test 2026'}
+                                </span>
+                                <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                  <span>Confirmed</span>
+                                </span>
+                              </div>
+                              <div className="font-mono text-sm font-black text-[#002147] tracking-wider">
+                                {reg.rollNo}
+                              </div>
+                              <div className="text-xs text-slate-600 flex items-center gap-2">
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="w-3 h-3 text-slate-400" />
+                                  {reg.testDate}
+                                </span>
+                                <span>•</span>
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="w-3 h-3 text-slate-400" />
+                                  {reg.selectedCenter || 'Centre'} ({reg.testMode})
+                                </span>
+                              </div>
+                            </div>
+
                             <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-black uppercase tracking-wider text-[#ED1C24] bg-red-50 px-2.5 py-0.5 rounded-full border border-red-200">
-                                {reg.examId === 'ftre_2026' ? 'FIITJEE FTRE' : 'Big Bang Edge Test 2026'}
-                              </span>
-                              <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                <span>Confirmed</span>
-                              </span>
-                            </div>
-                            <div className="font-mono text-sm font-black text-[#002147] tracking-wider">
-                              {reg.rollNo}
-                            </div>
-                            <div className="text-xs text-slate-600 flex items-center gap-2">
-                              <span className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3 text-slate-400" />
-                                {reg.testDate}
-                              </span>
-                              <span>•</span>
-                              <span className="flex items-center gap-1">
-                                <MapPin className="w-3 h-3 text-slate-400" />
-                                {reg.selectedCenter || 'Centre'} ({reg.testMode})
-                              </span>
+                              <button
+                                onClick={() => setSelectedTicketReg(reg)}
+                                className="px-3.5 py-2 bg-[#002147] hover:bg-[#001733] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                              >
+                                <Printer className="w-3.5 h-3.5 text-amber-400" />
+                                <span>Hall Ticket</span>
+                              </button>
+                              <button
+                                onClick={() => handleTabChange('results')}
+                                className="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                              >
+                                Result
+                              </button>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => setSelectedTicketReg(reg)}
-                              className="px-3.5 py-2 bg-[#002147] hover:bg-[#001733] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
-                            >
-                              <Printer className="w-3.5 h-3.5 text-amber-400" />
-                              <span>Hall Ticket</span>
-                            </button>
-                            <button
-                              onClick={() => handleTabChange('results')}
-                              className="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold cursor-pointer transition-colors"
-                            >
-                              Result
-                            </button>
-                          </div>
+                          {/* Developer Action Bar (Strictly Developer Only) */}
+                          {isDeveloper && (
+                            <div className="pt-2 border-t border-amber-200/60 flex items-center justify-between gap-2 bg-amber-50/80 -mx-4 -mb-4 px-4 py-2 rounded-b-2xl">
+                              <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-900">
+                                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                                <span>Developer Mode</span>
+                              </div>
+                              <button
+                                type="button"
+                                disabled={devActionRoll === reg.rollNo}
+                                onClick={() => handleDevDeregisterExam(reg)}
+                                className="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-[11px] font-bold rounded-lg cursor-pointer transition-all shadow-xs flex items-center gap-1"
+                                title="Purge registration from RTDB to test registration wizard again"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                                <span>{devActionRoll === reg.rollNo ? 'De-registering...' : 'De-Register Exam (Reset)'}</span>
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -1342,6 +1429,35 @@ export const StudentDashboard: React.FC = () => {
                             View Result
                           </button>
                         </div>
+
+                        {/* Developer Quick Controls (Strictly Developer Only) */}
+                        {isDeveloper && (
+                          <div className="pt-3 border-t border-amber-200/80 mt-2 bg-amber-50/80 -mx-6 -mb-6 p-4 rounded-b-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex items-center gap-1.5 text-[11px] font-black text-amber-900 uppercase">
+                              <Terminal className="w-3.5 h-3.5 text-amber-600" />
+                              <span>Developer Mode Controls</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                disabled={devActionRoll === reg.rollNo}
+                                onClick={() => handleDevDeregisterExam(reg)}
+                                className="px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                                title="De-register this candidate from RTDB to test registration wizard again"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>{devActionRoll === reg.rollNo ? 'De-registering...' : 'De-Register Exam (Reset)'}</span>
+                              </button>
+                              <Link
+                                to="/admin/dev-tools"
+                                className="px-3 py-1.5 bg-white border border-amber-300 hover:bg-amber-100 text-amber-900 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                              >
+                                <span>Full Dev Console</span>
+                                <ChevronRight className="w-3 h-3" />
+                              </Link>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}

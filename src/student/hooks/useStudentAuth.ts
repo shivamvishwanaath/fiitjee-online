@@ -13,7 +13,7 @@ import {
 import { ref, set, update, onValue, remove, get, query, orderByChild, equalTo } from 'firebase/database';
 import { auth, db } from '../../firebase';
 import { StudentProfile } from '../../types';
-import { sanitizeForFirebase } from '../../admin/utils/centreUtils';
+import { sanitizeForFirebase, isDeveloperEmail } from '../../admin/utils/centreUtils';
 
 /**
  * Searches the Realtime Database registrations across centres for an email, phone, or roll number
@@ -628,6 +628,7 @@ export function useStudentAuth() {
     student,
     loading,
     isAuthenticated: !!firebaseUser && !!student,
+    isDeveloper: isDeveloperEmail(firebaseUser?.email) || isDeveloperEmail(student?.email),
     login,
     loginWithRollOrPhone,
     setupRecaptcha,
