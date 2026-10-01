@@ -107,11 +107,16 @@ export const CENTRES_CONFIG: Record<string, CentreProfile> = {
 
 export const ALL_CENTRES = Object.values(CENTRES_CONFIG);
 
+export const DEVELOPER_EMAIL = 'shivam.strive@gmail.com';
+
 export const SUPERADMIN_EMAILS = [
-  'shivam.strive@gmail.com',
-  'admin@fiitjee.online',
-  'corporate@fiitjee.online'
+  'shivam.strive@gmail.com'
 ];
+
+export function isDeveloperEmail(email?: string | null): boolean {
+  if (!email) return false;
+  return email.trim().toLowerCase() === DEVELOPER_EMAIL.toLowerCase();
+}
 
 export function isSuperAdminEmail(email?: string | null): boolean {
   if (!email) return false;

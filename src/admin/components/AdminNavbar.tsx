@@ -7,7 +7,9 @@ import {
   ExternalLink,
   ChevronDown,
   Check,
-  Lock
+  Lock,
+  RefreshCw,
+  Sparkles
 } from 'lucide-react';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { AdminBreadcrumbs } from './AdminBreadcrumbs';
@@ -20,7 +22,7 @@ export const AdminNavbar: React.FC<AdminNavbarProps> = ({
   onOpenMobileMenu 
 }) => {
   const navigate = useNavigate();
-  const { centre, user, logout, switchCentre, availableCentres, canSwitchCentres } = useAdminAuth();
+  const { centre, user, logout, switchCentre, cycleNextCentre, availableCentres, canSwitchCentres } = useAdminAuth();
   const [centreMenuOpen, setCentreMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -59,57 +61,88 @@ export const AdminNavbar: React.FC<AdminNavbarProps> = ({
 
       {/* Right: Centre Badge & User Actions */}
       <div className="flex items-center gap-2.5">
-        {/* Operating Branch: Locked for Centre Staff, Switcher for Superadmin */}
+        {/* Operating Branch: Locked for Centre Staff, Switcher & Cycler for Developer */}
         {canSwitchCentres ? (
-          <div className="relative" ref={dropdownRef}>
+          <div className="flex items-center gap-1.5">
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setCentreMenuOpen(!centreMenuOpen)}
+                className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-800 px-3 py-1.5 rounded-full text-xs font-bold border border-slate-200 transition-colors cursor-pointer shadow-2xs"
+                title="Developer: Switch active operating centre"
+              >
+                <Building2 className="w-3.5 h-3.5 text-[#ED1C24]" />
+                <span>{centre?.name || 'All Centres'}</span>
+                <span className="bg-[#002147] text-white px-1.5 py-0.5 rounded text-[10px] font-mono">
+                  {centre?.code}
+                </span>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${centreMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {centreMenuOpen && (
+                <div className="absolute right-0 mt-1.5 w-64 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="px-3 py-1.5 bg-amber-50/70 border-b border-amber-200/60 flex items-center justify-between rounded-t-xl">
+                    <div>
+                      <div className="text-[10px] font-black text-amber-800 uppercase tracking-wider flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-amber-600" />
+                        <span>Developer Console</span>
+                      </div>
+                      <div className="text-[10px] text-amber-700/80 font-mono truncate max-w-[130px]">{user?.email}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        cycleNextCentre();
+                        setCentreMenuOpen(false);
+                      }}
+                      className="text-[10px] bg-white hover:bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded border border-amber-300 transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+                      title="Cycle to next centre"
+                    >
+                      <RefreshCw className="w-2.5 h-2.5 text-amber-600" />
+                      <span>Cycle</span>
+                    </button>
+                  </div>
+                  <div className="mt-1 divide-y divide-slate-100">
+                    {availableCentres.map((c) => {
+                      const isSelected = centre?.id === c.id;
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => {
+                            switchCentre(c.id);
+                            setCentreMenuOpen(false);
+                          }}
+                          className={`w-full px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer text-left ${
+                            isSelected ? 'font-bold text-[#ED1C24] bg-red-50/50' : 'text-slate-700'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Building2 className={`w-3.5 h-3.5 ${isSelected ? 'text-[#ED1C24]' : 'text-slate-400'}`} />
+                            <span>FIITJEE {c.name}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono text-[10px] text-slate-400">{c.code}</span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-[#ED1C24]" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Quick One-Click Centre Cycler */}
             <button
               type="button"
-              onClick={() => setCentreMenuOpen(!centreMenuOpen)}
-              className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-800 px-3 py-1.5 rounded-full text-xs font-bold border border-slate-200 transition-colors cursor-pointer shadow-2xs"
-              title="Superadmin: Switch active operating centre"
+              onClick={cycleNextCentre}
+              className="flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shadow-2xs group"
+              title={`Developer Mode: Click to cycle to next centre (Current: ${centre?.name})`}
             >
-              <Building2 className="w-3.5 h-3.5 text-[#ED1C24]" />
-              <span>{centre?.name || 'All Centres'}</span>
-              <span className="bg-[#002147] text-white px-1.5 py-0.5 rounded text-[10px] font-mono">
-                {centre?.code}
-              </span>
-              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${centreMenuOpen ? 'rotate-180' : ''}`} />
+              <RefreshCw className="w-3.5 h-3.5 text-amber-600 group-hover:rotate-180 transition-transform duration-300" />
+              <span className="hidden sm:inline">Cycle Centre</span>
             </button>
-
-            {centreMenuOpen && (
-              <div className="absolute right-0 mt-1.5 w-60 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-3 py-1 text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                  Superadmin Centre Switcher
-                </div>
-                <div className="mt-1 divide-y divide-slate-100">
-                  {availableCentres.map((c) => {
-                    const isSelected = centre?.id === c.id;
-                    return (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => {
-                          switchCentre(c.id);
-                          setCentreMenuOpen(false);
-                        }}
-                        className={`w-full px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer text-left ${
-                          isSelected ? 'font-bold text-[#ED1C24] bg-red-50/50' : 'text-slate-700'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Building2 className={`w-3.5 h-3.5 ${isSelected ? 'text-[#ED1C24]' : 'text-slate-400'}`} />
-                          <span>FIITJEE {c.name}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-mono text-[10px] text-slate-400">{c.code}</span>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-[#ED1C24]" />}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
         ) : (
           <div className="flex items-center gap-1.5 bg-slate-100 text-slate-800 px-3 py-1.5 rounded-full text-xs font-bold border border-slate-200 shadow-2xs select-none">

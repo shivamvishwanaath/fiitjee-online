@@ -19,7 +19,8 @@ import {
   Sparkles,
   Lock,
   Award,
-  HelpCircle
+  HelpCircle,
+  RefreshCw
 } from 'lucide-react';
 import { CentreProfile } from '../utils/centreUtils';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
@@ -45,7 +46,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   onLogout
 }) => {
   const navigate = useNavigate();
-  const { switchCentre, availableCentres, canSwitchCentres } = useAdminAuth();
+  const { switchCentre, cycleNextCentre, availableCentres, canSwitchCentres } = useAdminAuth();
 
   const handleSignOut = async () => {
     await onLogout();
@@ -132,18 +133,28 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
               <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Active Branch</span>
             </div>
             {canSwitchCentres ? (
-              <select
-                value={centre.id}
-                onChange={(e) => switchCentre(e.target.value)}
-                className="bg-slate-800 text-[10px] text-amber-300 font-bold rounded px-1.5 py-0.5 border border-slate-600 focus:outline-none cursor-pointer"
-                title="Superadmin: Switch Active Operating Centre"
-              >
-                {availableCentres.map(c => (
-                  <option key={c.id} value={c.id} className="bg-slate-900 text-white">
-                    {c.name} {c.code}
-                  </option>
-                ))}
-              </select>
+              <div className="flex items-center gap-1">
+                <select
+                  value={centre.id}
+                  onChange={(e) => switchCentre(e.target.value)}
+                  className="bg-slate-800 text-[10px] text-amber-300 font-bold rounded px-1.5 py-0.5 border border-slate-600 focus:outline-none cursor-pointer"
+                  title="Developer: Switch Active Operating Centre"
+                >
+                  {availableCentres.map(c => (
+                    <option key={c.id} value={c.id} className="bg-slate-900 text-white">
+                      {c.name} {c.code}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={cycleNextCentre}
+                  className="p-1 bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-white rounded border border-slate-600 transition-colors cursor-pointer"
+                  title={`Cycle to next centre (Current: ${centre.name})`}
+                >
+                  <RefreshCw className="w-2.5 h-2.5" />
+                </button>
+              </div>
             ) : (
               <div className="flex items-center gap-1 bg-slate-800/90 text-[10px] text-amber-300 font-bold px-1.5 py-0.5 rounded border border-slate-700 select-none" title="Branch is locked to this authenticated account">
                 <Lock className="w-2.5 h-2.5 text-amber-400" />

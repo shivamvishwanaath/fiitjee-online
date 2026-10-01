@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { 
   isSuperAdminEmail, 
+  isDeveloperEmail,
   isValidAdminEmail, 
   getCentreByEmail,
   CENTRES_CONFIG,
@@ -9,10 +10,12 @@ import {
 } from '../admin/utils/centreUtils';
 
 describe('Admin Centre and Email Authorization Logic', () => {
-  it('correctly identifies super-admin accounts', () => {
+  it('correctly identifies developer account as exclusive super-admin with cross-centre access', () => {
     expect(isSuperAdminEmail('shivam.strive@gmail.com')).toBe(true);
-    expect(isSuperAdminEmail('admin@fiitjee.online')).toBe(true);
-    expect(isSuperAdminEmail('corporate@fiitjee.online')).toBe(true);
+    expect(isDeveloperEmail('shivam.strive@gmail.com')).toBe(true);
+    // Regular admin and corporate emails are centre-isolated, not super-admin
+    expect(isSuperAdminEmail('admin@fiitjee.online')).toBe(false);
+    expect(isSuperAdminEmail('corporate@fiitjee.online')).toBe(false);
     expect(isSuperAdminEmail('random.student@gmail.com')).toBe(false);
     expect(isSuperAdminEmail('cand_7052@candidate.fiitjee.online')).toBe(false);
   });

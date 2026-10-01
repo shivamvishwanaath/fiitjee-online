@@ -12,7 +12,8 @@ import {
   Printer,
   Sparkles,
   PhoneCall,
-  Clock
+  Clock,
+  RefreshCw
 } from 'lucide-react';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useRegistrations } from '../hooks/useRegistrations';
@@ -24,7 +25,7 @@ import { ExamRegistration } from '../../types';
 
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { centre, user } = useAdminAuth();
+  const { centre, user, cycleNextCentre, canSwitchCentres } = useAdminAuth();
   const { registrations, loading, updateStatus } = useRegistrations(centre?.name, user?.email || undefined);
 
   const [selectedTicketReg, setSelectedTicketReg] = useState<ExamRegistration | null>(null);
@@ -88,7 +89,17 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Quick action buttons */}
-        <div className="flex items-center gap-2 self-stretch md:self-auto">
+        <div className="flex items-center gap-2 self-stretch md:self-auto flex-wrap">
+          {canSwitchCentres && (
+            <button
+              onClick={cycleNextCentre}
+              className="px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs group"
+              title={`Developer Mode: Click to cycle to next centre (Currently viewing: ${centre?.name})`}
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-180 transition-transform duration-300" />
+              <span>Cycle Centre</span>
+            </button>
+          )}
           <button
             onClick={() => navigate('/admin/registrations/add')}
             className="px-4 py-2 bg-[#ED1C24] hover:bg-[#c9141b] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"

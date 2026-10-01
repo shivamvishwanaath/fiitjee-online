@@ -16,6 +16,7 @@ import {
   CENTRES_CONFIG, 
   getCentreByEmail, 
   isSuperAdminEmail,
+  isDeveloperEmail,
   isValidAdminEmail 
 } from '../utils/centreUtils';
 
@@ -27,9 +28,11 @@ export interface AdminAuthContextType {
   isAuthenticated: boolean;
   isCentreLocked: boolean;
   canSwitchCentres: boolean;
+  isDeveloper: boolean;
   availableCentres: CentreProfile[];
   refreshToken: number;
   switchCentre: (centreId: string) => void;
+  cycleNextCentre: () => void;
   loginWithEmail: (email: string, pass: string, targetCentreId?: string) => Promise<void>;
   loginWithGoogle: (targetCentreId?: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -161,6 +164,14 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const cycleNextCentre = () => {
+    if (!canSwitchCentres || availableCentres.length <= 1) return;
+    const currentId = centre?.id || 'bhubaneswar';
+    const currentIndex = availableCentres.findIndex(c => c.id === currentId);
+    const nextIndex = (currentIndex + 1) % availableCentres.length;
+    switchCentre(availableCentres[nextIndex].id);
+  };
+
   const loginWithEmail = async (email: string, pass: string, targetCentreId?: string): Promise<void> => {
     setLoading(true);
     try {
@@ -191,7 +202,14 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         assignedCentre = CENTRES_CONFIG[targetCentreId];
       }
 
-      if (!isSuper && assignedCentre) {
+      if (isSuper) {
+        setIsCentreLocked(false);
+        setCanSwitchCentres(true);
+        setAvailableCentres(ALL_CENTRES);
+        const targetCentre = (targetCentreId && CENTRES_CONFIG[targetCentreId]) || CENTRES_CONFIG.bhubaneswar;
+        setCentre(targetCentre);
+        localStorage.setItem(STORAGE_KEY, targetCentre.id);
+      } else if (assignedCentre) {
         setCentre(assignedCentre);
         setIsCentreLocked(true);
         setCanSwitchCentres(false);
@@ -242,7 +260,14 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         assignedCentre = CENTRES_CONFIG[targetCentreId];
       }
 
-      if (!isSuper && assignedCentre) {
+      if (isSuper) {
+        setIsCentreLocked(false);
+        setCanSwitchCentres(true);
+        setAvailableCentres(ALL_CENTRES);
+        const targetCentre = (targetCentreId && CENTRES_CONFIG[targetCentreId]) || CENTRES_CONFIG.bhubaneswar;
+        setCentre(targetCentre);
+        localStorage.setItem(STORAGE_KEY, targetCentre.id);
+      } else if (assignedCentre) {
         setCentre(assignedCentre);
         setIsCentreLocked(true);
         setCanSwitchCentres(false);
@@ -283,9 +308,11 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     isAuthenticated: !!user && !!centre,
     isCentreLocked,
     canSwitchCentres,
+    isDeveloper: isDeveloperEmail(user?.email),
     availableCentres,
     refreshToken,
     switchCentre,
+    cycleNextCentre,
     loginWithEmail,
     loginWithGoogle,
     logout,
