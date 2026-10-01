@@ -110,7 +110,7 @@ export const AdminLogin: React.FC = () => {
           Centre Operations Portal
         </h2>
         <p className="mt-1 text-xs text-slate-300">
-          Management &amp; Admissions Operations Console
+          Management & Admissions Operations Console
         </p>
       </div>
 

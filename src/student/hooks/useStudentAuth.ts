@@ -13,6 +13,7 @@ import {
 import { ref, set, update, onValue, remove, get, query, orderByChild, equalTo } from 'firebase/database';
 import { auth, db } from '../../firebase';
 import { StudentProfile } from '../../types';
+import { sanitizeForFirebase } from '../../admin/utils/centreUtils';
 
 /**
  * Searches the Realtime Database registrations across centres for an email, phone, or roll number
@@ -497,6 +498,9 @@ export function useStudentAuth() {
   const updateStudentProfile = async (updates: Partial<StudentProfile>): Promise<void> => {
     if (!firebaseUser) throw new Error('Not authenticated');
 
+    // Clean and sanitize any undefined values so Firebase RTDB never crashes
+    const cleanUpdates = sanitizeForFirebase(updates);
+
     // If preferredCentreId is updated, update the cross-index
     if (updates.preferredCentreId && student?.preferredCentreId !== updates.preferredCentreId) {
       if (student?.preferredCentreId) {
@@ -508,10 +512,13 @@ export function useStudentAuth() {
     }
 
     const studentRef = ref(db, `students/${firebaseUser.uid}`);
-    await update(studentRef, updates);
+    await update(studentRef, cleanUpdates);
     if (updates.fullName) {
       await updateFirebaseProfile(firebaseUser, { displayName: updates.fullName });
     }
+
+    // Immediately update local state so changes reflect instantly in UI
+    setStudent(prev => prev ? { ...prev, ...cleanUpdates } : null);
   };
 
   /**

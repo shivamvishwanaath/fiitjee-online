@@ -261,7 +261,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
         <div className="border-t border-slate-200 pt-3 flex justify-between items-center">
           <div>
             <span className="text-base font-black text-[#002147]">Total Net Payable</span>
-            <span className="text-[11px] text-slate-400 block font-normal">Inclusive of all applicable taxes &amp; examination fees</span>
+            <span className="text-[11px] text-slate-400 block font-normal">Inclusive of all applicable taxes & examination fees</span>
           </div>
           <div className="text-right">
             <span className="text-2xl font-black text-[#ED1C24]">
@@ -360,7 +360,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
             ) : (
               <>
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Confirm &amp; Complete Registration</span>
+                <span>Confirm & Complete Registration</span>
               </>
             )}
           </button>

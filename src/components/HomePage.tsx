@@ -70,7 +70,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               onClick={() => onNavigate('/all-programs')}
               className="text-xs font-bold text-[#ED1C24] hover:underline uppercase"
             >
-              View All Programs &rarr;
+              View All Programs →
             </button>
           </div>
           <CourseFinderWizard
@@ -93,7 +93,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               onClick={() => onNavigate('/fiitjee-results')}
               className="text-xs font-bold text-[#ED1C24] hover:underline uppercase"
             >
-              View Full Hall of Fame &rarr;
+              View Full Hall of Fame →
             </button>
           </div>
           <ResultsShowcase />
@@ -109,7 +109,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               onClick={() => onNavigate('/fiitjee-centres')}
               className="text-xs font-bold text-[#ED1C24] hover:underline uppercase"
             >
-              Search All Centers &rarr;
+              Search All Centers →
             </button>
           </div>
           <CenterLocator

@@ -402,7 +402,7 @@ export const CRMCompose: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[10px] uppercase font-mono font-black tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                Serverbyt SMTP Connected &bull; Port 465 (SSL)
+                Serverbyt SMTP Connected • Port 465 (SSL)
               </span>
               <span className="text-[10px] text-slate-300 font-mono">
                 Host: smtp.fiitjee.online
@@ -740,7 +740,7 @@ export const CRMCompose: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Target Segment:</span>
-                  <span className="text-slate-700">{selectedStatus} Status &bull; {selectedTestDate} Test</span>
+                  <span className="text-slate-700">{selectedStatus} Status • {selectedTestDate} Test</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Outgoing Host:</span>

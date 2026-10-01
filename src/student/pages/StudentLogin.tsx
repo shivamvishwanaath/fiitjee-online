@@ -240,12 +240,22 @@ export const StudentLogin: React.FC = () => {
       navigate(redirectUrl);
     } catch (err: any) {
       console.error('Student login error:', err);
-      if (err.message && !err.message.includes('Firebase:')) {
-        setErrorMessage(err.message);
-      } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+      const isAuthErr = 
+        err.code === 'auth/invalid-credential' || 
+        err.code === 'auth/wrong-password' || 
+        err.code === 'auth/user-not-found' ||
+        (typeof err.message === 'string' && (
+          err.message.includes('auth/invalid-credential') || 
+          err.message.includes('auth/wrong-password') || 
+          err.message.includes('auth/user-not-found')
+        ));
+
+      if (isAuthErr) {
         setErrorMessage('Incorrect mobile number/email or password. Please verify your details, or switch to "Roll No / Fast" if you registered for an admission test.');
+      } else if (err.message && !err.message.includes('Firebase:')) {
+        setErrorMessage(err.message);
       } else {
-        setErrorMessage(err.message || 'Failed to sign in. Please verify your internet and credentials.');
+        setErrorMessage('Failed to sign in. Please verify your internet and credentials.');
       }
     } finally {
       setSubmitting(false);
@@ -1533,7 +1543,7 @@ export const StudentLogin: React.FC = () => {
                 <span>FIITJEE Centre Staff?</span>
               </span>
               <Link to="/admin/login" className="font-bold text-[#002147] hover:text-[#ED1C24] transition-colors underline">
-                Access Centre Admin Portal &rarr;
+                Access Centre Admin Portal →
               </Link>
             </div>
 
@@ -1600,7 +1610,7 @@ export const StudentLogin: React.FC = () => {
                       }}
                       className="text-xs font-medium text-slate-600 hover:text-[#ED1C24] transition-colors py-1 cursor-pointer"
                     >
-                      Or Sign in via Roll No / Mobile &rarr;
+                      Or Sign in via Roll No / Mobile →
                     </button>
                   </div>
                 </div>

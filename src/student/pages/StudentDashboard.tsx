@@ -17,6 +17,7 @@ import {
   School, 
   CreditCard, 
   ArrowRight,
+  ArrowLeft,
   ExternalLink,
   Copy,
   Check,
@@ -400,10 +401,10 @@ export const StudentDashboard: React.FC = () => {
         phone: profileForm.phone.trim(),
         schoolName: profileForm.schoolName.trim(),
         currentClass: profileForm.currentClass,
-        preferredCentreId: profileForm.preferredCentreId || undefined,
-        city: profileForm.city.trim() || undefined,
-        state: profileForm.state.trim() || undefined,
-        pincode: profileForm.pincode.trim() || undefined
+        preferredCentreId: profileForm.preferredCentreId || 'bhubaneswar',
+        city: profileForm.city.trim() || '',
+        state: profileForm.state.trim() || '',
+        pincode: profileForm.pincode.trim() || ''
       });
       setSaveSuccess(true);
       setEditingProfile(false);
@@ -689,7 +690,8 @@ export const StudentDashboard: React.FC = () => {
             to="/" 
             className="text-slate-400 hover:text-white transition-colors text-[11px] font-bold flex items-center gap-1"
           >
-            <span>&larr; Main Site</span>
+            <ArrowLeft className="w-3 h-3" />
+            <span>Main Site</span>
           </Link>
 
           <button
@@ -818,8 +820,9 @@ export const StudentDashboard: React.FC = () => {
             </div>
 
             <div className="pt-3 border-t border-slate-800 flex justify-between items-center text-xs shrink-0">
-              <Link to="/" className="text-slate-400 hover:text-white font-bold text-xs">
-                &larr; Main Site
+              <Link to="/" className="text-slate-400 hover:text-white font-bold text-xs flex items-center gap-1">
+                <ArrowLeft className="w-3 h-3" />
+                <span>Main Site</span>
               </Link>
               <button
                 onClick={() => { logout(); navigate('/student/login'); }}
@@ -1717,7 +1720,7 @@ export const StudentDashboard: React.FC = () => {
                                 Results Scheduled Post-Evaluation
                               </h4>
                               <p className="text-xs text-slate-600 leading-relaxed">
-                                Evaluation for Big Bang Edge Test 2026 takes place after test completion on 11th &amp; 18th October 2026. Your official marks, All India Rank (AIR), and scholarship voucher will be automatically published here.
+                                Evaluation for Big Bang Edge Test 2026 takes place after test completion on 11th & 18th October 2026. Your official marks, All India Rank (AIR), and scholarship voucher will be automatically published here.
                               </p>
                             </div>
                             <div className="pt-2">
@@ -1858,7 +1861,8 @@ export const StudentDashboard: React.FC = () => {
                       ) : (
                         <Send className="w-4 h-4" />
                       )}
-                      <span>Send to Centre Team &rarr;</span>
+                      <span>Send to Centre Team</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </form>
@@ -2126,9 +2130,16 @@ export const StudentDashboard: React.FC = () => {
                       <button
                         type="submit"
                         disabled={savingProfile}
-                        className="px-6 py-2.5 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-bold cursor-pointer disabled:opacity-50 transition-all shadow-xs"
+                        className="px-6 py-2.5 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-bold cursor-pointer disabled:opacity-50 transition-all shadow-xs flex items-center gap-1.5"
                       >
-                        {savingProfile ? 'Saving Changes...' : 'Save Changes &rarr;'}
+                        {savingProfile ? (
+                          <span>Saving Changes...</span>
+                        ) : (
+                          <>
+                            <span>Save Changes</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </>
+                        )}
                       </button>
                       <button
                         type="button"

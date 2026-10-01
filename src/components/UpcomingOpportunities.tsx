@@ -184,7 +184,7 @@ export const UpcomingOpportunities: React.FC<UpcomingOpportunitiesProps> = ({
               onClick={() => onNavigate('/fiitjee-admission-test-details')}
               className="px-6 py-3 bg-transparent border-2 border-slate-300 hover:border-[#ED1C24] text-slate-700 hover:text-[#ED1C24] font-black text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center"
             >
-              Other Test Dates &rarr;
+              Other Test Dates →
             </button>
           </div>
         </div>

@@ -185,13 +185,13 @@ export const AdminDashboard: React.FC = () => {
             onClick={() => navigate('/admin/crm')}
             className="text-[#002147] hover:underline font-bold"
           >
-            Send Exam Reminders &rarr;
+            Send Exam Reminders →
           </button>
           <button
             onClick={() => navigate('/admin/registrations')}
             className="text-[#ED1C24] hover:underline font-bold"
           >
-            View All Applications &rarr;
+            View All Applications →
           </button>
         </div>
       </div>
