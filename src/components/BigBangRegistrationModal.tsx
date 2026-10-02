@@ -14,7 +14,8 @@ import {
   ArrowRight,
   ShieldCheck,
   AlertTriangle,
-  Loader2
+  Loader2,
+  Building2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { ref, push, set, get, query, orderByChild, equalTo, update } from 'firebase/database';
@@ -38,6 +39,7 @@ interface BigBangRegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
   examId?: string;
+  defaultCenter?: string;
 }
 
 const initialFormData = {
@@ -70,7 +72,8 @@ function sanitizeForFirebase<T>(obj: T): T {
 export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> = ({
   isOpen,
   onClose,
-  examId = 'big-bang-edge-test'
+  examId = 'big-bang-edge-test',
+  defaultCenter: defaultCenterProp
 }) => {
   const navigate = useNavigate();
   const { student, isAuthenticated } = useStudentAuth();
@@ -101,11 +104,13 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
       setLastPaymentData(null);
 
       if (student) {
-        let defaultCenter = 'Bhubaneswar';
-        if (student.preferredCentreId === 'dwarka') defaultCenter = 'Dwarka';
-        else if (student.preferredCentreId === 'ranchi') defaultCenter = 'Ranchi';
-        else if (student.preferredCentreId === 'hyderabad') defaultCenter = 'Hyderabad';
-        else if (student.preferredCentreId === 'bhubaneswar') defaultCenter = 'Bhubaneswar';
+        let defaultCenter = defaultCenterProp || 'Bhubaneswar';
+        if (!defaultCenterProp) {
+          if (student.preferredCentreId === 'dwarka') defaultCenter = 'Dwarka';
+          else if (student.preferredCentreId === 'ranchi') defaultCenter = 'Ranchi';
+          else if (student.preferredCentreId === 'hyderabad') defaultCenter = 'Hyderabad';
+          else if (student.preferredCentreId === 'bhubaneswar') defaultCenter = 'Bhubaneswar';
+        }
 
         setFormData({
           studentName: student.fullName || '',
@@ -121,11 +126,12 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
       } else {
         setFormData({ 
           ...initialFormData,
+          selectedCenter: defaultCenterProp || 'Bhubaneswar',
           currentClass: BIG_BANG_CLASSES[5].label
         });
       }
     }
-  }, [isOpen, student]);
+  }, [isOpen, student, defaultCenterProp]);
 
   // Synchronize dynamic exam configuration for the selected centre
   useEffect(() => {
@@ -232,7 +238,12 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
       try {
         const selCentre = getCentreByName(formData.selectedCenter || 'Bhubaneswar');
         const centreId = selCentre.id;
-        const dbRef = ref(db, `${BIG_BANG_EXAM.registrationDbPath}/${centreId}`);
+        const checkExamId = examConfig?.id || BIG_BANG_EXAM.id;
+        const checkExamYear = examConfig?.year || BIG_BANG_EXAM.year;
+        const regDbPath = (checkExamId && checkExamId !== 'big-bang-edge-test')
+          ? `registrations/${checkExamId}_${checkExamYear}`
+          : BIG_BANG_EXAM.registrationDbPath;
+        const dbRef = ref(db, `${regDbPath}/${centreId}`);
         let existingReg: ExamRegistration | null = null;
 
         try {
@@ -352,9 +363,16 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
         }
       }
 
+      const cleanExamId = examConfig?.id || BIG_BANG_EXAM.id;
+      const cleanExamYear = examConfig?.year || BIG_BANG_EXAM.year;
+      const cleanExamName = examConfig?.name || BIG_BANG_EXAM.name;
+      const registrationDbPath = (cleanExamId && cleanExamId !== 'big-bang-edge-test') 
+        ? `registrations/${cleanExamId}_${cleanExamYear}` 
+        : BIG_BANG_EXAM.registrationDbPath;
+
       const payload: ExamRegistration = {
-        examId: BIG_BANG_EXAM.id,
-        examYear: BIG_BANG_EXAM.year,
+        examId: cleanExamId,
+        examYear: cleanExamYear,
         studentName: formData.studentName.trim(),
         parentName: formData.parentName.trim(),
         currentClass: formData.currentClass,
@@ -381,7 +399,7 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
       };
 
       const cleanRollKey = rollNo.replace(/\s+/g, '_');
-      const dbRef = ref(db, `${BIG_BANG_EXAM.registrationDbPath}/${centreId}/${cleanRollKey}`);
+      const dbRef = ref(db, `${registrationDbPath}/${centreId}/${cleanRollKey}`);
       await set(dbRef, sanitizeForFirebase(payload));
 
       // Link registration to authenticated or newly provisioned student profile
@@ -402,10 +420,11 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
             registeredAt: new Date().toISOString()
           }));
 
-          const studentExamLinkRef = ref(db, `students/${effectiveStudentUid}/registeredExams/big_bang_2026`);
+          const cleanExamLinkKey = cleanExamId.replace(/[^a-zA-Z0-9_-]/g, '_');
+          const studentExamLinkRef = ref(db, `students/${effectiveStudentUid}/registeredExams/${cleanExamLinkKey}`);
           await set(studentExamLinkRef, sanitizeForFirebase({
-            examId: BIG_BANG_EXAM.id,
-            examName: BIG_BANG_EXAM.name,
+            examId: cleanExamId,
+            examName: cleanExamName,
             rollNo: rollNo,
             centreId: centreId,
             selectedCenter: selectedCentreProfile.name,
@@ -625,11 +644,14 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
                     onChange={(e) => setFormData({ ...formData, currentClass: e.target.value })}
                     className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ED1C24] outline-hidden font-semibold"
                   >
-                    {BIG_BANG_CLASSES.map((cls) => (
-                      <option key={cls.code} value={cls.label}>
-                        {cls.label}
-                      </option>
-                    ))}
+                    {BIG_BANG_CLASSES.map((cls) => {
+                      const fee = calculateExamFeeForClass(examConfig, cls.label);
+                      return (
+                        <option key={cls.code} value={cls.label}>
+                          {cls.label} — ₹{fee}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
                 <div>
@@ -785,7 +807,32 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
                     ))}
                   </div>
 
-                  {formData.selectedCenter === 'Ranchi' && (
+                  {/* Designated Test Venues from examConfig for this specific centre */}
+                  {examConfig?.venues && examConfig.venues.length > 0 ? (
+                    <div className="mt-3.5 pt-3.5 border-t border-slate-200 space-y-2">
+                      <label className="block text-xs font-bold text-slate-700 flex items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          <Building2 className="w-3.5 h-3.5 text-[#ED1C24]" />
+                          <span>Designated Test Venue(s) for FIITJEE {formData.selectedCenter} Centre</span>
+                        </span>
+                        <span className="text-[10px] text-slate-500 font-normal">Official Test Labs</span>
+                      </label>
+                      <div className={`grid grid-cols-1 ${examConfig.venues.length > 1 ? 'sm:grid-cols-2' : ''} gap-2.5`}>
+                        {examConfig.venues.map((v, vIdx) => (
+                          <div 
+                            key={vIdx}
+                            className="p-3 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-2xs hover:border-slate-300 transition-colors"
+                          >
+                            <div className="font-bold text-[#002147] text-xs flex items-center justify-between">
+                              <span>{v.name}</span>
+                              {v.phone && <span className="text-[10px] text-slate-500 font-mono">Ph: {v.phone}</span>}
+                            </div>
+                            {v.address && <div className="text-[10px] text-slate-500 mt-1">{v.address}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : formData.selectedCenter === 'Ranchi' ? (
                     <div className="mt-3.5 pt-3.5 border-t border-slate-200 space-y-2">
                       <label className="block text-xs font-bold text-slate-700">Select Ranchi Test Centre Venue *</label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -821,7 +868,7 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
                         </button>
                       </div>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               ) : (
                 <div className="p-3 bg-blue-50 border border-blue-200 text-[#002147] rounded-xl text-xs font-bold flex items-start gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -875,7 +922,7 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
                 <div className="border-t border-slate-200 pt-2 grid grid-cols-2 sm:grid-cols-3 gap-2 font-bold text-slate-800">
                   <div>Date: {formData.testDate}</div>
                   <div>Mode: {formData.testMode}</div>
-                  <div>Exam Fee: <span className="text-[#ED1C24]">₹{getRegistrationFeeForClass(formData.currentClass)}</span></div>
+                  <div>Exam Fee: <span className="text-[#ED1C24]">₹{calculateExamFeeForClass(examConfig, formData.currentClass)}</span> <span className="text-[10px] text-slate-500 font-normal">({formData.selectedCenter} Centre Rate)</span></div>
                   {formData.testMode === 'Offline' && <div className="sm:col-span-3">Center: {formData.selectedCenter}</div>}
                 </div>
               </div>

@@ -87,9 +87,21 @@ export const BIG_BANG_EXAM: AdmissionExam = {
   isFree: false
 };
 
-import { calculateExamFeeForClass } from '../admin/utils/examUtils';
+import { calculateExamFeeForClass, DEFAULT_CENTRE_EXAMS, CentreExamConfig } from '../admin/utils/examUtils';
 
-export function getRegistrationFeeForClass(className?: string): number {
+export function getRegistrationFeeForClass(
+  className?: string,
+  centreId?: string,
+  examConfig?: CentreExamConfig | null
+): number {
+  if (examConfig) {
+    return calculateExamFeeForClass(examConfig, className);
+  }
+  if (centreId) {
+    const cleanId = centreId.toLowerCase();
+    const blueprint = DEFAULT_CENTRE_EXAMS[cleanId] || DEFAULT_CENTRE_EXAMS.bhubaneswar;
+    return calculateExamFeeForClass(blueprint, className);
+  }
   return calculateExamFeeForClass(null, className);
 }
 

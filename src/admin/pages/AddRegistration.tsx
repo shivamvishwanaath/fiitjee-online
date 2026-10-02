@@ -20,7 +20,8 @@ import { ref, set } from 'firebase/database';
 import { firebaseConfig, db } from '../../firebase';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useRegistrations } from '../hooks/useRegistrations';
-import { ALL_CENTRES, generateSID, generateInvoiceNumber, getCentreByName, generateRollNumber, getRegistrationFeeForClass, BIG_BANG_CLASSES, getClassOption } from '../utils/centreUtils';
+import { ALL_CENTRES, generateSID, generateInvoiceNumber, getCentreByName, generateRollNumber, BIG_BANG_CLASSES, getClassOption } from '../utils/centreUtils';
+import { getCentreExams, calculateExamFeeForClass, CentreExamConfig } from '../utils/examUtils';
 import { HallTicketModal } from '../../components/HallTicketModal';
 import { ExamRegistration } from '../../types';
 
@@ -28,6 +29,9 @@ export const AddRegistration: React.FC = () => {
   const navigate = useNavigate();
   const { centre, user, canSwitchCentres } = useAdminAuth();
   const { addRegistration, registrations } = useRegistrations(centre?.name, user?.email || undefined);
+
+  const [centreExams, setCentreExams] = useState<CentreExamConfig[]>([]);
+  const [selectedExamId, setSelectedExamId] = useState<string>('big-bang-edge-test');
 
   const [formData, setFormData] = useState({
     studentName: '',
@@ -42,11 +46,35 @@ export const AddRegistration: React.FC = () => {
     testMode: 'Offline' as 'Offline' | 'Proctored Online',
     testDate: '11th October 2026 (Sunday)',
     status: 'Confirmed' as ExamRegistration['status'],
-    paymentAmount: getRegistrationFeeForClass(BIG_BANG_CLASSES[5].label),
+    paymentAmount: 250,
     paymentMode: 'Cash (Counter)',
     paymentStatus: 'paid' as 'paid' | 'pending' | 'free',
     paymentRef: ''
   });
+
+  const targetCentreProfile = getCentreByName(formData.selectedCenter);
+  const targetCentreId = targetCentreProfile?.id || 'bhubaneswar';
+  const selectedCentreProfile = targetCentreProfile || { name: formData.selectedCenter, id: targetCentreId, code: '820' };
+
+  // Load centre-specific exams whenever selected center changes
+  React.useEffect(() => {
+    let isMounted = true;
+    getCentreExams(targetCentreId).then(exams => {
+      if (isMounted && exams && exams.length > 0) {
+        setCentreExams(exams);
+        const currentExam = exams.find(e => e.id === selectedExamId) || exams[0];
+        setSelectedExamId(currentExam.id);
+        const classFee = calculateExamFeeForClass(currentExam, formData.currentClass);
+        setFormData(prev => ({
+          ...prev,
+          paymentAmount: classFee,
+          testDate: currentExam.testDates && currentExam.testDates.length > 0 ? currentExam.testDates[0] : prev.testDate,
+          testMode: currentExam.modes && currentExam.modes.length > 0 ? currentExam.modes[0] : prev.testMode
+        }));
+      }
+    });
+    return () => { isMounted = false; };
+  }, [targetCentreId]);
 
   React.useEffect(() => {
     if (centre?.name && !canSwitchCentres) {
@@ -57,17 +85,33 @@ export const AddRegistration: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [createdReg, setCreatedReg] = useState<ExamRegistration | null>(null);
 
+  const selectedExam = centreExams.find(e => e.id === selectedExamId) || centreExams[0] || null;
+
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleClassChange = (newClass: string) => {
-    const standardFee = getRegistrationFeeForClass(newClass);
+    const fee = calculateExamFeeForClass(selectedExam, newClass);
     setFormData(prev => ({
       ...prev,
       currentClass: newClass,
-      paymentAmount: standardFee
+      paymentAmount: fee
     }));
+  };
+
+  const handleExamChange = (newExamId: string) => {
+    setSelectedExamId(newExamId);
+    const exam = centreExams.find(e => e.id === newExamId);
+    if (exam) {
+      const fee = calculateExamFeeForClass(exam, formData.currentClass);
+      setFormData(prev => ({
+        ...prev,
+        paymentAmount: fee,
+        testDate: exam.testDates && exam.testDates.length > 0 ? exam.testDates[0] : prev.testDate,
+        testMode: exam.modes && exam.modes.length > 0 ? exam.modes[0] : prev.testMode
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -139,8 +183,8 @@ export const AddRegistration: React.FC = () => {
       }
 
       const newRecord: ExamRegistration = {
-        examId: 'big_bang_2026',
-        examYear: '2026',
+        examId: selectedExam?.id || 'big_bang_2026',
+        examYear: selectedExam?.year || '2026',
         studentName: formData.studentName.trim(),
         parentName: formData.parentName.trim(),
         currentClass: formData.currentClass,
@@ -350,6 +394,27 @@ export const AddRegistration: React.FC = () => {
               )}
             </div>
 
+            {/* Centre Exam Blueprint Selector */}
+            <div className="sm:col-span-2">
+              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px] flex items-center justify-between">
+                <span>Examination Blueprint for {selectedCentreProfile.name} Centre *</span>
+                <span className="text-emerald-700 font-bold lowercase text-[10px]">
+                  {selectedExam?.registrationOpen ? '🟢 registration open' : '🔴 registration paused'}
+                </span>
+              </label>
+              <select
+                value={selectedExamId}
+                onChange={(e) => handleExamChange(e.target.value)}
+                className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] bg-white font-bold text-xs"
+              >
+                {centreExams.map((exam) => (
+                  <option key={exam.id} value={exam.id}>
+                    {exam.name} ({exam.year}) — {exam.registrationOpen ? 'Open' : 'Paused'}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Ranchi Test Centre Venue Selection */}
             {formData.selectedCenter.toLowerCase().includes('ranchi') && (
               <div>
@@ -377,8 +442,11 @@ export const AddRegistration: React.FC = () => {
                 onChange={(e) => handleInputChange('testMode', e.target.value as any)}
                 className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] bg-white font-bold"
               >
-                <option value="Offline">Offline Physical Classroom Test</option>
-                <option value="Proctored Online">Proctored Online (From Home)</option>
+                {(selectedExam?.modes && selectedExam.modes.length > 0 ? selectedExam.modes : ['Offline', 'Proctored Online']).map((mode) => (
+                  <option key={mode} value={mode}>
+                    {mode === 'Offline' ? 'Offline Physical Classroom Test' : 'Proctored Online (From Home)'}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -392,8 +460,9 @@ export const AddRegistration: React.FC = () => {
                 onChange={(e) => handleInputChange('testDate', e.target.value)}
                 className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] bg-white font-bold text-[#002147]"
               >
-                <option value="11th October 2026 (Sunday)">11th October 2026 (Sunday)</option>
-                <option value="18th October 2026 (Sunday)">18th October 2026 (Sunday)</option>
+                {(selectedExam?.testDates && selectedExam.testDates.length > 0 ? selectedExam.testDates : ['11th October 2026 (Sunday)', '18th October 2026 (Sunday)']).map((date) => (
+                  <option key={date} value={date}>{date}</option>
+                ))}
               </select>
             </div>
 
@@ -412,6 +481,25 @@ export const AddRegistration: React.FC = () => {
                 <option value="Contacted">Contacted</option>
               </select>
             </div>
+
+            {/* Centre Offline Test Venues Banner (if configured) */}
+            {formData.testMode === 'Offline' && selectedExam?.venues && selectedExam.venues.length > 0 && (
+              <div className="sm:col-span-2 p-3 bg-blue-50/70 border border-blue-200 rounded-xl space-y-1">
+                <span className="text-[10px] font-bold text-blue-900 uppercase tracking-wider flex items-center gap-1">
+                  <Building2 className="w-3.5 h-3.5 text-[#002147]" />
+                  <span>Designated Test Venue(s) for FIITJEE {selectedCentreProfile.name} Centre</span>
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                  {selectedExam.venues.map((venue, vIdx) => (
+                    <div key={vIdx} className="text-xs text-slate-700 bg-white p-2.5 rounded-lg border border-blue-100 shadow-2xs">
+                      <div className="font-bold text-[#002147]">{venue.name}</div>
+                      {venue.address && <div className="text-[10px] text-slate-600">{venue.address}</div>}
+                      {venue.phone && <div className="text-[10px] text-slate-500 font-mono">Ph: {venue.phone}</div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* --- Fee Collection & Counter Payment Section --- */}
             <div className="sm:col-span-2 pt-4 border-t border-slate-200 mt-2">
@@ -443,8 +531,8 @@ export const AddRegistration: React.FC = () => {
                       className="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] font-mono font-bold text-xs"
                     />
                   </div>
-                  <span className="text-[9px] text-slate-400 mt-0.5 block">
-                    Standard fee for {formData.currentClass}: ₹{getRegistrationFeeForClass(formData.currentClass)}
+                  <span className="text-[9px] text-slate-500 mt-0.5 block">
+                    Standard fee for {formData.currentClass} at {selectedCentreProfile.name}: <strong className="text-slate-900">₹{calculateExamFeeForClass(selectedExam, formData.currentClass)}</strong>
                   </span>
                 </div>
 

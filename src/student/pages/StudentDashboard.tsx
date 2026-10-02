@@ -53,6 +53,7 @@ import { deregisterCandidateExam } from '../../admin/utils/developerUtils';
 import { ExamRegistration, StudentExamLink, SupportTicket, ExamResult } from '../../types';
 import { BIG_BANG_EXAM } from '../../data/examsData';
 import { getExamScheduleForClass, CENTRES_CONFIG, getRegistrationFeeForClass, getClassOption } from '../../admin/utils/centreUtils';
+import { getCentreExams, calculateExamFeeForClass, CentreExamConfig } from '../../admin/utils/examUtils';
 import { ref, onValue, get, push, set } from 'firebase/database';
 import { db } from '../../firebase';
 import { sendTicketEmailAlertToCentre } from '../../services/ticketEmailAlert';
@@ -155,6 +156,34 @@ export const StudentDashboard: React.FC = () => {
   const [isBigBangModalOpen, setIsBigBangModalOpen] = useState(false);
   const [isFtreModalOpen, setIsFtreModalOpen] = useState(false);
   const [copiedRoll, setCopiedRoll] = useState<string | null>(null);
+
+  // Centre-specific admission exams state
+  const [activeFilterCentreId, setActiveFilterCentreId] = useState<string>('bhubaneswar');
+  const [centreExams, setCentreExams] = useState<CentreExamConfig[]>([]);
+  const [loadingCentreExams, setLoadingCentreExams] = useState<boolean>(true);
+  const [selectedRegisterExamId, setSelectedRegisterExamId] = useState<string>('big-bang-edge-test');
+
+  useEffect(() => {
+    if (student?.preferredCentreId) {
+      setActiveFilterCentreId(student.preferredCentreId);
+    }
+  }, [student?.preferredCentreId]);
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoadingCentreExams(true);
+    getCentreExams(activeFilterCentreId)
+      .then(exams => {
+        if (isMounted) {
+          setCentreExams(exams);
+        }
+      })
+      .catch(err => console.error('Error fetching centre exams in StudentDashboard:', err))
+      .finally(() => {
+        if (isMounted) setLoadingCentreExams(false);
+      });
+    return () => { isMounted = false; };
+  }, [activeFilterCentreId]);
 
   // Profile Edit State
   const [editingProfile, setEditingProfile] = useState(false);
@@ -2372,124 +2401,269 @@ export const StudentDashboard: React.FC = () => {
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 7: AVAILABLE TESTS (Big Bang & FTRE with 1-click apply)               */}
+          {/* TAB 7: AVAILABLE TESTS (Dynamically loaded per Centre)                     */}
           {/* ========================================================================= */}
           {activeTab === 'available' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="border-b border-slate-200 pb-4">
-                <div className="inline-flex items-center gap-1.5 bg-red-50 text-[#ED1C24] border border-red-200 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full mb-2">
-                  <Sparkles className="w-3 h-3" />
-                  <span>National Admissions 2026</span>
-                </div>
-                <h2 className="text-xl font-black text-[#002147] uppercase font-display">
-                  Available Admission & Scholarship Tests
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Pre-filled application with your saved student profile for instant hall ticket generation.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Big Bang Card */}
-                <div className="bg-white rounded-3xl border border-slate-200/80 shadow-md p-6 space-y-4 flex flex-col justify-between">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="bg-[#ED1C24] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full">
-                        Spotlight Admission Exam
-                      </span>
-                      <span className="text-xs font-bold text-amber-600 font-mono">2026 Edition</span>
-                    </div>
-                    <h3 className="text-xl font-black text-[#002147] uppercase font-display">
-                      FIITJEE Big Bang Edge Test 2026
-                    </h3>
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      A 360° diagnostic examination of scholastic aptitude, analytical potential & All India rank benchmarking across 4 major hubs.
-                    </p>
-
-                    <div className="space-y-1.5 pt-2 text-xs text-slate-700">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-[#ED1C24]" />
-                        <span><strong>Exam Dates:</strong> 11th & 18th October 2026 (Sunday)</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <GraduationCap className="w-4 h-4 text-[#ED1C24]" />
-                        <span><strong>Target Classes:</strong> Class V, VI, VII, VIII, IX, X, XI</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-[#ED1C24]" />
-                        <span><strong>Exam Hubs:</strong> Bhubaneswar, Dwarka, Ranchi, Hyderabad</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-[#ED1C24]" />
-                        <span><strong>Test Fee:</strong> ₹200 (Class V–VIII) · ₹250 (Class IX–XI)</span>
-                      </div>
-                    </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 bg-red-50 text-[#ED1C24] border border-red-200 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full mb-2">
+                    <Sparkles className="w-3 h-3" />
+                    <span>Live Branch Examination Blueprints</span>
                   </div>
-
-                  <div className="pt-4 border-t border-slate-100">
-                    {isBigBangRegistered ? (
-                      <button
-                        onClick={() => handleTabChange('hall-tickets')}
-                        className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-[#002147] rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-colors"
-                      >
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                        <span>Already Registered • Download Hall Ticket</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setIsBigBangModalOpen(true)}
-                        className="w-full py-2.5 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all"
-                      >
-                        <Sparkles className="w-4 h-4" />
-                        <span>Register Now (Pre-filled Profile)</span>
-                      </button>
-                    )}
-                  </div>
+                  <h2 className="text-xl font-black text-[#002147] uppercase font-display">
+                    Available Admission & Scholarship Tests
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Branch-specific fees, official test dates, physical lab venues, and direct instant registration.
+                  </p>
                 </div>
 
-                {/* FTRE Card */}
-                <div className="bg-white rounded-3xl border border-slate-200/80 shadow-md p-6 space-y-4 flex flex-col justify-between">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="bg-[#002147] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full">
-                        Scholarship Test
-                      </span>
-                      <span className="text-xs font-bold text-slate-500 font-mono">Annual National Test</span>
-                    </div>
-                    <h3 className="text-xl font-black text-[#002147] uppercase font-display">
-                      FTRE 2026-27 (Talent Reward Exam)
-                    </h3>
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      India’s premier scholarship exam offering up to 100% tuition fee waiver, hostel fee assistance, and cash scholarships.
-                    </p>
-
-                    <div className="space-y-1.5 pt-2 text-xs text-slate-700">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-[#002147]" />
-                        <span><strong>Exam Period:</strong> December 2026</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Award className="w-4 h-4 text-[#002147]" />
-                        <span><strong>Scholarships:</strong> Up to 100% Tuition Fee Waiver</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <GraduationCap className="w-4 h-4 text-[#002147]" />
-                        <span><strong>Eligible:</strong> Class V to XI students</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-100">
+                {/* Branch Switcher Tabs */}
+                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0 self-start sm:self-auto">
+                  {Object.entries(CENTRES_CONFIG).map(([cid, cProfile]) => (
                     <button
-                      onClick={() => setIsFtreModalOpen(true)}
-                      className="w-full py-2.5 bg-[#002147] hover:bg-[#001733] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-colors"
+                      key={cid}
+                      onClick={() => setActiveFilterCentreId(cid)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        activeFilterCentreId === cid
+                          ? 'bg-[#002147] text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                      }`}
                     >
-                      <span>Apply for FTRE Scholarship</span>
-                      <ArrowRight className="w-4 h-4" />
+                      {cProfile.name}
                     </button>
-                  </div>
+                  ))}
                 </div>
               </div>
+
+              {/* Centre Info Banner */}
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-red-100 text-[#ED1C24] flex items-center justify-center font-bold shrink-0">
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-extrabold text-[#002147]">
+                      FIITJEE {CENTRES_CONFIG[activeFilterCentreId]?.name || 'Centre'} Admissions
+                    </div>
+                    <div className="text-slate-500 text-[11px]">
+                      {CENTRES_CONFIG[activeFilterCentreId]?.address} • Ph: {CENTRES_CONFIG[activeFilterCentreId]?.phoneNumbers[0]}
+                    </div>
+                  </div>
+                </div>
+                {student?.preferredCentreId === activeFilterCentreId && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full font-bold text-[10px] uppercase tracking-wider self-start sm:self-auto">
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span>Your Home Centre</span>
+                  </span>
+                )}
+              </div>
+
+              {/* Exams Grid */}
+              {loadingCentreExams ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <SkeletonCard rows={3} />
+                  <SkeletonCard rows={3} />
+                </div>
+              ) : centreExams.length === 0 ? (
+                <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-3">
+                  <Award className="w-12 h-12 text-slate-300 mx-auto" />
+                  <h3 className="font-bold text-slate-800 text-sm">No Active Tests Found for This Centre</h3>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    There are currently no admission tests scheduled for FIITJEE {CENTRES_CONFIG[activeFilterCentreId]?.name} Centre.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {centreExams.map((exam) => {
+                    const isRegistered = registeredList.some(
+                      r => r.examId === exam.id || (exam.id === 'big-bang-edge-test' && ['6052', '7052', '8052', '9052', '1052', '1152', '1252'].some(code => r.rollNo?.startsWith(code)))
+                    );
+                    const studentFee = calculateExamFeeForClass(exam, student?.currentClass);
+                    const isClosed = exam.registrationOpen === false;
+
+                    return (
+                      <div 
+                        key={exam.id}
+                        className="bg-white rounded-3xl border border-slate-200/80 shadow-md p-6 space-y-4 flex flex-col justify-between hover:border-slate-300 transition-all"
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between flex-wrap gap-2">
+                            <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+                              isClosed
+                                ? 'bg-red-100 text-red-700 border border-red-200'
+                                : 'bg-[#ED1C24] text-white'
+                            }`}>
+                              {isClosed ? 'Registration Paused' : 'Live Admission Exam'}
+                            </span>
+                            <span className="text-xs font-bold text-amber-600 font-mono">
+                              {exam.year || '2026'} Edition
+                            </span>
+                          </div>
+
+                          <h3 className="text-xl font-black text-[#002147] uppercase font-display">
+                            {exam.name}
+                          </h3>
+
+                          {exam.tagline && (
+                            <p className="text-xs text-slate-600 italic">
+                              "{exam.tagline}"
+                            </p>
+                          )}
+
+                          <p className="text-xs text-slate-600 leading-relaxed">
+                            {exam.description || 'A comprehensive diagnostic evaluation assessing conceptual aptitude and competitive benchmark.'}
+                          </p>
+
+                          <div className="space-y-2 pt-2 text-xs text-slate-700">
+                            {/* Exam Dates */}
+                            <div className="flex items-start gap-2">
+                              <Calendar className="w-4 h-4 text-[#ED1C24] shrink-0 mt-0.5" />
+                              <div>
+                                <span className="font-bold text-slate-800">Test Dates: </span>
+                                <span>{exam.testDates?.join(' · ') || '11th & 18th October 2026'}</span>
+                              </div>
+                            </div>
+
+                            {/* Exam Modes */}
+                            <div className="flex items-start gap-2">
+                              <Compass className="w-4 h-4 text-[#ED1C24] shrink-0 mt-0.5" />
+                              <div>
+                                <span className="font-bold text-slate-800">Modes: </span>
+                                <span>{exam.modes?.join(' & ') || 'Offline & Proctored Online'}</span>
+                              </div>
+                            </div>
+
+                            {/* Candidate's Personalized Class Fee */}
+                            <div className="p-3 bg-red-50/70 border border-red-200/80 rounded-2xl flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <CreditCard className="w-4 h-4 text-[#ED1C24]" />
+                                <div>
+                                  <div className="font-bold text-[#002147] text-xs">
+                                    Your Fee ({student?.currentClass || 'Class X'}):
+                                  </div>
+                                  <div className="text-[10px] text-slate-500">
+                                    {CENTRES_CONFIG[activeFilterCentreId]?.name} Centre Rate
+                                  </div>
+                                </div>
+                              </div>
+                              <span className="font-mono font-black text-lg text-[#ED1C24]">
+                                ₹{studentFee}
+                              </span>
+                            </div>
+
+                            {/* Class Fees Schedule Pills */}
+                            {exam.classFees && Object.keys(exam.classFees).length > 0 && (
+                              <div className="pt-1">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                                  Branch Fee Schedule by Class:
+                                </span>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {Object.entries(exam.classFees).map(([cKey, cFee]) => (
+                                    <span key={cKey} className="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] text-slate-700 font-semibold">
+                                      {cKey}: <strong className="text-slate-900 font-mono">₹{cFee}</strong>
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Designated Test Venue(s) */}
+                            {exam.venues && exam.venues.length > 0 && (
+                              <div className="pt-1 space-y-1">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                                  Physical Test Venue:
+                                </span>
+                                {exam.venues.map((v, vIdx) => (
+                                  <div key={vIdx} className="text-[11px] bg-slate-50 p-2 rounded-xl border border-slate-200">
+                                    <div className="font-bold text-slate-800">{v.name}</div>
+                                    {v.address && <div className="text-slate-500 text-[10px]">{v.address}</div>}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="pt-4 border-t border-slate-100">
+                          {isRegistered ? (
+                            <button
+                              onClick={() => handleTabChange('hall-tickets')}
+                              className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-[#002147] rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                            >
+                              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                              <span>Already Registered • Download Hall Ticket</span>
+                            </button>
+                          ) : isClosed ? (
+                            <button
+                              disabled
+                              className="w-full py-2.5 bg-slate-200 text-slate-500 rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-not-allowed"
+                            >
+                              <AlertCircle className="w-4 h-4 text-slate-400" />
+                              <span>Registrations Paused for this Branch</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setSelectedRegisterExamId(exam.id);
+                                setIsBigBangModalOpen(true);
+                              }}
+                              className="w-full py-2.5 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all"
+                            >
+                              <Sparkles className="w-4 h-4" />
+                              <span>Register for {CENTRES_CONFIG[activeFilterCentreId]?.name} (₹{studentFee})</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* FTRE Card as additional Annual Test option */}
+                  <div className="bg-white rounded-3xl border border-slate-200/80 shadow-md p-6 space-y-4 flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="bg-[#002147] text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full">
+                          National Scholarship Test
+                        </span>
+                        <span className="text-xs font-bold text-slate-500 font-mono">Annual National Test</span>
+                      </div>
+                      <h3 className="text-xl font-black text-[#002147] uppercase font-display">
+                        FTRE 2026-27 (Talent Reward Exam)
+                      </h3>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        India’s premier scholarship exam offering up to 100% tuition fee waiver, hostel fee assistance, and cash scholarships.
+                      </p>
+
+                      <div className="space-y-1.5 pt-2 text-xs text-slate-700">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-[#002147]" />
+                          <span><strong>Exam Period:</strong> December 2026</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Award className="w-4 h-4 text-[#002147]" />
+                          <span><strong>Scholarships:</strong> Up to 100% Tuition Fee Waiver</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <GraduationCap className="w-4 h-4 text-[#002147]" />
+                          <span><strong>Eligible:</strong> Class V to XI students</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-100">
+                      <button
+                        onClick={() => setIsFtreModalOpen(true)}
+                        className="w-full py-2.5 bg-[#002147] hover:bg-[#001733] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-colors"
+                      >
+                        <span>Apply for FTRE Scholarship</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -2503,7 +2677,7 @@ export const StudentDashboard: React.FC = () => {
                   Examination Day Protocols & Timings
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Official instructions for {student?.currentClass || 'Class X'} candidates taking Big Bang Edge Test 2026.
+                  Official instructions for {student?.currentClass || 'Class X'} candidates taking examinations at FIITJEE {activeCentreProfile.name} Centre.
                 </p>
               </div>
 
@@ -2511,11 +2685,25 @@ export const StudentDashboard: React.FC = () => {
               <div className="bg-red-50 border border-red-200 p-5 rounded-2xl space-y-2">
                 <div className="text-xs font-bold text-[#ED1C24] uppercase tracking-wider flex items-center gap-1.5">
                   <Clock className="w-4 h-4" />
-                  <span>Exam Schedule for {student?.currentClass || 'Class X'}</span>
+                  <span>Exam Schedule for {student?.currentClass || 'Class X'} ({activeCentreProfile.name} Centre)</span>
                 </div>
                 <div className="text-xs font-semibold text-slate-800 leading-relaxed space-y-0.5">
                   <div>Test Duration : 3 Hours</div>
                   <div>Test Timing : 10:00 AM to 01:00 PM</div>
+                  <div>Centre Reporting Time : 09:15 AM</div>
+                </div>
+              </div>
+
+              {/* Centre Lab & Address Info */}
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                <div className="text-xs font-bold text-[#002147] flex items-center gap-1.5 uppercase tracking-wider">
+                  <Building2 className="w-4 h-4 text-[#ED1C24]" />
+                  <span>Your Designated Examination Centre</span>
+                </div>
+                <div className="text-xs text-slate-700">
+                  <div className="font-bold">FIITJEE {activeCentreProfile.name} Centre</div>
+                  <div className="text-slate-500 mt-0.5">{activeCentreProfile.address}</div>
+                  <div className="text-slate-500 mt-1 font-mono">Admissions Helpline: {activeCentreProfile.phoneNumbers.join(' · ')}</div>
                 </div>
               </div>
 
@@ -2560,6 +2748,8 @@ export const StudentDashboard: React.FC = () => {
       <BigBangRegistrationModal
         isOpen={isBigBangModalOpen}
         onClose={() => setIsBigBangModalOpen(false)}
+        examId={selectedRegisterExamId || 'big-bang-edge-test'}
+        defaultCenter={CENTRES_CONFIG[activeFilterCentreId]?.name || 'Bhubaneswar'}
       />
 
       {/* FTRE Modal */}

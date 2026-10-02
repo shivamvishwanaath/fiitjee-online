@@ -31,7 +31,7 @@ export const OfficialHallTicket: React.FC<OfficialHallTicketProps> = ({
     `${registration.schoolName ? `${registration.schoolName}, ` : ''}${centre.name.toUpperCase()}, ${centre.stateName}::${centre.stateCode}, India`;
 
   // Dynamic fee calculation (if fee paid or free/waived)
-  const standardFee = getRegistrationFeeForClass(registration.currentClass);
+  const standardFee = getRegistrationFeeForClass(registration.currentClass, centre.id);
   const paidAmount = registration.paymentAmount !== undefined ? Number(registration.paymentAmount) : (registration.paymentStatus === 'paid' ? standardFee : 0.00);
 
   const renderTaxInvoice = (type: 'Duplicate' | 'Original') => (

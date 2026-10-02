@@ -120,7 +120,12 @@ function AppContent() {
     setIsFtreModalOpen(true);
   };
 
-  const handleOpenBigBang = () => {
+  const [selectedBigBangCenter, setSelectedBigBangCenter] = useState<string | undefined>(undefined);
+
+  const handleOpenBigBang = (centerName?: string) => {
+    if (centerName) {
+      setSelectedBigBangCenter(centerName);
+    }
     setIsBigBangModalOpen(true);
   };
 
@@ -557,7 +562,11 @@ function AppContent() {
 
       <BigBangRegistrationModal
         isOpen={isBigBangModalOpen}
-        onClose={() => setIsBigBangModalOpen(false)}
+        onClose={() => {
+          setIsBigBangModalOpen(false);
+          setSelectedBigBangCenter(undefined);
+        }}
+        defaultCenter={selectedBigBangCenter}
       />
 
     </div>
