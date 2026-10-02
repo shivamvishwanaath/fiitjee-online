@@ -786,7 +786,7 @@ export const DeveloperTools: React.FC = () => {
 
             <div>
               <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5 text-[10px]">
-                Student Class
+                Class
               </label>
               <select
                 value={getClassOption(seedClass).label}

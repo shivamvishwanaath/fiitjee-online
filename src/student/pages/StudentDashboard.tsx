@@ -2188,7 +2188,7 @@ export const StudentDashboard: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Current Academic Class *</label>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Class *</label>
                         <select
                           value={profileForm.currentClass?.includes('1252') ? 'Class XI' : (profileForm.currentClass?.includes('XII') && !profileForm.currentClass?.includes('1252') ? 'Class XII' : getClassOption(profileForm.currentClass).canonical)}
                           onChange={(e) => setProfileForm({ ...profileForm, currentClass: e.target.value })}
@@ -2362,7 +2362,7 @@ export const StudentDashboard: React.FC = () => {
                     <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 border-l-4 border-l-amber-500">
                       <div className="text-slate-400 text-[10px] font-bold uppercase flex items-center gap-1.5">
                         <GraduationCap className="w-3.5 h-3.5 text-amber-500" />
-                        <span>Present Academic Class</span>
+                        <span>Class</span>
                       </div>
                       <div className="font-black text-[#ED1C24] text-sm mt-1">{student?.currentClass || 'Class X'}</div>
                     </div>

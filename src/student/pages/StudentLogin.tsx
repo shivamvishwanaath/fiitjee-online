@@ -730,7 +730,7 @@ export const StudentLogin: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Class / Academic Stream *
+                          Class *
                         </label>
                         <select
                           value={registerData.currentClass}
@@ -1000,7 +1000,7 @@ export const StudentLogin: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Class / Academic Stream *
+                          Class *
                         </label>
                         <select
                           value={registerData.currentClass}

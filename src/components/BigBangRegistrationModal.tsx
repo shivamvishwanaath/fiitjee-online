@@ -638,7 +638,7 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Present Class *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Class *</label>
                   <select
                     value={getClassOption(formData.currentClass).label}
                     onChange={(e) => setFormData({ ...formData, currentClass: e.target.value })}

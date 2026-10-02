@@ -3,20 +3,20 @@ import { AdmissionExam } from '../types';
 export interface BigBangClassItem {
   key: string;       // 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'
   canonical: string; // 'Class V', 'Class VI', ...
-  label: string;     // '05th. Going to 06th. - 6052', '06th. Going to 07th. - 7052', ...
+  label: string;     // '05th. Going to 06th.', '06th. Going to 07th.', ...
   code: string;      // '6052', '7052', ...
   fromGrade: string; // '05th'
   toGrade: string;   // '06th'
 }
 
 export const BIG_BANG_CLASSES: BigBangClassItem[] = [
-  { key: 'V',    canonical: 'Class V',    label: '05th. Going to 06th. - 6052', code: '6052', fromGrade: '05th', toGrade: '06th' },
-  { key: 'VI',   canonical: 'Class VI',   label: '06th. Going to 07th. - 7052', code: '7052', fromGrade: '06th', toGrade: '07th' },
-  { key: 'VII',  canonical: 'Class VII',  label: '07th. Going to 08th. - 8052', code: '8052', fromGrade: '07th', toGrade: '08th' },
-  { key: 'VIII', canonical: 'Class VIII', label: '08th. Going to 09th. - 9052', code: '9052', fromGrade: '08th', toGrade: '09th' },
-  { key: 'IX',   canonical: 'Class IX',   label: '09th. Going to 10th. - 1052', code: '1052', fromGrade: '09th', toGrade: '10th' },
-  { key: 'X',    canonical: 'Class X',    label: '10th. Going to 11th. - 1152', code: '1152', fromGrade: '10th', toGrade: '11th' },
-  { key: 'XI',   canonical: 'Class XI',   label: '11th. Going to 12th. - 1252', code: '1252', fromGrade: '11th', toGrade: '12th' },
+  { key: 'V',    canonical: 'Class V',    label: '05th. Going to 06th.', code: '6052', fromGrade: '05th', toGrade: '06th' },
+  { key: 'VI',   canonical: 'Class VI',   label: '06th. Going to 07th.', code: '7052', fromGrade: '06th', toGrade: '07th' },
+  { key: 'VII',  canonical: 'Class VII',  label: '07th. Going to 08th.', code: '8052', fromGrade: '07th', toGrade: '08th' },
+  { key: 'VIII', canonical: 'Class VIII', label: '08th. Going to 09th.', code: '9052', fromGrade: '08th', toGrade: '09th' },
+  { key: 'IX',   canonical: 'Class IX',   label: '09th. Going to 10th.', code: '1052', fromGrade: '09th', toGrade: '10th' },
+  { key: 'X',    canonical: 'Class X',    label: '10th. Going to 11th.', code: '1152', fromGrade: '10th', toGrade: '11th' },
+  { key: 'XI',   canonical: 'Class XI',   label: '11th. Going to 12th.', code: '1252', fromGrade: '11th', toGrade: '12th' },
 ];
 
 export function getClassOption(className?: string): BigBangClassItem {

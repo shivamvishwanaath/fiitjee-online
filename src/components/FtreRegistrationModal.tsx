@@ -189,7 +189,7 @@ export const FtreRegistrationModal: React.FC<FtreRegistrationModalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Present Class *</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Class *</label>
                   <select
                     value={formData.currentClass}
                     onChange={(e) => setFormData({ ...formData, currentClass: e.target.value })}
@@ -433,7 +433,7 @@ export const FtreRegistrationModal: React.FC<FtreRegistrationModalProps> = ({
                     <span className="font-mono font-bold">{generatedAdmitCard.registrationNo}</span>
                   </div>
                   <div>
-                    <span className="block text-[10px] text-slate-500 font-bold uppercase">Class / Grade</span>
+                    <span className="block text-[10px] text-slate-500 font-bold uppercase">Class</span>
                     <span className="font-bold text-slate-900">{formData.currentClass}</span>
                   </div>
                   <div>

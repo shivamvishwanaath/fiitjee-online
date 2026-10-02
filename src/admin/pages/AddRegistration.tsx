@@ -290,7 +290,7 @@ export const AddRegistration: React.FC = () => {
             {/* Class */}
             <div>
               <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1 text-[10px]">
-                Current Grade / Class *
+                Class *
               </label>
               <select
                 value={getClassOption(formData.currentClass).label}
