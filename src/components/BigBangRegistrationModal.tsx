@@ -21,7 +21,7 @@ import { ref, push, set, get, query, orderByChild, equalTo, update } from 'fireb
 import { db, auth, firebaseConfig } from '../firebase';
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { BIG_BANG_EXAM, getRegistrationFeeForClass } from '../data/examsData';
+import { BIG_BANG_EXAM, BIG_BANG_CLASSES, getClassOption, getRegistrationFeeForClass } from '../data/examsData';
 import { ExamRegistration } from '../types';
 import { FiitjeeLogo } from './FiitjeeLogo';
 import { OfficialHallTicket } from './OfficialHallTicket';
@@ -43,7 +43,7 @@ interface BigBangRegistrationModalProps {
 const initialFormData = {
   studentName: '',
   parentName: '',
-  currentClass: 'Class X',
+  currentClass: BIG_BANG_CLASSES[5].label,
   schoolName: '',
   phone: '',
   email: '',
@@ -110,7 +110,7 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
         setFormData({
           studentName: student.fullName || '',
           parentName: student.parentName || '',
-          currentClass: student.currentClass || 'Class X',
+          currentClass: student.currentClass ? getClassOption(student.currentClass).label : BIG_BANG_CLASSES[5].label,
           schoolName: student.schoolName || '',
           phone: student.phone || '',
           email: student.email || '',
@@ -121,7 +121,7 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
       } else {
         setFormData({ 
           ...initialFormData,
-          currentClass: `Class ${BIG_BANG_EXAM.targetClasses[BIG_BANG_EXAM.targetClasses.length - 2]}`
+          currentClass: BIG_BANG_CLASSES[5].label
         });
       }
     }
@@ -621,12 +621,14 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Present Class *</label>
                   <select
-                    value={formData.currentClass}
+                    value={getClassOption(formData.currentClass).label}
                     onChange={(e) => setFormData({ ...formData, currentClass: e.target.value })}
                     className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ED1C24] outline-hidden font-semibold"
                   >
-                    {BIG_BANG_EXAM.targetClasses.map((cls) => (
-                      <option key={cls} value={`Class ${cls}`}>Class {cls} (Going to {cls === 'XI' ? 'XII' : `Class ${cls} Next Year`})</option>
+                    {BIG_BANG_CLASSES.map((cls) => (
+                      <option key={cls.code} value={cls.label}>
+                        {cls.label}
+                      </option>
                     ))}
                   </select>
                 </div>

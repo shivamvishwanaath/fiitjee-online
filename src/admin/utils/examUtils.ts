@@ -1,6 +1,7 @@
 import { ref, get, set, update, remove } from 'firebase/database';
 import { db } from '../../firebase';
 import { CENTRES_CONFIG } from './centreUtils';
+import { getClassOption } from '../../data/examsData';
 
 export interface CentreExamVenue {
   name: string;
@@ -323,6 +324,13 @@ export function calculateExamFeeForClass(
 ): number {
   if (!examConfig) return 250;
   if (!className) return examConfig.defaultFee || 250;
+
+  // 1. Map via getClassOption canonical (e.g. '05th. Going to 06th. - 6052' -> 'Class V')
+  const opt = getClassOption(className);
+  const canonical = opt.canonical;
+  if (examConfig.classFees && examConfig.classFees[canonical] !== undefined) {
+    return examConfig.classFees[canonical];
+  }
 
   const normalizedClass = className.startsWith('Class ') ? className : `Class ${className.toUpperCase()}`;
   if (examConfig.classFees && examConfig.classFees[normalizedClass] !== undefined) {

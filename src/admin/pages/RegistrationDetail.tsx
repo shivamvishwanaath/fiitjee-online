@@ -20,7 +20,7 @@ import { useRegistrations } from '../hooks/useRegistrations';
 import { NoteEditor } from '../components/NoteEditor';
 import { OfficialHallTicket } from '../../components/OfficialHallTicket';
 import { HallTicketModal } from '../../components/HallTicketModal';
-import { ALL_CENTRES } from '../utils/centreUtils';
+import { ALL_CENTRES, BIG_BANG_CLASSES, getClassOption } from '../utils/centreUtils';
 import { ExamRegistration } from '../../types';
 import { ref, get } from 'firebase/database';
 import { db } from '../../firebase';
@@ -269,18 +269,15 @@ export const RegistrationDetail: React.FC = () => {
                   Present Class / Grade
                 </label>
                 <select
-                  value={formData.currentClass || 'Class X'}
+                  value={getClassOption(formData.currentClass).label}
                   onChange={(e) => handleInputChange('currentClass', e.target.value)}
                   className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] bg-white font-bold"
                 >
-                  <option value="Class V">Class V</option>
-                  <option value="Class VI">Class VI</option>
-                  <option value="Class VII">Class VII</option>
-                  <option value="Class VIII">Class VIII</option>
-                  <option value="Class IX">Class IX</option>
-                  <option value="Class X">Class X</option>
-                  <option value="Class XI">Class XI</option>
-                  <option value="Class XII">Class XII</option>
+                  {BIG_BANG_CLASSES.map((cls) => (
+                    <option key={cls.code} value={cls.label}>
+                      {cls.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 

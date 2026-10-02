@@ -20,7 +20,7 @@ import { ref, set } from 'firebase/database';
 import { firebaseConfig, db } from '../../firebase';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useRegistrations } from '../hooks/useRegistrations';
-import { ALL_CENTRES, generateSID, generateInvoiceNumber, getCentreByName, generateRollNumber, getRegistrationFeeForClass } from '../utils/centreUtils';
+import { ALL_CENTRES, generateSID, generateInvoiceNumber, getCentreByName, generateRollNumber, getRegistrationFeeForClass, BIG_BANG_CLASSES, getClassOption } from '../utils/centreUtils';
 import { HallTicketModal } from '../../components/HallTicketModal';
 import { ExamRegistration } from '../../types';
 
@@ -32,7 +32,7 @@ export const AddRegistration: React.FC = () => {
   const [formData, setFormData] = useState({
     studentName: '',
     parentName: '',
-    currentClass: 'Class X',
+    currentClass: BIG_BANG_CLASSES[5].label,
     schoolName: '',
     phone: '',
     email: '',
@@ -42,7 +42,7 @@ export const AddRegistration: React.FC = () => {
     testMode: 'Offline' as 'Offline' | 'Proctored Online',
     testDate: '11th October 2026 (Sunday)',
     status: 'Confirmed' as ExamRegistration['status'],
-    paymentAmount: getRegistrationFeeForClass('Class X'),
+    paymentAmount: getRegistrationFeeForClass(BIG_BANG_CLASSES[5].label),
     paymentMode: 'Cash (Counter)',
     paymentStatus: 'paid' as 'paid' | 'pending' | 'free',
     paymentRef: ''
@@ -249,18 +249,15 @@ export const AddRegistration: React.FC = () => {
                 Current Grade / Class *
               </label>
               <select
-                value={formData.currentClass}
+                value={getClassOption(formData.currentClass).label}
                 onChange={(e) => handleClassChange(e.target.value)}
                 className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#002147] bg-white font-bold"
               >
-                <option value="Class V">Class V</option>
-                <option value="Class VI">Class VI</option>
-                <option value="Class VII">Class VII</option>
-                <option value="Class VIII">Class VIII</option>
-                <option value="Class IX">Class IX</option>
-                <option value="Class X">Class X</option>
-                <option value="Class XI">Class XI</option>
-                <option value="Class XII">Class XII</option>
+                {BIG_BANG_CLASSES.map((cls) => (
+                  <option key={cls.code} value={cls.label}>
+                    {cls.label}
+                  </option>
+                ))}
               </select>
             </div>
 

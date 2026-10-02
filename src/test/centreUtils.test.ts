@@ -6,7 +6,9 @@ import {
   getCentreByEmail,
   CENTRES_CONFIG,
   resolveCanonicalCentreId,
-  isCentreMatch
+  isCentreMatch,
+  BIG_BANG_CLASSES,
+  getExamCodeForClass
 } from '../admin/utils/centreUtils';
 
 describe('Admin Centre and Email Authorization Logic', () => {
@@ -74,5 +76,35 @@ describe('Admin Centre and Email Authorization Logic', () => {
     expect(isCentreMatch('ALL', 'hyderabad')).toBe(true);
     expect(isCentreMatch('all', 'bhubaneswar')).toBe(true);
     expect(isCentreMatch(undefined, 'dwarka')).toBe(true);
+  });
+
+  it('correctly maps the official Big Bang Edge Test classes and codes', () => {
+    expect(BIG_BANG_CLASSES).toHaveLength(7);
+    expect(BIG_BANG_CLASSES.map(c => c.label)).toEqual([
+      '05th. Going to 06th. - 6052',
+      '06th. Going to 07th. - 7052',
+      '07th. Going to 08th. - 8052',
+      '08th. Going to 09th. - 9052',
+      '09th. Going to 10th. - 1052',
+      '10th. Going to 11th. - 1152',
+      '11th. Going to 12th. - 1252',
+    ]);
+
+    expect(getExamCodeForClass('05th. Going to 06th. - 6052')).toBe('6052');
+    expect(getExamCodeForClass('06th. Going to 07th. - 7052')).toBe('7052');
+    expect(getExamCodeForClass('07th. Going to 08th. - 8052')).toBe('8052');
+    expect(getExamCodeForClass('08th. Going to 09th. - 9052')).toBe('9052');
+    expect(getExamCodeForClass('09th. Going to 10th. - 1052')).toBe('1052');
+    expect(getExamCodeForClass('10th. Going to 11th. - 1152')).toBe('1152');
+    expect(getExamCodeForClass('11th. Going to 12th. - 1252')).toBe('1252');
+
+    // Backward compatibility for legacy inputs
+    expect(getExamCodeForClass('Class V')).toBe('6052');
+    expect(getExamCodeForClass('Class VI')).toBe('7052');
+    expect(getExamCodeForClass('Class VII')).toBe('8052');
+    expect(getExamCodeForClass('Class VIII')).toBe('9052');
+    expect(getExamCodeForClass('Class IX')).toBe('1052');
+    expect(getExamCodeForClass('Class X')).toBe('1152');
+    expect(getExamCodeForClass('Class XI')).toBe('1252');
   });
 });

@@ -52,7 +52,7 @@ import { FiitjeeLogo } from '../../components/FiitjeeLogo';
 import { deregisterCandidateExam } from '../../admin/utils/developerUtils';
 import { ExamRegistration, StudentExamLink, SupportTicket, ExamResult } from '../../types';
 import { BIG_BANG_EXAM } from '../../data/examsData';
-import { getExamScheduleForClass, CENTRES_CONFIG, getRegistrationFeeForClass } from '../../admin/utils/centreUtils';
+import { getExamScheduleForClass, CENTRES_CONFIG, getRegistrationFeeForClass, getClassOption } from '../../admin/utils/centreUtils';
 import { ref, onValue, get, push, set } from 'firebase/database';
 import { db } from '../../firebase';
 import { sendTicketEmailAlertToCentre } from '../../services/ticketEmailAlert';
@@ -2161,7 +2161,7 @@ export const StudentDashboard: React.FC = () => {
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Current Academic Class *</label>
                         <select
-                          value={profileForm.currentClass}
+                          value={profileForm.currentClass?.includes('1252') ? 'Class XI' : (profileForm.currentClass?.includes('XII') && !profileForm.currentClass?.includes('1252') ? 'Class XII' : getClassOption(profileForm.currentClass).canonical)}
                           onChange={(e) => setProfileForm({ ...profileForm, currentClass: e.target.value })}
                           className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-[#002147]/40 cursor-pointer"
                         >

@@ -42,7 +42,7 @@ import {
 } from '../utils/developerUtils';
 import { ref, get, set, remove } from 'firebase/database';
 import { db } from '../../firebase';
-import { ALL_CENTRES, CENTRES_CONFIG, getRegistrationFeeForClass } from '../utils/centreUtils';
+import { ALL_CENTRES, CENTRES_CONFIG, getRegistrationFeeForClass, BIG_BANG_CLASSES, getClassOption } from '../utils/centreUtils';
 import { ExamRegistration, CouponProfile } from '../../types';
 
 export const DeveloperTools: React.FC = () => {
@@ -66,7 +66,7 @@ export const DeveloperTools: React.FC = () => {
 
   // --- TAB 2: SEEDER STATE ---
   const [seedCentre, setSeedCentre] = useState('bhubaneswar');
-  const [seedClass, setSeedClass] = useState('Class X');
+  const [seedClass, setSeedClass] = useState(BIG_BANG_CLASSES[5].label);
   const [seedMode, setSeedMode] = useState<'Offline' | 'Proctored Online'>('Offline');
   const [seedPayment, setSeedPayment] = useState<'paid' | 'free' | 'pending'>('paid');
   const [seedName, setSeedName] = useState('Demo Test Student');
@@ -789,12 +789,12 @@ export const DeveloperTools: React.FC = () => {
                 Student Class
               </label>
               <select
-                value={seedClass}
+                value={getClassOption(seedClass).label}
                 onChange={(e) => setSeedClass(e.target.value)}
                 className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800"
               >
-                {['Class V', 'Class VI', 'Class VII', 'Class VIII', 'Class IX', 'Class X', 'Class XI', 'Class XII', 'Class XII Pass'].map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                {BIG_BANG_CLASSES.map((cls) => (
+                  <option key={cls.code} value={cls.label}>{cls.label}</option>
                 ))}
               </select>
             </div>
