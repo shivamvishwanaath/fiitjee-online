@@ -20,11 +20,12 @@ import {
   KeyRound,
   AlertCircle
 } from 'lucide-react';
-import { sendPasswordResetEmail, ConfirmationResult } from 'firebase/auth';
+import { sendPasswordResetEmail } from 'firebase/auth';
 import { ref, get, query, orderByChild, equalTo } from 'firebase/database';
 import { auth, db } from '../../firebase';
 import { useStudentAuth, findRegistrationInDatabase } from '../hooks/useStudentAuth';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
+import { BIG_BANG_CLASSES, getClassOption } from '../../data/examsData';
 
 export const StudentLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -35,34 +36,17 @@ export const StudentLogin: React.FC = () => {
   const { 
     login, 
     loginWithRollOrPhone, 
-    setupRecaptcha, 
-    clearRecaptcha,
-    sendPhoneOtp, 
-    verifyPhoneOtp, 
-    completePhoneSignup,
     signup, 
     isAuthenticated, 
     loading: authLoading 
   } = useStudentAuth();
 
-  useEffect(() => {
-    return () => {
-      clearRecaptcha();
-    };
-  }, [clearRecaptcha]);
-
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
-  const [loginMethod, setLoginMethod] = useState<'password' | 'roll_phone' | 'phone_otp'>('password');
+  const [loginMethod, setLoginMethod] = useState<'password' | 'roll_phone'>('password');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Phone OTP state (Login)
-  const [phoneInput, setPhoneInput] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-  const [otpStep, setOtpStep] = useState<'phone' | 'verify'>('phone');
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-  const [resendCooldown, setResendCooldown] = useState(0);
 
   // Form states
   const [identifierInput, setIdentifierInput] = useState('');
@@ -76,30 +60,23 @@ export const StudentLogin: React.FC = () => {
   const [forgotSuccess, setForgotSuccess] = useState(false);
   const [forgotError, setForgotError] = useState<string | null>(null);
 
-  // Registration sub-tab state ('email' | 'phone')
-  const [registerMethod, setRegisterMethod] = useState<'email' | 'phone'>('email');
-  const [registerOtpStep, setRegisterOtpStep] = useState<'form' | 'verify'>('form');
-  const [registerOtpCode, setRegisterOtpCode] = useState('');
-  const [registerConfirmationResult, setRegisterConfirmationResult] = useState<ConfirmationResult | null>(null);
-  const [registerResendCooldown, setRegisterResendCooldown] = useState(0);
-  const [showPhoneFallbackPassword, setShowPhoneFallbackPassword] = useState(false);
-  const [phoneFallbackPassword, setPhoneFallbackPassword] = useState('');
+  // Registration sub-tab state ('phone' | 'email')
+  const [registerMethod, setRegisterMethod] = useState<'phone' | 'email'>('phone');
 
   const [registerData, setRegisterData] = useState({
     fullName: '',
     parentName: '',
     email: '',
     phone: '',
-    currentClass: 'Class X',
+    currentClass: BIG_BANG_CLASSES[5].label,
     schoolName: '',
-    preferredCentreId: '',
-    password: ''
+    preferredCentreId: 'bhubaneswar',
+    password: '',
+    confirmPassword: ''
   });
 
-  const hasRegisterEmail = registerData.email.trim().length > 0;
-  const hasRegisterPhone = registerData.phone.replace(/\D/g, '').length > 0;
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [updatesOptIn, setUpdatesOptIn] = useState(false);
+  const [updatesOptIn, setUpdatesOptIn] = useState(true);
 
   // If already authenticated, redirect
   React.useEffect(() => {
@@ -108,110 +85,9 @@ export const StudentLogin: React.FC = () => {
     }
   }, [isAuthenticated, authLoading, navigate, redirectUrl]);
 
-  // Resend OTP countdown timer for both login and register
-  React.useEffect(() => {
-    if (resendCooldown <= 0 && registerResendCooldown <= 0) return;
-    const interval = setInterval(() => {
-      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
-      setRegisterResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [resendCooldown, registerResendCooldown]);
-
-  const handleSendPhoneOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
-
-    const cleanPhone = phoneInput.replace(/\D/g, '');
-    if (cleanPhone.length < 10) {
-      setErrorMessage('Please enter a valid 10-digit mobile number.');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const verifier = setupRecaptcha('recaptcha-phone-container', 'invisible');
-      const confirmation = await sendPhoneOtp(cleanPhone, verifier);
-      setConfirmationResult(confirmation);
-      setOtpStep('verify');
-      setResendCooldown(30);
-    } catch (err: any) {
-      console.error('Phone OTP dispatch error:', err);
-      if (err.code === 'auth/operation-not-allowed' || err.message?.includes('SMS unable to be sent until this region enabled') || err.message?.includes('operation-not-allowed')) {
-        setErrorMessage(
-          'SMS verification is currently restricted by Firebase SMS Region Policy. Please use the "Mobile / Email & Pass" tab above to sign in instantly with your registered mobile and password.'
-        );
-      } else if (err.code === 'auth/invalid-phone-number') {
-        setErrorMessage('Invalid phone number format. Please enter a valid 10-digit mobile number.');
-      } else if (err.code === 'auth/quota-exceeded') {
-        setErrorMessage('SMS verification quota reached for now. Please switch to "Mobile / Email & Pass" or "Roll No / Fast" for instant sign in.');
-      } else if (err.code === 'auth/captcha-check-failed') {
-        setErrorMessage('reCAPTCHA verification failed. Please try again.');
-      } else {
-        setErrorMessage(err.message || 'Unable to send SMS OTP. Please switch to "Mobile / Email & Pass" tab.');
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleVerifyPhoneOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
-
-    const cleanCode = otpCode.trim();
-    if (cleanCode.length !== 6) {
-      setErrorMessage('Please enter the 6-digit OTP received via SMS.');
-      return;
-    }
-
-    if (!confirmationResult) {
-      setErrorMessage('Verification session expired. Please request a new OTP.');
-      setOtpStep('phone');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      await verifyPhoneOtp(confirmationResult, cleanCode);
-      navigate(redirectUrl);
-    } catch (err: any) {
-      console.error('Phone OTP verification error:', err);
-      if (err.code === 'auth/invalid-verification-code') {
-        setErrorMessage('Incorrect 6-digit SMS OTP code. Please check and re-enter.');
-      } else if (err.code === 'auth/code-expired') {
-        setErrorMessage('SMS OTP code has expired. Please click "Resend OTP".');
-      } else {
-        setErrorMessage(err.message || 'Verification failed. Please try again.');
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
-    if (resendCooldown > 0) return;
-    setErrorMessage(null);
-    setSubmitting(true);
-    try {
-      const verifier = setupRecaptcha('recaptcha-phone-container', 'invisible');
-      const confirmation = await sendPhoneOtp(phoneInput, verifier);
-      setConfirmationResult(confirmation);
-      setResendCooldown(30);
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to resend SMS OTP.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const switchLoginMethod = (method: 'password' | 'roll_phone' | 'phone_otp') => {
+  const switchLoginMethod = (method: 'password' | 'roll_phone') => {
     setLoginMethod(method);
     setErrorMessage(null);
-    setOtpStep('phone');
-    setConfirmationResult(null);
-    setOtpCode('');
-    clearRecaptcha();
   };
 
   const handleRollLoginSubmit = async (e: React.FormEvent) => {
@@ -352,6 +228,11 @@ export const StudentLogin: React.FC = () => {
       return;
     }
 
+    if (registerData.password !== registerData.confirmPassword) {
+      setErrorMessage('Passwords do not match. Please re-enter.');
+      return;
+    }
+
     if (!termsAccepted || !updatesOptIn) {
       setErrorMessage('You must accept the Terms & Conditions and opt in for examination notifications to complete your registration.');
       return;
@@ -368,7 +249,7 @@ export const StudentLogin: React.FC = () => {
         currentClass: registerData.currentClass,
         schoolName: registerData.schoolName.trim(),
         preferredCentreId: registerData.preferredCentreId
-      }, registerData.password);
+      }, registerData.password, 'email');
 
       navigate(redirectUrl);
     } catch (err: any) {
@@ -387,11 +268,11 @@ export const StudentLogin: React.FC = () => {
     e.preventDefault();
     setErrorMessage(null);
 
-    const cleanPhone = registerData.phone.replace(/\D/g, '');
+    const cleanPhone = registerData.phone.replace(/\D/g, '').slice(-10);
     const cleanEmail = registerData.email.trim().toLowerCase();
 
     if (cleanPhone.length !== 10) {
-      setErrorMessage('A valid 10-digit Indian mobile number is mandatory for Phone Registration.');
+      setErrorMessage('Please enter a valid 10-digit Indian mobile number.');
       return;
     }
 
@@ -410,106 +291,18 @@ export const StudentLogin: React.FC = () => {
       return;
     }
 
+    if (registerData.password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters long.');
+      return;
+    }
+
+    if (registerData.password !== registerData.confirmPassword) {
+      setErrorMessage('Passwords do not match. Please re-enter.');
+      return;
+    }
+
     if (!termsAccepted || !updatesOptIn) {
       setErrorMessage('You must accept the Terms & Conditions and opt in for examination notifications to complete your registration.');
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      const verifier = setupRecaptcha('recaptcha-register-phone-container', 'invisible');
-      const confirmation = await sendPhoneOtp(cleanPhone, verifier);
-      setRegisterConfirmationResult(confirmation);
-      setRegisterOtpStep('verify');
-      setRegisterResendCooldown(30);
-    } catch (err: any) {
-      console.error('Phone register OTP dispatch error:', err);
-      if (err.code === 'auth/operation-not-allowed' || err.message?.includes('SMS unable to be sent until this region enabled') || err.message?.includes('operation-not-allowed')) {
-        setShowPhoneFallbackPassword(true);
-        setErrorMessage(
-          'Firebase SMS verification is currently restricted by Firebase SMS Region Policy. You can either switch to "Register with Email" tab above, or set a password below to register instantly without SMS!'
-        );
-      } else if (err.code === 'auth/invalid-phone-number') {
-        setErrorMessage('Invalid phone number format. Please enter a valid 10-digit Indian mobile number.');
-      } else if (err.code === 'auth/quota-exceeded') {
-        setShowPhoneFallbackPassword(true);
-        setErrorMessage('SMS verification quota reached. You can switch to "Register with Email" or set a password below to complete registration.');
-      } else {
-        setErrorMessage(err.message || 'Unable to send SMS OTP. Please try again or switch to Email Registration.');
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleVerifyRegisterOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
-
-    const cleanCode = registerOtpCode.trim();
-    if (cleanCode.length !== 6) {
-      setErrorMessage('Please enter the 6-digit SMS verification code.');
-      return;
-    }
-
-    if (!registerConfirmationResult) {
-      setErrorMessage('Verification session expired. Please request a new OTP.');
-      setRegisterOtpStep('form');
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      const user = await verifyPhoneOtp(registerConfirmationResult, cleanCode);
-      await completePhoneSignup(user, {
-        fullName: registerData.fullName.trim(),
-        parentName: registerData.parentName.trim(),
-        email: registerData.email.trim().toLowerCase(),
-        phone: registerData.phone.replace(/\D/g, ''),
-        currentClass: registerData.currentClass,
-        schoolName: registerData.schoolName.trim(),
-        preferredCentreId: registerData.preferredCentreId
-      });
-      navigate(redirectUrl);
-    } catch (err: any) {
-      console.error('Verify register OTP error:', err);
-      if (err.code === 'auth/invalid-verification-code') {
-        setErrorMessage('Incorrect 6-digit SMS OTP. Please check and re-enter.');
-      } else if (err.code === 'auth/code-expired') {
-        setErrorMessage('Verification code has expired. Please click "Resend OTP".');
-      } else {
-        setErrorMessage(err.message || 'Verification failed. Please try again.');
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleResendRegisterOtp = async () => {
-    if (registerResendCooldown > 0) return;
-    setErrorMessage(null);
-    setSubmitting(true);
-    try {
-      const cleanPhone = registerData.phone.replace(/\D/g, '');
-      const verifier = setupRecaptcha('recaptcha-register-phone-container', 'invisible');
-      const confirmation = await sendPhoneOtp(cleanPhone, verifier);
-      setRegisterConfirmationResult(confirmation);
-      setRegisterResendCooldown(30);
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to resend registration SMS OTP.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handlePhoneFallbackSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
-
-    if (phoneFallbackPassword.length < 6) {
-      setErrorMessage('Password must be at least 6 characters long.');
       return;
     }
 
@@ -519,16 +312,17 @@ export const StudentLogin: React.FC = () => {
       await signup({
         fullName: registerData.fullName.trim(),
         parentName: registerData.parentName.trim(),
-        email: registerData.email.trim().toLowerCase(),
-        phone: registerData.phone.replace(/\D/g, ''),
+        email: cleanEmail,
+        phone: cleanPhone,
         currentClass: registerData.currentClass,
         schoolName: registerData.schoolName.trim(),
         preferredCentreId: registerData.preferredCentreId
-      }, phoneFallbackPassword);
+      }, registerData.password, 'phone');
 
       navigate(redirectUrl);
     } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to complete registration.');
+      console.error('Phone signup error:', err);
+      setErrorMessage(err.message || 'Failed to create student account.');
     } finally {
       setSubmitting(false);
     }
@@ -627,20 +421,7 @@ export const StudentLogin: React.FC = () => {
                   <ShieldAlert className="w-4 h-4 text-[#ED1C24] shrink-0 mt-0.5" />
                   <span className="font-semibold leading-relaxed">{errorMessage}</span>
                 </div>
-                {loginMethod === 'phone_otp' && (
-                  <div className="pt-1 flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (phoneInput) setLoginEmail(phoneInput);
-                        switchLoginMethod('password');
-                      }}
-                      className="px-3 py-1.5 bg-[#002147] text-white font-bold rounded-lg text-[11px] hover:bg-slate-800 transition-colors cursor-pointer shadow-xs"
-                    >
-                      Sign In with Mobile & Password instead
-                    </button>
-                  </div>
-                )}
+
               </div>
             )}
 
@@ -669,16 +450,6 @@ export const StudentLogin: React.FC = () => {
                     <Hash className="w-3.5 h-3.5" />
                     <span>Roll No / Fast</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => switchLoginMethod('phone_otp')}
-                    className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                      loginMethod === 'phone_otp' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <Phone className="w-3.5 h-3.5" />
-                    <span>Mobile SMS OTP</span>
-                  </button>
                 </div>
 
                 {loginMethod === 'password' ? (
@@ -686,21 +457,21 @@ export const StudentLogin: React.FC = () => {
                   <form onSubmit={handleLoginSubmit} className="space-y-4">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Mobile Number (10 digits) or Email Address
+                        Mobile Number or Email Address
                       </label>
                       <div className="relative">
                         <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                         <input
                           type="text"
                           required
-                          placeholder="e.g. 9470356441 or rahul.sharma@gmail.com"
+                          placeholder="e.g. 9876543210 or arjun.verma@gmail.com"
                           value={loginEmail}
                           onChange={(e) => setLoginEmail(e.target.value)}
                           className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
                         />
                       </div>
                       <p className="text-[10px] text-slate-500 mt-1">
-                        Enter the 10-digit mobile number or email address registered with your student account.
+                        Enter your 10-digit mobile number (with or without +91) or registered email address.
                       </p>
                     </div>
 
@@ -760,7 +531,7 @@ export const StudentLogin: React.FC = () => {
                       )}
                     </button>
                   </form>
-                ) : loginMethod === 'roll_phone' ? (
+                ) : (
                   /* Option 2: Fast Access via Roll Number or Mobile */
                   <form onSubmit={handleRollLoginSubmit} className="space-y-4">
                     <div>
@@ -772,7 +543,7 @@ export const StudentLogin: React.FC = () => {
                         <input
                           type="text"
                           required
-                          placeholder="e.g. 7052 45828 911105 60069 or 9470356441"
+                          placeholder="e.g. 7052 45828 911105 60069 or 9876543210"
                           value={identifierInput}
                           onChange={(e) => setIdentifierInput(e.target.value)}
                           className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
@@ -798,117 +569,6 @@ export const StudentLogin: React.FC = () => {
                       )}
                     </button>
                   </form>
-                ) : (
-                  /* Option 3: Native Firebase Phone OTP Authentication */
-                  <div className="space-y-4">
-                    {otpStep === 'phone' ? (
-                      <form onSubmit={handleSendPhoneOtp} className="space-y-4">
-                        <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Candidate Mobile Number
-                          </label>
-                          <div className="flex rounded-xl overflow-hidden border border-slate-200 bg-slate-50 focus-within:ring-2 focus-within:ring-[#002147] focus-within:bg-white transition-all">
-                            <span className="inline-flex items-center px-3.5 bg-slate-100 text-xs font-bold text-slate-600 border-r border-slate-200 select-none">
-                              🇮🇳 +91
-                            </span>
-                            <div className="relative flex-1">
-                              <input
-                                type="tel"
-                                required
-                                maxLength={10}
-                                placeholder="Enter 10-digit mobile number"
-                                value={phoneInput}
-                                onChange={(e) => setPhoneInput(e.target.value.replace(/\D/g, ''))}
-                                className="w-full px-3.5 py-2.5 bg-transparent text-xs font-mono font-medium outline-none text-slate-900"
-                              />
-                            </div>
-                          </div>
-                          <p className="text-[10px] text-slate-500 mt-1.5">
-                            We will send a 6-digit verification code via SMS to this number.
-                          </p>
-                        </div>
-
-                        {/* reCAPTCHA container for Phone Auth */}
-                        {loginMethod === 'phone_otp' && otpStep === 'phone' && (
-                          <div id="recaptcha-phone-container" className="flex justify-center my-2" />
-                        )}
-
-                        <button
-                          type="submit"
-                          disabled={submitting || phoneInput.length < 10}
-                          className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 mt-2"
-                        >
-                          {submitting ? (
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <>
-                              <span>Send Verification OTP</span>
-                              <ArrowRight className="w-4 h-4" />
-                            </>
-                          )}
-                        </button>
-                      </form>
-                    ) : (
-                      <form onSubmit={handleVerifyPhoneOtp} className="space-y-4">
-                        <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between text-xs">
-                          <div>
-                            <span className="text-[10px] uppercase font-bold text-blue-600 block">OTP Sent to Mobile</span>
-                            <span className="font-mono font-bold text-slate-900">+91 {phoneInput}</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => { setOtpStep('phone'); setOtpCode(''); setErrorMessage(null); }}
-                            className="text-[11px] font-bold text-[#ED1C24] hover:underline cursor-pointer"
-                          >
-                            Change Number
-                          </button>
-                        </div>
-
-                        <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5 text-center">
-                            Enter 6-Digit SMS Verification Code
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            maxLength={6}
-                            autoFocus
-                            placeholder="• • • • • •"
-                            value={otpCode}
-                            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                            className="w-full py-3 text-center text-xl tracking-[0.5em] font-mono font-bold bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between text-xs pt-1">
-                          <span className="text-[11px] text-slate-500">Didn't receive code?</span>
-                          <button
-                            type="button"
-                            disabled={submitting || resendCooldown > 0}
-                            onClick={handleResendOtp}
-                            className="text-[11px] font-bold text-[#002147] hover:underline disabled:text-slate-400 cursor-pointer disabled:cursor-not-allowed"
-                          >
-                            {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : 'Resend SMS OTP'}
-                          </button>
-                        </div>
-
-                        <button
-                          type="submit"
-                          disabled={submitting || otpCode.length !== 6}
-                          className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 mt-2"
-                        >
-                          {submitting ? (
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <>
-                              <span>Verify & Access Portal</span>
-                              <ArrowRight className="w-4 h-4" />
-                            </>
-                          )}
-                        </button>
-                      </form>
-                    )}
-                  </div>
                 )}
 
                 <div className="text-center pt-2">
@@ -930,60 +590,59 @@ export const StudentLogin: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setRegisterMethod('email');
-                      setErrorMessage(null);
-                      setRegisterOtpStep('form');
-                    }}
-                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                      registerMethod === 'email' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <Mail className="w-3.5 h-3.5" />
-                    <span>Register with Email</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
                       setRegisterMethod('phone');
                       setErrorMessage(null);
-                      setRegisterOtpStep('form');
                     }}
                     className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                       registerMethod === 'phone' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     <Phone className="w-3.5 h-3.5" />
-                    <span>Register with Mobile & OTP</span>
+                    <span>Mobile & Password</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRegisterMethod('email');
+                      setErrorMessage(null);
+                    }}
+                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      registerMethod === 'email' ? 'bg-[#002147] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Email & Password</span>
                   </button>
                 </div>
 
-                {registerMethod === 'email' ? (
+                {registerMethod === 'phone' ? (
                   /* ========================================================
-                     TAB 1: REGISTER WITH EMAIL & PASSWORD (PHONE OPTIONAL)
+                     TAB 1 (DEFAULT): REGISTER WITH PHONE NUMBER & PASSWORD
+                     (ZERO SMS DELAY • CANDIDATE INSTANT PASS IDENTITY)
                      ======================================================== */
-                  <form onSubmit={handleEmailRegisterSubmit} className="space-y-4">
+                  <form onSubmit={handlePhoneRegisterSubmit} className="space-y-4">
                     {/* Relevant Info Card */}
                     <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded-2xl flex items-start gap-3 text-blue-950 text-xs shadow-xs">
-                      <Mail className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                      <Phone className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                       <div className="space-y-0.5">
                         <div className="font-bold text-blue-900 uppercase tracking-wider text-[11px]">
-                          Email Registration Mode
+                          Direct Mobile Registration (Instant • Zero SMS Delay)
                         </div>
                         <p className="text-blue-800 text-[11px] leading-relaxed">
-                          Your primary login credentials will be your <strong>Email Address & Password</strong>. Entering your mobile number below is <em>optional</em>.
+                          Your account is created instantly using your <strong>10-Digit Mobile Number & Password</strong>. No SMS OTP wait or network drops required.
                         </p>
                       </div>
                     </div>
 
-                    {/* Warning on Leaving Mobile Number Empty */}
+                    {/* Warning on Leaving Email Address Empty */}
                     <div className="p-3.5 bg-amber-50/90 border-2 border-amber-300 rounded-2xl flex items-start gap-3 text-amber-950 text-xs shadow-xs">
                       <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                       <div className="space-y-1">
                         <div className="font-black text-amber-950 uppercase tracking-wider text-[11px]">
-                          Important Warning: Leaving Mobile Number Empty
+                          Important Note: Providing Email is Recommended
                         </div>
                         <p className="text-amber-900 text-[11px] leading-relaxed font-medium">
-                          If you leave your Mobile Number empty, you will <strong>not be able to receive real-time SMS or WhatsApp notifications</strong> regarding Big Bang Edge Test dates, admit card release reminders, test center allocations, OTP verification, or urgent exam day guidelines. We strongly encourage providing your mobile number.
+                          If you leave your Email Address empty, official PDF Hall Tickets, scorecards, and fee receipts will be accessible only inside this student portal. Providing an email ensures you get direct copies sent to your inbox.
                         </p>
                       </div>
                     </div>
@@ -1022,42 +681,48 @@ export const StudentLogin: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Email (Mandatory) & Phone (Optional) */}
+                    {/* Mobile (Mandatory with +91 badge) & Email (Optional) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Email Address * <span className="text-[10px] text-[#ED1C24] font-normal lowercase">(mandatory)</span>
+                          Mobile Number * <span className="text-[10px] text-[#ED1C24] font-normal lowercase">(10 digits)</span>
+                        </label>
+                        <div className="flex rounded-xl overflow-hidden border border-slate-200 bg-slate-50 focus-within:ring-2 focus-within:ring-[#002147] focus-within:bg-white transition-all">
+                          <span className="inline-flex items-center px-3 bg-slate-100 text-xs font-bold text-slate-600 border-r border-slate-200 select-none">
+                            🇮🇳 +91
+                          </span>
+                          <input
+                            type="tel"
+                            required
+                            maxLength={10}
+                            placeholder="10-digit mobile number"
+                            value={registerData.phone}
+                            onChange={(e) => {
+                              let digits = e.target.value.replace(/\D/g, '');
+                              if (digits.length > 10) digits = digits.slice(-10);
+                              setRegisterData({ ...registerData, phone: digits });
+                            }}
+                            className="w-full px-3.5 py-2.5 bg-transparent text-xs font-mono font-medium outline-none text-slate-900"
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-1">Used for signing in and real-time test alerts.</p>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Email Address <span className="text-slate-400 font-normal lowercase">(optional)</span>
                         </label>
                         <div className="relative">
                           <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                           <input
                             type="email"
-                            required
-                            placeholder="e.g. arjun.verma@gmail.com"
+                            placeholder="e.g. arjun@gmail.com (optional)"
                             value={registerData.email}
                             onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
                             className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
                           />
                         </div>
-                        <p className="text-[10px] text-slate-500 mt-1">Used for signing in and receiving exam scorecards.</p>
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Mobile Number <span className="text-slate-400 font-normal lowercase">(optional)</span>
-                        </label>
-                        <div className="relative">
-                          <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                          <input
-                            type="tel"
-                            maxLength={10}
-                            placeholder="e.g. 9876543210 (optional)"
-                            value={registerData.phone}
-                            onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value.replace(/\D/g, '') })}
-                            className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none font-mono"
-                          />
-                        </div>
-                        <p className="text-[10px] text-slate-500 mt-1">Recommended for instant SMS test alerts.</p>
+                        <p className="text-[10px] text-slate-500 mt-1">Recommended for PDF Hall Ticket attachments.</p>
                       </div>
                     </div>
 
@@ -1065,21 +730,18 @@ export const StudentLogin: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Current Class Grade *
+                          Class / Academic Stream *
                         </label>
                         <select
                           value={registerData.currentClass}
                           onChange={(e) => setRegisterData({ ...registerData, currentClass: e.target.value })}
-                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none cursor-pointer"
                         >
-                          <option value="Class V">Class V (Going to VI)</option>
-                          <option value="Class VI">Class VI (Going to VII)</option>
-                          <option value="Class VII">Class VII (Going to VIII)</option>
-                          <option value="Class VIII">Class VIII (Going to IX)</option>
-                          <option value="Class IX">Class IX (Going to X)</option>
-                          <option value="Class X">Class X (Going to XI)</option>
-                          <option value="Class XI">Class XI (Going to XII)</option>
-                          <option value="Class XII">Class XII / Dropper</option>
+                          {BIG_BANG_CLASSES.map((cls) => (
+                            <option key={cls.key} value={cls.label}>
+                              {cls.label}
+                            </option>
+                          ))}
                         </select>
                       </div>
 
@@ -1123,28 +785,324 @@ export const StudentLogin: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Password */}
+                    {/* Password & Confirm Password */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Create Password (min 6 chars) *
+                        </label>
+                        <div className="relative">
+                          <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            required
+                            placeholder="Create account password"
+                            value={registerData.password}
+                            onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                            className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Confirm Password *
+                        </label>
+                        <div className="relative">
+                          <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                          <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            required
+                            placeholder="Confirm your password"
+                            value={registerData.confirmPassword}
+                            onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
+                            className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                          >
+                            {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mandatory Consent Checkboxes */}
+                    <div className="space-y-3 pt-3 border-t border-slate-200">
+                      <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 select-none">
+                        <input
+                          type="checkbox"
+                          checked={termsAccepted}
+                          onChange={(e) => setTermsAccepted(e.target.checked)}
+                          className="mt-0.5 w-4 h-4 rounded border-slate-300 text-[#ED1C24] focus:ring-[#ED1C24] cursor-pointer shrink-0"
+                        />
+                        <span className="leading-snug">
+                          I have read, understood, and unconditionally agree to the{' '}
+                          <a href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="text-[#002147] font-bold underline hover:text-[#ED1C24]">
+                            Terms & Conditions
+                          </a>
+                          ,{' '}
+                          <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[#002147] font-bold underline hover:text-[#ED1C24]">
+                            Privacy Policy
+                          </a>
+                          , and candidate testing covenants. <span className="text-[#ED1C24] font-bold">*</span>
+                        </span>
+                      </label>
+
+                      <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 select-none">
+                        <input
+                          type="checkbox"
+                          checked={updatesOptIn}
+                          onChange={(e) => setUpdatesOptIn(e.target.checked)}
+                          className="mt-0.5 w-4 h-4 rounded border-slate-300 text-[#ED1C24] focus:ring-[#ED1C24] cursor-pointer shrink-0"
+                        />
+                        <span className="leading-snug">
+                          I expressly opt in and consent to receive critical examination alerts, Hall Ticket issuances, scorecards, scholarship results, and admission notifications via Email and SMS / WhatsApp carrier dispatch. <span className="text-[#ED1C24] font-bold">*</span>
+                        </span>
+                      </label>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={submitting || registerData.phone.length < 10 || !termsAccepted || !updatesOptIn}
+                      className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                    >
+                      {submitting ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <span>Create Student Account Instantly</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                ) : (
+                  /* ========================================================
+                     TAB 2: REGISTER WITH EMAIL & PASSWORD (PHONE OPTIONAL)
+                     ======================================================== */
+                  <form onSubmit={handleEmailRegisterSubmit} className="space-y-4">
+                    {/* Relevant Info Card */}
+                    <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded-2xl flex items-start gap-3 text-blue-950 text-xs shadow-xs">
+                      <Mail className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <div className="font-bold text-blue-900 uppercase tracking-wider text-[11px]">
+                          Email Registration Mode
+                        </div>
+                        <p className="text-blue-800 text-[11px] leading-relaxed">
+                          Your primary login credentials will be your <strong>Email Address & Password</strong>. Entering your mobile number below is <em>optional</em>.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Warning on Leaving Mobile Number Empty */}
+                    <div className="p-3.5 bg-amber-50/90 border-2 border-amber-300 rounded-2xl flex items-start gap-3 text-amber-950 text-xs shadow-xs">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <div className="font-black text-amber-950 uppercase tracking-wider text-[11px]">
+                          Important Warning: Leaving Mobile Number Empty
+                        </div>
+                        <p className="text-amber-900 text-[11px] leading-relaxed font-medium">
+                          If you leave your Mobile Number empty, you will <strong>not be able to receive real-time SMS or WhatsApp notifications</strong> regarding Big Bang Edge Test dates, admit card release reminders, test center allocations, or urgent exam day guidelines. We strongly encourage providing your mobile number.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Student Full Name & Parent Name */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Student Full Name *
+                        </label>
+                        <div className="relative">
+                          <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. ARJUN VERMA"
+                            value={registerData.fullName}
+                            onChange={(e) => setRegisterData({ ...registerData, fullName: e.target.value })}
+                            className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none uppercase"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Father / Mother's Name *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. RAJESH VERMA"
+                          value={registerData.parentName}
+                          onChange={(e) => setRegisterData({ ...registerData, parentName: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none uppercase"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Email (Mandatory) & Phone (Optional with +91 badge) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Email Address * <span className="text-[10px] text-[#ED1C24] font-normal lowercase">(mandatory)</span>
+                        </label>
+                        <div className="relative">
+                          <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                          <input
+                            type="email"
+                            required
+                            placeholder="e.g. arjun.verma@gmail.com"
+                            value={registerData.email}
+                            onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                            className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-1">Used for signing in and receiving exam scorecards.</p>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Mobile Number <span className="text-slate-400 font-normal lowercase">(optional)</span>
+                        </label>
+                        <div className="flex rounded-xl overflow-hidden border border-slate-200 bg-slate-50 focus-within:ring-2 focus-within:ring-[#002147] focus-within:bg-white transition-all">
+                          <span className="inline-flex items-center px-3 bg-slate-100 text-xs font-bold text-slate-600 border-r border-slate-200 select-none">
+                            🇮🇳 +91
+                          </span>
+                          <input
+                            type="tel"
+                            maxLength={10}
+                            placeholder="10-digit mobile number"
+                            value={registerData.phone}
+                            onChange={(e) => {
+                              let digits = e.target.value.replace(/\D/g, '');
+                              if (digits.length > 10) digits = digits.slice(-10);
+                              setRegisterData({ ...registerData, phone: digits });
+                            }}
+                            className="w-full px-3.5 py-2.5 bg-transparent text-xs font-mono font-medium outline-none text-slate-900"
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-1">Recommended for instant SMS test alerts.</p>
+                      </div>
+                    </div>
+
+                    {/* Class & School Name */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Class / Academic Stream *
+                        </label>
+                        <select
+                          value={registerData.currentClass}
+                          onChange={(e) => setRegisterData({ ...registerData, currentClass: e.target.value })}
+                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none cursor-pointer"
+                        >
+                          {BIG_BANG_CLASSES.map((cls) => (
+                            <option key={cls.key} value={cls.label}>
+                              {cls.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          School Name *
+                        </label>
+                        <div className="relative">
+                          <School className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. DPS R.K. Puram"
+                            value={registerData.schoolName}
+                            onChange={(e) => setRegisterData({ ...registerData, schoolName: e.target.value })}
+                            className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Preferred FIITJEE Centre */}
                     <div>
                       <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Create Account Password (minimum 6 characters) *
+                        Nearest / Preferred FIITJEE Centre *
                       </label>
                       <div className="relative">
-                        <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                        <input
-                          type={showPassword ? 'text' : 'password'}
+                        <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <select
                           required
-                          placeholder="Create a strong account password"
-                          value={registerData.password}
-                          onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                          className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                          value={registerData.preferredCentreId}
+                          onChange={(e) => setRegisterData({ ...registerData, preferredCentreId: e.target.value })}
+                          className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none cursor-pointer"
                         >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
+                          <option value="">— Select your nearest FIITJEE centre —</option>
+                          <option value="bhubaneswar">FIITJEE Bhubaneswar (Odisha)</option>
+                          <option value="dwarka">FIITJEE Dwarka (New Delhi)</option>
+                          <option value="ranchi">FIITJEE Ranchi (Jharkhand)</option>
+                          <option value="hyderabad">FIITJEE Hyderabad (Telangana)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Password & Confirm Password */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Create Password (min 6 chars) *
+                        </label>
+                        <div className="relative">
+                          <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            required
+                            placeholder="Create account password"
+                            value={registerData.password}
+                            onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                            className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Confirm Password *
+                        </label>
+                        <div className="relative">
+                          <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                          <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            required
+                            placeholder="Confirm your password"
+                            value={registerData.confirmPassword}
+                            onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
+                            className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                          >
+                            {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -1192,335 +1150,12 @@ export const StudentLogin: React.FC = () => {
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       ) : (
                         <>
-                          <span>Create Student Account (Email & Password)</span>
+                          <span>Create Student Account Instantly</span>
                           <ArrowRight className="w-4 h-4" />
                         </>
                       )}
                     </button>
                   </form>
-                ) : (
-                  /* ========================================================
-                     TAB 2: REGISTER WITH PHONE NUMBER & OTP (EMAIL OPTIONAL)
-                     ======================================================== */
-                  <div className="space-y-4">
-                    {/* Relevant Info Card */}
-                    <div className="p-3.5 bg-purple-50/80 border border-purple-200 rounded-2xl flex items-start gap-3 text-purple-950 text-xs shadow-xs">
-                      <Phone className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
-                      <div className="space-y-0.5">
-                        <div className="font-bold text-purple-900 uppercase tracking-wider text-[11px]">
-                          Mobile OTP Registration Mode
-                        </div>
-                        <p className="text-purple-800 text-[11px] leading-relaxed">
-                          Your account will be authenticated directly via your <strong>10-Digit Mobile Number</strong> using SMS OTP verification. Providing an email address below is <em>optional</em>.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Warning on Leaving Email Address Empty */}
-                    <div className="p-3.5 bg-amber-50/90 border-2 border-amber-300 rounded-2xl flex items-start gap-3 text-amber-950 text-xs shadow-xs">
-                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                      <div className="space-y-1">
-                        <div className="font-black text-amber-950 uppercase tracking-wider text-[11px]">
-                          Important Warning: Leaving Email Address Empty
-                        </div>
-                        <p className="text-amber-900 text-[11px] leading-relaxed font-medium">
-                          If you leave your Email Address empty, you will <strong>not be able to receive official PDF Hall Tickets, formal admission confirmation letters, detailed result scorecards, scholarship certificates, or GST fee receipts</strong> via email. We strongly encourage providing your email address.
-                        </p>
-                      </div>
-                    </div>
-
-                    {registerOtpStep === 'form' ? (
-                      <form onSubmit={handlePhoneRegisterSubmit} className="space-y-4">
-                        {/* Student Full Name & Parent Name */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                              Student Full Name *
-                            </label>
-                            <div className="relative">
-                              <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                              <input
-                                type="text"
-                                required
-                                placeholder="e.g. ARJUN VERMA"
-                                value={registerData.fullName}
-                                onChange={(e) => setRegisterData({ ...registerData, fullName: e.target.value })}
-                                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none uppercase"
-                              />
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                              Father / Mother's Name *
-                            </label>
-                            <input
-                              type="text"
-                              required
-                              placeholder="e.g. RAJESH VERMA"
-                              value={registerData.parentName}
-                              onChange={(e) => setRegisterData({ ...registerData, parentName: e.target.value })}
-                              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none uppercase"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Mobile (Mandatory) & Email (Optional) */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                              Mobile Number * <span className="text-[10px] text-[#ED1C24] font-normal lowercase">(mandatory)</span>
-                            </label>
-                            <div className="flex rounded-xl overflow-hidden border border-slate-200 bg-slate-50 focus-within:ring-2 focus-within:ring-[#002147] focus-within:bg-white transition-all">
-                              <span className="inline-flex items-center px-3 bg-slate-100 text-xs font-bold text-slate-600 border-r border-slate-200 select-none">
-                                🇮🇳 +91
-                              </span>
-                              <input
-                                type="tel"
-                                required
-                                maxLength={10}
-                                placeholder="10-digit mobile number"
-                                value={registerData.phone}
-                                onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value.replace(/\D/g, '') })}
-                                className="w-full px-3.5 py-2.5 bg-transparent text-xs font-mono font-medium outline-none text-slate-900"
-                              />
-                            </div>
-                            <p className="text-[10px] text-slate-500 mt-1">We will dispatch a 6-digit OTP code to this mobile.</p>
-                          </div>
-
-                          <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                              Email Address <span className="text-slate-400 font-normal lowercase">(optional)</span>
-                            </label>
-                            <div className="relative">
-                              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                              <input
-                                type="email"
-                                placeholder="e.g. arjun@gmail.com (optional)"
-                                value={registerData.email}
-                                onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
-                              />
-                            </div>
-                            <p className="text-[10px] text-slate-500 mt-1">Recommended for PDF Hall Ticket attachments.</p>
-                          </div>
-                        </div>
-
-                        {/* Class & School Name */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                              Current Class Grade *
-                            </label>
-                            <select
-                              value={registerData.currentClass}
-                              onChange={(e) => setRegisterData({ ...registerData, currentClass: e.target.value })}
-                              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
-                            >
-                              <option value="Class V">Class V (Going to VI)</option>
-                              <option value="Class VI">Class VI (Going to VII)</option>
-                              <option value="Class VII">Class VII (Going to VIII)</option>
-                              <option value="Class VIII">Class VIII (Going to IX)</option>
-                              <option value="Class IX">Class IX (Going to X)</option>
-                              <option value="Class X">Class X (Going to XI)</option>
-                              <option value="Class XI">Class XI (Going to XII)</option>
-                              <option value="Class XII">Class XII / Dropper</option>
-                            </select>
-                          </div>
-
-                          <div>
-                            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                              School Name *
-                            </label>
-                            <div className="relative">
-                              <School className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                              <input
-                                type="text"
-                                required
-                                placeholder="e.g. DPS R.K. Puram"
-                                value={registerData.schoolName}
-                                onChange={(e) => setRegisterData({ ...registerData, schoolName: e.target.value })}
-                                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Preferred FIITJEE Centre */}
-                        <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Nearest / Preferred FIITJEE Centre *
-                          </label>
-                          <div className="relative">
-                            <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                            <select
-                              required
-                              value={registerData.preferredCentreId}
-                              onChange={(e) => setRegisterData({ ...registerData, preferredCentreId: e.target.value })}
-                              className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none cursor-pointer"
-                            >
-                              <option value="">— Select your nearest FIITJEE centre —</option>
-                              <option value="bhubaneswar">FIITJEE Bhubaneswar (Odisha)</option>
-                              <option value="dwarka">FIITJEE Dwarka (New Delhi)</option>
-                              <option value="ranchi">FIITJEE Ranchi (Jharkhand)</option>
-                              <option value="hyderabad">FIITJEE Hyderabad (Telangana)</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        {/* Mandatory Consent Checkboxes */}
-                        <div className="space-y-3 pt-3 border-t border-slate-200">
-                          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 select-none">
-                            <input
-                              type="checkbox"
-                              checked={termsAccepted}
-                              onChange={(e) => setTermsAccepted(e.target.checked)}
-                              className="mt-0.5 w-4 h-4 rounded border-slate-300 text-[#ED1C24] focus:ring-[#ED1C24] cursor-pointer shrink-0"
-                            />
-                            <span className="leading-snug">
-                              I have read, understood, and unconditionally agree to the{' '}
-                              <a href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="text-[#002147] font-bold underline hover:text-[#ED1C24]">
-                                Terms & Conditions
-                              </a>
-                              ,{' '}
-                              <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[#002147] font-bold underline hover:text-[#ED1C24]">
-                                Privacy Policy
-                              </a>
-                              , and candidate testing covenants. <span className="text-[#ED1C24] font-bold">*</span>
-                            </span>
-                          </label>
-
-                          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-700 select-none">
-                            <input
-                              type="checkbox"
-                              checked={updatesOptIn}
-                              onChange={(e) => setUpdatesOptIn(e.target.checked)}
-                              className="mt-0.5 w-4 h-4 rounded border-slate-300 text-[#ED1C24] focus:ring-[#ED1C24] cursor-pointer shrink-0"
-                            />
-                            <span className="leading-snug">
-                              I expressly opt in and consent to receive critical examination alerts, Hall Ticket issuances, scorecards, scholarship results, and admission notifications via Email and SMS / WhatsApp carrier dispatch. <span className="text-[#ED1C24] font-bold">*</span>
-                            </span>
-                          </label>
-                        </div>
-
-                        {/* reCAPTCHA container for Phone Register */}
-                        <div id="recaptcha-register-phone-container" className="flex justify-center my-2" />
-
-                        <button
-                          type="submit"
-                          disabled={submitting || registerData.phone.length < 10 || !termsAccepted || !updatesOptIn}
-                          className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-                        >
-                          {submitting ? (
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <>
-                              <span>Verify Mobile via OTP & Register</span>
-                              <ArrowRight className="w-4 h-4" />
-                            </>
-                          )}
-                        </button>
-
-                        {/* Fallback option if Firebase SMS is restricted by Region Policy */}
-                        {showPhoneFallbackPassword && (
-                          <div className="mt-4 p-4 bg-slate-50 border border-slate-300 rounded-2xl space-y-3">
-                            <div className="text-[11px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                              <Lock className="w-3.5 h-3.5 text-[#002147]" />
-                              <span>Instant Password Alternative (No SMS Needed)</span>
-                            </div>
-                            <p className="text-[11px] text-slate-600">
-                              Since SMS delivery is restricted by policy, you can set a password right now to complete your student registration instantly:
-                            </p>
-                            <div className="relative">
-                              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                              <input
-                                type={showPassword ? 'text' : 'password'}
-                                placeholder="Create a strong account password"
-                                value={phoneFallbackPassword}
-                                onChange={(e) => setPhoneFallbackPassword(e.target.value)}
-                                className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-[#002147] outline-none"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-                              >
-                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                              </button>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={handlePhoneFallbackSubmit}
-                              disabled={submitting || phoneFallbackPassword.length < 6 || !termsAccepted || !updatesOptIn}
-                              className="w-full py-2.5 bg-[#002147] hover:bg-slate-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-xs disabled:opacity-50"
-                            >
-                              Register Instantly with Password
-                            </button>
-                          </div>
-                        )}
-                      </form>
-                    ) : (
-                      /* Phone OTP Verification Sub-step */
-                      <form onSubmit={handleVerifyRegisterOtp} className="space-y-4">
-                        <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between text-xs">
-                          <div>
-                            <span className="text-[10px] uppercase font-bold text-blue-600 block">OTP Sent to Mobile</span>
-                            <span className="font-mono font-bold text-slate-900">+91 {registerData.phone}</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => { setRegisterOtpStep('form'); setRegisterOtpCode(''); setErrorMessage(null); }}
-                            className="text-[11px] font-bold text-[#ED1C24] hover:underline cursor-pointer"
-                          >
-                            Change Details
-                          </button>
-                        </div>
-
-                        <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5 text-center">
-                            Enter 6-Digit SMS Verification Code
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            maxLength={6}
-                            autoFocus
-                            placeholder="• • • • • •"
-                            value={registerOtpCode}
-                            onChange={(e) => setRegisterOtpCode(e.target.value.replace(/\D/g, ''))}
-                            className="w-full py-3 text-center text-xl tracking-[0.5em] font-mono font-bold bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#002147] focus:bg-white outline-none"
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between text-xs pt-1">
-                          <span className="text-[11px] text-slate-500">Didn't receive code?</span>
-                          <button
-                            type="button"
-                            disabled={submitting || registerResendCooldown > 0}
-                            onClick={handleResendRegisterOtp}
-                            className="text-[11px] font-bold text-[#002147] hover:underline disabled:text-slate-400 cursor-pointer disabled:cursor-not-allowed"
-                          >
-                            {registerResendCooldown > 0 ? `Resend OTP in ${registerResendCooldown}s` : 'Resend SMS OTP'}
-                          </button>
-                        </div>
-
-                        <button
-                          type="submit"
-                          disabled={submitting || registerOtpCode.length !== 6}
-                          className="w-full py-3 bg-[#ED1C24] hover:bg-[#d6171e] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50 mt-2"
-                        >
-                          {submitting ? (
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <>
-                              <span>Verify OTP & Complete Registration</span>
-                              <ArrowRight className="w-4 h-4" />
-                            </>
-                          )}
-                        </button>
-                      </form>
-                    )}
-                  </div>
                 )}
 
                 <div className="text-center pt-2">

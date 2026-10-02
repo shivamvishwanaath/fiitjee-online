@@ -279,6 +279,32 @@ export function useStudentAuth() {
           }
         }
 
+        // If candidate entered email, but registered via phone in students table (authEmail = cand_phone)
+        if (!isDigitsOnly && cleanInput.includes('@') && (authErr.code === 'auth/invalid-credential' || authErr.code === 'auth/user-not-found')) {
+          try {
+            const emailQuery = query(ref(db, 'students'), orderByChild('email'), equalTo(cleanInput.toLowerCase()));
+            const emailSnap = await get(emailQuery);
+            if (emailSnap.exists()) {
+              const studentsObj = emailSnap.val();
+              const matchedStudent = Object.values(studentsObj)[0] as StudentProfile;
+              if (matchedStudent?.phone) {
+                const candPhone = matchedStudent.phone.replace(/\D/g, '').slice(-10);
+                const candEmail = `cand_${candPhone}@candidate.fiitjee.online`;
+                const cred = await signInWithEmailAndPassword(auth, candEmail, pass);
+                if (cred.user) {
+                  await update(ref(db, `students/${cred.user.uid}`), {
+                    lastLoginAt: new Date().toISOString(),
+                    lastLoginMethod: 'email_phone_alias'
+                  });
+                  return;
+                }
+              }
+            }
+          } catch (emailLookupErr) {
+            console.warn('Email profile lookup error:', emailLookupErr);
+          }
+        }
+
         // If invalid credential or user not found, check if a registration exists for this candidate
         if (authErr.code === 'auth/invalid-credential' || authErr.code === 'auth/user-not-found') {
           const found = await findRegistrationInDatabase(cleanInput);
@@ -439,19 +465,26 @@ export function useStudentAuth() {
 
   const signup = async (
     profileData: Omit<StudentProfile, 'uid' | 'createdAt'>, 
-    pass: string
+    pass: string,
+    authMode: 'phone' | 'email' = 'phone'
   ): Promise<string> => {
     setLoading(true);
     try {
       const cleanEmail = (profileData.email || '').trim().toLowerCase();
-      const cleanPhone = (profileData.phone || '').replace(/\D/g, '');
+      const cleanPhone = (profileData.phone || '').replace(/\D/g, '').slice(-10);
 
       if (!cleanEmail && !cleanPhone) {
-        throw new Error('Please provide either your Email Address or Mobile Number to register.');
+        throw new Error('Please provide either your Mobile Number or Email Address to register.');
       }
 
-      // If email provided, use it; otherwise generate synthetic candidate auth email for mobile
-      const authEmail = cleanEmail || `cand_${cleanPhone.slice(-10)}@candidate.fiitjee.online`;
+      if (authMode === 'phone' && cleanPhone.length !== 10) {
+        throw new Error('Please enter a valid 10-digit mobile number.');
+      }
+
+      // If registering with phone mode, ALWAYS use cand_<phone>@candidate.fiitjee.online as auth identity
+      const authEmail = (authMode === 'phone' && cleanPhone)
+        ? `cand_${cleanPhone}@candidate.fiitjee.online`
+        : (cleanEmail || `cand_${cleanPhone}@candidate.fiitjee.online`);
 
       const cred = await createUserWithEmailAndPassword(auth, authEmail, pass);
       const uid = cred.user.uid;
@@ -470,7 +503,7 @@ export function useStudentAuth() {
         schoolName: profileData.schoolName.trim(),
         createdAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString(),
-        lastLoginMethod: cleanEmail ? 'email' : 'phone_pass'
+        lastLoginMethod: authMode === 'phone' ? 'phone_pass' : 'email'
       };
 
       const studentRef = ref(db, `students/${uid}`);
@@ -484,6 +517,15 @@ export function useStudentAuth() {
 
       setStudent(fullProfile);
       return uid;
+    } catch (err: any) {
+      if (err.code === 'auth/email-already-in-use') {
+        const cleanPhone = (profileData.phone || '').replace(/\D/g, '').slice(-10);
+        if (authMode === 'phone' && cleanPhone) {
+          throw new Error(`Mobile number +91 ${cleanPhone} is already registered. Please go to the Sign In screen to log into your account.`);
+        }
+        throw new Error('This email address is already registered. Please sign in to your account.');
+      }
+      throw err;
     } finally {
       setLoading(false);
     }
