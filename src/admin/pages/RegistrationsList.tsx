@@ -16,6 +16,7 @@ import { RegistrationTable } from '../components/RegistrationTable';
 import { ExportButtons } from '../components/ExportButtons';
 import { HallTicketModal } from '../../components/HallTicketModal';
 import { ExamRegistration } from '../../types';
+import { getClassOption } from '../utils/centreUtils';
 
 export const RegistrationsList: React.FC = () => {
   const navigate = useNavigate();
@@ -95,7 +96,14 @@ export const RegistrationsList: React.FC = () => {
 
       // Class
       if (filters.classGrade !== 'All') {
-        if (r.currentClass !== filters.classGrade) return false;
+        const opt = getClassOption(r.currentClass);
+        const filterOpt = getClassOption(filters.classGrade);
+        if (
+          r.currentClass !== filters.classGrade &&
+          opt.code !== filterOpt.code &&
+          opt.canonical !== filters.classGrade &&
+          opt.label !== filters.classGrade
+        ) return false;
       }
 
       return true;

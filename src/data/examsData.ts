@@ -10,13 +10,14 @@ export interface BigBangClassItem {
 }
 
 export const BIG_BANG_CLASSES: BigBangClassItem[] = [
-  { key: 'V',    canonical: 'Class V',    label: '05th. Going to 06th.', code: '6052', fromGrade: '05th', toGrade: '06th' },
-  { key: 'VI',   canonical: 'Class VI',   label: '06th. Going to 07th.', code: '7052', fromGrade: '06th', toGrade: '07th' },
-  { key: 'VII',  canonical: 'Class VII',  label: '07th. Going to 08th.', code: '8052', fromGrade: '07th', toGrade: '08th' },
-  { key: 'VIII', canonical: 'Class VIII', label: '08th. Going to 09th.', code: '9052', fromGrade: '08th', toGrade: '09th' },
-  { key: 'IX',   canonical: 'Class IX',   label: '09th. Going to 10th.', code: '1052', fromGrade: '09th', toGrade: '10th' },
-  { key: 'X',    canonical: 'Class X',    label: '10th. Going to 11th.', code: '1152', fromGrade: '10th', toGrade: '11th' },
-  { key: 'XI',   canonical: 'Class XI',   label: '11th. Going to 12th.', code: '1252', fromGrade: '11th', toGrade: '12th' },
+  { key: 'V',    canonical: 'Class V',           label: '05th. Going to 06th.', code: '6052', fromGrade: '05th', toGrade: '06th' },
+  { key: 'VI',   canonical: 'Class VI',          label: '06th. Going to 07th.', code: '7052', fromGrade: '06th', toGrade: '07th' },
+  { key: 'VII',  canonical: 'Class VII',         label: '07th. Going to 08th.', code: '8052', fromGrade: '07th', toGrade: '08th' },
+  { key: 'VIII', canonical: 'Class VIII',        label: '08th. Going to 09th.', code: '9052', fromGrade: '08th', toGrade: '09th' },
+  { key: 'IX',   canonical: 'Class IX',          label: '09th. Going to 10th.', code: '1052', fromGrade: '09th', toGrade: '10th' },
+  { key: 'X',    canonical: 'Class X',           label: '10th. Going to 11th.', code: '1152', fromGrade: '10th', toGrade: '11th' },
+  { key: 'XI',   canonical: 'Class XI',          label: '11th. Going to 12th.', code: '1252', fromGrade: '11th', toGrade: '12th' },
+  { key: 'XII',  canonical: 'Class XII Passout', label: '12th Passout',         code: '1352', fromGrade: '12th', toGrade: 'Passout' },
 ];
 
 export function getClassOption(className?: string): BigBangClassItem {
@@ -54,7 +55,29 @@ export function getClassOption(className?: string): BigBangClassItem {
   if (c.includes('1152') || c.includes('10TH') || c === '10' || c.includes('CLASS 10') || (c.includes('CLASS X') && !c.includes('XI') && !c.includes('XII'))) {
     return BIG_BANG_CLASSES[5];
   }
-  if (c.includes('1252') || c.includes('11TH') || c === '11' || c.includes('CLASS 11') || (c.includes('CLASS XI') && !c.includes('XII'))) {
+  // 12th Passout / Dropper / 1352
+  if (
+    c.includes('1352') || 
+    c.includes('PASSWOUT') || 
+    c.includes('PASSOUT') || 
+    c.includes('PASS') || 
+    c.includes('DROPPER') || 
+    (c.includes('12TH') && !c.includes('11TH')) || 
+    c === '12' || 
+    c.includes('CLASS 12') || 
+    c.includes('XII')
+  ) {
+    return BIG_BANG_CLASSES[7];
+  }
+  // 11th Going to 12th / 1252
+  if (
+    c.includes('1252') || 
+    c.includes('11TH') || 
+    c === '11' || 
+    c.includes('CLASS 11') || 
+    (c.includes('CLASS XI') && !c.includes('XII')) ||
+    (c.includes('XI') && !c.includes('XII') && !c.includes('IX'))
+  ) {
     return BIG_BANG_CLASSES[6];
   }
 
@@ -67,8 +90,8 @@ export const BIG_BANG_EXAM: AdmissionExam = {
   fullBrandedName: 'FIITJEE Big Bang Edge Test',
   tagline: 'Some choices are obvious.',
   description: 'A 360° analysis of aptitude, potential & academic standing.',
-  targetClasses: ['V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'],
-  targetClassesDisplay: 'Class V · VI · VII · VIII · IX · X · XI',
+  targetClasses: ['V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'],
+  targetClassesDisplay: 'Class V · VI · VII · VIII · IX · X · XI · 12th Passout',
   testDates: [
     '11th October 2026 (Sunday)',
     '18th October 2026 (Sunday)'

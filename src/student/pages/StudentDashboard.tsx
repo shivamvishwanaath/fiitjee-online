@@ -51,7 +51,7 @@ import { FtreRegistrationModal } from '../../components/FtreRegistrationModal';
 import { FiitjeeLogo } from '../../components/FiitjeeLogo';
 import { deregisterCandidateExam } from '../../admin/utils/developerUtils';
 import { ExamRegistration, StudentExamLink, SupportTicket, ExamResult } from '../../types';
-import { BIG_BANG_EXAM } from '../../data/examsData';
+import { BIG_BANG_EXAM, BIG_BANG_CLASSES } from '../../data/examsData';
 import { getExamScheduleForClass, CENTRES_CONFIG, getRegistrationFeeForClass, getClassOption } from '../../admin/utils/centreUtils';
 import { getCentreExams, calculateExamFeeForClass, CentreExamConfig } from '../../admin/utils/examUtils';
 import { ref, onValue, get, push, set } from 'firebase/database';
@@ -538,7 +538,7 @@ export const StudentDashboard: React.FC = () => {
   };
 
   const isBigBangRegistered = useMemo(() => {
-    const validCodes = ['6052', '7052', '8052', '9052', '1052', '1152', '1252'];
+    const validCodes = ['6052', '7052', '8052', '9052', '1052', '1152', '1252', '1352'];
     return registeredList.some(r => r.examId === BIG_BANG_EXAM.id || validCodes.some(code => r.rollNo?.startsWith(code)));
   }, [registeredList]);
 
@@ -2190,18 +2190,15 @@ export const StudentDashboard: React.FC = () => {
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Class *</label>
                         <select
-                          value={profileForm.currentClass?.includes('1252') ? 'Class XI' : (profileForm.currentClass?.includes('XII') && !profileForm.currentClass?.includes('1252') ? 'Class XII' : getClassOption(profileForm.currentClass).canonical)}
+                          value={profileForm.currentClass ? getClassOption(profileForm.currentClass).label : BIG_BANG_CLASSES[5].label}
                           onChange={(e) => setProfileForm({ ...profileForm, currentClass: e.target.value })}
                           className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-[#002147]/40 cursor-pointer"
                         >
-                          <option value="Class V">Class V (Going to VI)</option>
-                          <option value="Class VI">Class VI (Going to VII)</option>
-                          <option value="Class VII">Class VII (Going to VIII)</option>
-                          <option value="Class VIII">Class VIII (Going to IX)</option>
-                          <option value="Class IX">Class IX (Going to X)</option>
-                          <option value="Class X">Class X (Going to XI)</option>
-                          <option value="Class XI">Class XI (Going to XII)</option>
-                          <option value="Class XII">Class XII / Dropper</option>
+                          {BIG_BANG_CLASSES.map((cls) => (
+                            <option key={cls.key} value={cls.label}>
+                              {cls.label}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </div>
@@ -2478,7 +2475,7 @@ export const StudentDashboard: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {centreExams.map((exam) => {
                     const isRegistered = registeredList.some(
-                      r => r.examId === exam.id || (exam.id === 'big-bang-edge-test' && ['6052', '7052', '8052', '9052', '1052', '1152', '1252'].some(code => r.rollNo?.startsWith(code)))
+                      r => r.examId === exam.id || (exam.id === 'big-bang-edge-test' && ['6052', '7052', '8052', '9052', '1052', '1152', '1252', '1352'].some(code => r.rollNo?.startsWith(code)))
                     );
                     const studentFee = calculateExamFeeForClass(exam, student?.currentClass);
                     const isClosed = exam.registrationOpen === false;

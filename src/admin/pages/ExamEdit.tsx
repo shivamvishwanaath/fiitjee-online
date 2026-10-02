@@ -67,7 +67,8 @@ export const ExamEdit: React.FC<ExamEditProps> = ({ isNew = false }) => {
       'Class VIII': 200,
       'Class IX': 250,
       'Class X': 250,
-      'Class XI': 250
+      'Class XI': 250,
+      'Class XII Passout': 250
     },
     defaultFee: 250,
     paymentModes: ['Online (Cashfree / UPI / Cards)', 'Centre Cash Desk / Offline DD'],

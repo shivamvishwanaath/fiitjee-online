@@ -121,6 +121,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <option value="Class X">Class X</option>
             <option value="Class XI">Class XI</option>
             <option value="Class XII">Class XII</option>
+            <option value="Class XII Passout">12th Passout (Class XII Passout)</option>
           </select>
         </div>
       </div>

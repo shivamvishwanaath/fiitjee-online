@@ -188,7 +188,7 @@ export const AdmissionTestDetails: React.FC<AdmissionTestDetailsProps> = ({
             <span className="text-[10px] text-slate-300">Inclusive of GST & diagnostic assessment</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
             {Object.entries(examConfig.classFees || {
               'Class V': 200,
               'Class VI': 200,
@@ -196,7 +196,8 @@ export const AdmissionTestDetails: React.FC<AdmissionTestDetailsProps> = ({
               'Class VIII': 200,
               'Class IX': 250,
               'Class X': 250,
-              'Class XI': 250
+              'Class XI': 250,
+              'Class XII Passout': 250
             }).map(([cls, fee]) => (
               <div key={cls} className="bg-white/10 border border-white/10 rounded-xl p-2.5 text-center">
                 <div className="text-[10px] text-slate-300 font-bold uppercase">{cls}</div>

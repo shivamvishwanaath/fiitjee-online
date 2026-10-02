@@ -8,7 +8,8 @@ import {
   resolveCanonicalCentreId,
   isCentreMatch,
   BIG_BANG_CLASSES,
-  getExamCodeForClass
+  getExamCodeForClass,
+  generateRollNumber
 } from '../admin/utils/centreUtils';
 
 describe('Admin Centre and Email Authorization Logic', () => {
@@ -79,7 +80,7 @@ describe('Admin Centre and Email Authorization Logic', () => {
   });
 
   it('correctly maps the official Big Bang Edge Test classes and codes', () => {
-    expect(BIG_BANG_CLASSES).toHaveLength(7);
+    expect(BIG_BANG_CLASSES).toHaveLength(8);
     expect(BIG_BANG_CLASSES.map(c => c.label)).toEqual([
       '05th. Going to 06th.',
       '06th. Going to 07th.',
@@ -88,6 +89,7 @@ describe('Admin Centre and Email Authorization Logic', () => {
       '09th. Going to 10th.',
       '10th. Going to 11th.',
       '11th. Going to 12th.',
+      '12th Passout',
     ]);
 
     expect(getExamCodeForClass('05th. Going to 06th.')).toBe('6052');
@@ -97,6 +99,24 @@ describe('Admin Centre and Email Authorization Logic', () => {
     expect(getExamCodeForClass('09th. Going to 10th.')).toBe('1052');
     expect(getExamCodeForClass('10th. Going to 11th.')).toBe('1152');
     expect(getExamCodeForClass('11th. Going to 12th.')).toBe('1252');
+    expect(getExamCodeForClass('12th Passout')).toBe('1352');
+
+    // 12th Passout variations and typos
+    expect(getExamCodeForClass('12th passwout')).toBe('1352');
+    expect(getExamCodeForClass('12th Pass')).toBe('1352');
+    expect(getExamCodeForClass('Class XII Passout')).toBe('1352');
+    expect(getExamCodeForClass('Class XII')).toBe('1352');
+
+    // Roll number generation uses prefix 1352 for 12th Passout instead of 1252
+    const bbsrCentre = CENTRES_CONFIG.bhubaneswar;
+    const roll12thPass = generateRollNumber(bbsrCentre, '11th October 2026', 1, undefined, '12th Passout');
+    expect(roll12thPass.startsWith('1352 ')).toBe(true);
+
+    const roll12thTypo = generateRollNumber(bbsrCentre, '11th October 2026', 2, undefined, '12th passwout');
+    expect(roll12thTypo.startsWith('1352 ')).toBe(true);
+
+    const roll11th = generateRollNumber(bbsrCentre, '11th October 2026', 1, undefined, '11th. Going to 12th.');
+    expect(roll11th.startsWith('1252 ')).toBe(true);
 
     // Backward compatibility for legacy inputs with 4-digit code
     expect(getExamCodeForClass('05th. Going to 06th. - 6052')).toBe('6052');

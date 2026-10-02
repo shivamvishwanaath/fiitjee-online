@@ -34,8 +34,8 @@ describe('Phone Number Normalization & Candidate Identity', () => {
 });
 
 describe('BIG_BANG_CLASSES and Grade Mapping', () => {
-  it('correctly maps 7 class options with their respective codes', () => {
-    expect(BIG_BANG_CLASSES).toHaveLength(7);
+  it('correctly maps 8 class options with their respective codes', () => {
+    expect(BIG_BANG_CLASSES).toHaveLength(8);
 
     expect(BIG_BANG_CLASSES[0].label).toBe('05th. Going to 06th.');
     expect(BIG_BANG_CLASSES[0].code).toBe('6052');
@@ -57,13 +57,21 @@ describe('BIG_BANG_CLASSES and Grade Mapping', () => {
 
     expect(BIG_BANG_CLASSES[6].label).toBe('11th. Going to 12th.');
     expect(BIG_BANG_CLASSES[6].code).toBe('1252');
+
+    expect(BIG_BANG_CLASSES[7].label).toBe('12th Passout');
+    expect(BIG_BANG_CLASSES[7].code).toBe('1352');
   });
 
   it('getClassOption correctly matches by code, label, or grade', () => {
     expect(getClassOption('6052').label).toBe('05th. Going to 06th.');
     expect(getClassOption('1152').label).toBe('10th. Going to 11th.');
+    expect(getClassOption('1252').label).toBe('11th. Going to 12th.');
+    expect(getClassOption('1352').label).toBe('12th Passout');
+    expect(getClassOption('12th Passout').code).toBe('1352');
+    expect(getClassOption('12th passwout').code).toBe('1352');
     expect(getClassOption('Class VI').label).toBe('06th. Going to 07th.');
     expect(getClassOption('Class XI').label).toBe('11th. Going to 12th.');
+    expect(getClassOption('Class XII Passout').label).toBe('12th Passout');
     // Backward compatibility for legacy inputs with 4-digit code
     expect(getClassOption('05th. Going to 06th. - 6052').label).toBe('05th. Going to 06th.');
   });

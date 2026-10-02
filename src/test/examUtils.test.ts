@@ -11,7 +11,7 @@ describe('Exam Fee Calculation Engine', () => {
     description: 'Test description',
     year: '2026',
     registrationOpen: true,
-    targetClasses: ['Class V', 'Class VI', 'Class VII', 'Class VIII', 'Class IX', 'Class X', 'Class XI'],
+    targetClasses: ['Class V', 'Class VI', 'Class VII', 'Class VIII', 'Class IX', 'Class X', 'Class XI', 'Class XII Passout'],
     testDates: ['11th October 2026 (Sunday)'],
     modes: ['Offline'],
     venues: [],
@@ -22,7 +22,8 @@ describe('Exam Fee Calculation Engine', () => {
       'Class VIII': 200,
       'Class IX': 250,
       'Class X': 250,
-      'Class XI': 250
+      'Class XI': 250,
+      'Class XII Passout': 300
     },
     defaultFee: 250,
     paymentModes: ['Online']
@@ -35,10 +36,13 @@ describe('Exam Fee Calculation Engine', () => {
     expect(calculateExamFeeForClass(sampleConfig, 'Class VIII')).toBe(200);
   });
 
-  it('calculates senior class fees accurately (Class IX - XI -> ₹250)', () => {
+  it('calculates senior class fees accurately (Class IX - XII Passout)', () => {
     expect(calculateExamFeeForClass(sampleConfig, 'Class IX')).toBe(250);
     expect(calculateExamFeeForClass(sampleConfig, 'Class X')).toBe(250);
     expect(calculateExamFeeForClass(sampleConfig, 'Class XI')).toBe(250);
+    expect(calculateExamFeeForClass(sampleConfig, 'Class XII Passout')).toBe(300);
+    expect(calculateExamFeeForClass(sampleConfig, '12th Passout')).toBe(300);
+    expect(calculateExamFeeForClass(sampleConfig, '12th passwout')).toBe(300);
   });
 
   it('handles bare roman numeral class inputs cleanly', () => {

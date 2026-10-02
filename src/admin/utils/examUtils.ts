@@ -39,7 +39,8 @@ export const DEFAULT_EXAM_CLASSES = [
   'Class VIII',
   'Class IX',
   'Class X',
-  'Class XI'
+  'Class XI',
+  'Class XII Passout'
 ];
 
 /**
@@ -75,7 +76,8 @@ export const DEFAULT_CENTRE_EXAMS: Record<string, CentreExamConfig> = {
       'Class VIII': 200,
       'Class IX': 250,
       'Class X': 250,
-      'Class XI': 250
+      'Class XI': 250,
+      'Class XII Passout': 250
     },
     defaultFee: 250,
     paymentModes: ['Online (Cashfree / UPI / Cards)', 'Centre Cash Desk / Offline DD'],
@@ -111,7 +113,8 @@ export const DEFAULT_CENTRE_EXAMS: Record<string, CentreExamConfig> = {
       'Class VIII': 200,
       'Class IX': 250,
       'Class X': 250,
-      'Class XI': 250
+      'Class XI': 250,
+      'Class XII Passout': 250
     },
     defaultFee: 250,
     paymentModes: ['Online (Cashfree / UPI / Cards)', 'Centre Cash Desk / Offline DD'],
@@ -147,7 +150,8 @@ export const DEFAULT_CENTRE_EXAMS: Record<string, CentreExamConfig> = {
       'Class VIII': 200,
       'Class IX': 250,
       'Class X': 250,
-      'Class XI': 250
+      'Class XI': 250,
+      'Class XII Passout': 250
     },
     defaultFee: 250,
     paymentModes: ['Online (Cashfree / UPI / Cards)', 'Centre Cash Desk / Offline DD'],
@@ -183,7 +187,8 @@ export const DEFAULT_CENTRE_EXAMS: Record<string, CentreExamConfig> = {
       'Class VIII': 200,
       'Class IX': 250,
       'Class X': 250,
-      'Class XI': 250
+      'Class XI': 250,
+      'Class XII Passout': 250
     },
     defaultFee: 250,
     paymentModes: ['Online (Cashfree / UPI / Cards)', 'Centre Cash Desk / Offline DD'],
@@ -325,11 +330,20 @@ export function calculateExamFeeForClass(
   if (!examConfig) return 250;
   if (!className) return examConfig.defaultFee || 250;
 
-  // 1. Map via getClassOption canonical (e.g. '05th. Going to 06th. - 6052' -> 'Class V')
+  // 1. Map via getClassOption canonical (e.g. '05th. Going to 06th.' -> 'Class V', '12th Passout' -> 'Class XII Passout')
   const opt = getClassOption(className);
   const canonical = opt.canonical;
-  if (examConfig.classFees && examConfig.classFees[canonical] !== undefined) {
-    return examConfig.classFees[canonical];
+  if (examConfig.classFees) {
+    if (examConfig.classFees[canonical] !== undefined) {
+      return examConfig.classFees[canonical];
+    }
+    if (canonical === 'Class XII Passout') {
+      if (examConfig.classFees['Class XII'] !== undefined) return examConfig.classFees['Class XII'];
+      if (examConfig.classFees['12th Passout'] !== undefined) return examConfig.classFees['12th Passout'];
+    }
+    if (examConfig.classFees[opt.label] !== undefined) {
+      return examConfig.classFees[opt.label];
+    }
   }
 
   const normalizedClass = className.startsWith('Class ') ? className : `Class ${className.toUpperCase()}`;
