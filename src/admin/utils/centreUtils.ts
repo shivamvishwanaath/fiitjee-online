@@ -174,8 +174,8 @@ export function getCentreByEmail(email?: string | null): CentreProfile | null {
   return null;
 }
 
-export function getCentreByName(name?: string | null): CentreProfile {
-  if (!name) return CENTRES_CONFIG.bhubaneswar;
+export function getCentreByName(name?: any): CentreProfile {
+  if (!name || typeof name !== 'string') return CENTRES_CONFIG.bhubaneswar;
   const clean = name.toLowerCase();
   if (clean.includes('dwarka')) return CENTRES_CONFIG.dwarka;
   if (clean.includes('ranchi')) return CENTRES_CONFIG.ranchi;
@@ -183,8 +183,8 @@ export function getCentreByName(name?: string | null): CentreProfile {
   return CENTRES_CONFIG.bhubaneswar;
 }
 
-export function getCentreIdByName(name?: string | null): string {
-  if (!name) return 'bhubaneswar';
+export function getCentreIdByName(name?: any): string {
+  if (!name || typeof name !== 'string') return 'bhubaneswar';
   const clean = name.toLowerCase();
   if (clean.includes('dwarka')) return 'dwarka';
   if (clean.includes('ranchi')) return 'ranchi';
@@ -196,8 +196,8 @@ export function getCentreIdByName(name?: string | null): string {
  * Resolves any centre identifier, name, city string, or branch abbreviation
  * into a canonical centre ID ('bhubaneswar', 'dwarka', 'ranchi', 'hyderabad', or 'all').
  */
-export function resolveCanonicalCentreId(input?: string | null): string {
-  if (!input) return '';
+export function resolveCanonicalCentreId(input?: any): string {
+  if (!input || typeof input !== 'string') return '';
   const clean = input.trim().toLowerCase().replace(/[\s_\-()]+/g, '');
   if (!clean || clean === 'all' || clean === 'global' || clean === 'allcentres' || clean === 'allbranches' || clean === 'system') {
     return 'all';

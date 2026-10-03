@@ -103,9 +103,13 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
       setAssignedRollNo(null);
       setLastPaymentData(null);
 
+      const safeDefaultCenterProp = (typeof defaultCenterProp === 'string' && defaultCenterProp.trim()) 
+        ? defaultCenterProp.trim() 
+        : undefined;
+
       if (student) {
-        let defaultCenter = defaultCenterProp || 'Bhubaneswar';
-        if (!defaultCenterProp) {
+        let defaultCenter = safeDefaultCenterProp || 'Bhubaneswar';
+        if (!safeDefaultCenterProp) {
           if (student.preferredCentreId === 'dwarka') defaultCenter = 'Dwarka';
           else if (student.preferredCentreId === 'ranchi') defaultCenter = 'Ranchi';
           else if (student.preferredCentreId === 'hyderabad') defaultCenter = 'Hyderabad';
@@ -126,7 +130,7 @@ export const BigBangRegistrationModal: React.FC<BigBangRegistrationModalProps> =
       } else {
         setFormData({ 
           ...initialFormData,
-          selectedCenter: defaultCenterProp || 'Bhubaneswar',
+          selectedCenter: safeDefaultCenterProp || 'Bhubaneswar',
           currentClass: BIG_BANG_CLASSES[5].label
         });
       }

@@ -122,9 +122,11 @@ function AppContent() {
 
   const [selectedBigBangCenter, setSelectedBigBangCenter] = useState<string | undefined>(undefined);
 
-  const handleOpenBigBang = (centerName?: string) => {
-    if (centerName) {
-      setSelectedBigBangCenter(centerName);
+  const handleOpenBigBang = (centerName?: any) => {
+    if (typeof centerName === 'string' && centerName.trim()) {
+      setSelectedBigBangCenter(centerName.trim());
+    } else {
+      setSelectedBigBangCenter(undefined);
     }
     setIsBigBangModalOpen(true);
   };
@@ -142,7 +144,7 @@ function AppContent() {
         <>
           <Navbar
             onOpenFtreModal={() => handleOpenFtre()}
-            onOpenBigBangModal={handleOpenBigBang}
+            onOpenBigBangModal={(center) => handleOpenBigBang(center)}
             onOpenEnquiryModal={() => handleOpenEnquiry('General Counseling')}
             onOpenPortalModal={() => setIsPortalModalOpen(true)}
             onOpenSearch={() => setIsSearchOpen(true)}
@@ -154,7 +156,7 @@ function AppContent() {
           {/* Dynamic News & Admission Notice Marquee */}
           <NoticeTicker
             onOpenFtreModal={() => handleOpenFtre()}
-            onOpenBigBangModal={handleOpenBigBang}
+            onOpenBigBangModal={() => handleOpenBigBang()}
             onNavigate={handleNavigate}
           />
         </>
@@ -447,7 +449,7 @@ function AppContent() {
           >
             <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
               <AdmissionTestDetails
-                onOpenBigBangModal={handleOpenBigBang}
+                onOpenBigBangModal={() => handleOpenBigBang()}
                 onOpenFtreModal={() => handleOpenFtre()}
               />
             </main>
@@ -487,7 +489,7 @@ function AppContent() {
             onNavigate={handleNavigate}
             onOpenFtreModal={() => handleOpenFtre()}
             onOpenEnquiryModal={() => handleOpenEnquiry('General Support')}
-            onOpenBigBangModal={handleOpenBigBang}
+            onOpenBigBangModal={() => handleOpenBigBang()}
           />
 
           {/* Floating Bottom Quick Action Strip for Mobile / Quick Access */}
@@ -514,7 +516,7 @@ function AppContent() {
 
           {/* Persistent Floating Bottom Big Bang Action Bar */}
           <BigBangFloatingBar
-            onOpenBigBangModal={handleOpenBigBang}
+            onOpenBigBangModal={() => handleOpenBigBang()}
             isBigBangModalOpen={isBigBangModalOpen}
           />
 
@@ -532,7 +534,7 @@ function AppContent() {
               setIsBigBangPopupOpen(false);
               localStorage.setItem('bigbang_popup_seen', 'true');
             }}
-            onOpenBigBangModal={handleOpenBigBang}
+            onOpenBigBangModal={() => handleOpenBigBang()}
           />
         </>
       )}

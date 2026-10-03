@@ -55,7 +55,7 @@ export const BigBangFloatingBar: React.FC<BigBangFloatingBarProps> = ({
         {/* Right: Registration Trigger */}
         <div className="flex items-center gap-3">
           <button
-            onClick={onOpenBigBangModal}
+            onClick={() => onOpenBigBangModal()}
             className="px-5 py-2 bg-[#ED1C24] hover:bg-[#d6171e] text-white font-black text-[10px] uppercase tracking-widest rounded-lg transition-all flex items-center gap-1 cursor-pointer shadow-md shadow-red-950/20"
           >
             <span>Register Now</span>

@@ -88,7 +88,7 @@ export const AnnouncementCards: React.FC<AnnouncementCardsProps> = ({
 
         <div className="pt-4 flex gap-2">
           <button
-            onClick={onOpenBigBangModal}
+            onClick={() => onOpenBigBangModal()}
             className="flex-1 py-2 bg-[#ED1C24] hover:bg-[#d6171e] text-white font-black text-xs uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
           >
             <span>Register Now</span>

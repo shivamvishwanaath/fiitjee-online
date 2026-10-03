@@ -20,8 +20,8 @@ export const BIG_BANG_CLASSES: BigBangClassItem[] = [
   { key: 'XII',  canonical: 'Class XII Passout', label: '12th Passout',         code: '1352', fromGrade: '12th', toGrade: 'Passout' },
 ];
 
-export function getClassOption(className?: string): BigBangClassItem {
-  if (!className) return BIG_BANG_CLASSES[5]; // Default to 10th
+export function getClassOption(className?: any): BigBangClassItem {
+  if (!className || typeof className !== 'string') return BIG_BANG_CLASSES[5]; // Default to 10th
   const c = className.trim().toUpperCase();
 
   // 1. Direct match on key, code, canonical, or label
@@ -120,7 +120,7 @@ export function getRegistrationFeeForClass(
   if (examConfig) {
     return calculateExamFeeForClass(examConfig, className);
   }
-  if (centreId) {
+  if (centreId && typeof centreId === 'string') {
     const cleanId = centreId.toLowerCase();
     const blueprint = DEFAULT_CENTRE_EXAMS[cleanId] || DEFAULT_CENTRE_EXAMS.bhubaneswar;
     return calculateExamFeeForClass(blueprint, className);

@@ -89,7 +89,7 @@ export const UpcomingOpportunities: React.FC<UpcomingOpportunitiesProps> = ({
             </div>
             <div className="pt-5">
               <button
-                onClick={onOpenBigBangModal}
+                onClick={() => onOpenBigBangModal()}
                 className="w-full py-2.5 bg-[#ED1C24] hover:bg-[#d6171e] text-white font-black text-xs uppercase tracking-widest rounded-full shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span>Register Now</span>

@@ -70,7 +70,7 @@ export const BigBangHeroBanner: React.FC<BigBangHeroBannerProps> = ({
 
             <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
               <button
-                onClick={onOpenBigBangModal}
+                onClick={() => onOpenBigBangModal()}
                 className="w-full sm:w-auto px-8 py-3.5 bg-[#ED1C24] hover:bg-[#d6171e] text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-red-950/20"
               >
                 <span>Register Now</span>
