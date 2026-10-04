@@ -2,7 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { 
   assertDeveloper, 
   isDeveloperEmail, 
-  DEVELOPER_EMAIL 
+  DEVELOPER_EMAIL,
+  fetchAllRegistrations,
+  fetchAllStudents,
+  fetchAllCoupons,
+  fetchAllSupportTickets,
+  fetchSystemDiagnosticStats
 } from '../admin/utils/developerUtils';
 
 describe('Developer Utilities & Authorization Guards', () => {
@@ -26,5 +31,14 @@ describe('Developer Utilities & Authorization Guards', () => {
     expect(() => assertDeveloper('other.person@gmail.com')).toThrow(/Unauthorized/i);
     expect(() => assertDeveloper('')).toThrow(/Unauthorized/i);
     expect(() => assertDeveloper(undefined)).toThrow(/Unauthorized/i);
+  });
+
+  it('guards all CRUD functions against unauthorized calls', async () => {
+    const unauthEmail = 'intruder@example.com';
+    await expect(fetchAllRegistrations('big_bang_2026', unauthEmail)).rejects.toThrow(/Unauthorized/i);
+    await expect(fetchAllStudents(unauthEmail)).rejects.toThrow(/Unauthorized/i);
+    await expect(fetchAllCoupons(unauthEmail)).rejects.toThrow(/Unauthorized/i);
+    await expect(fetchAllSupportTickets(unauthEmail)).rejects.toThrow(/Unauthorized/i);
+    await expect(fetchSystemDiagnosticStats(unauthEmail)).rejects.toThrow(/Unauthorized/i);
   });
 });
