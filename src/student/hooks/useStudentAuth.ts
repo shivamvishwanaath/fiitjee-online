@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut,
+  deleteUser,
   updateProfile as updateFirebaseProfile,
   RecaptchaVerifier,
   signInWithPhoneNumber,
@@ -14,6 +15,7 @@ import { ref, set, update, onValue, remove, get, query, orderByChild, equalTo } 
 import { auth, db } from '../../firebase';
 import { StudentProfile } from '../../types';
 import { sanitizeForFirebase, isDeveloperEmail } from '../../admin/utils/centreUtils';
+import { isAccountPurged } from '../../admin/utils/deleteRegistrationUtil';
 
 /**
  * Searches the Realtime Database registrations across centres for an email, phone, or roll number
@@ -121,7 +123,7 @@ export function useStudentAuth() {
     let isCancelled = false;
     let unsubscribeDb: (() => void) | null = null;
 
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       if (isCancelled) return;
       setFirebaseUser(currentUser);
 
@@ -147,6 +149,25 @@ export function useStudentAuth() {
       }
 
       try {
+        // Check if user is in purged_accounts
+        const isPurged = await isAccountPurged({
+          uid: currentUser.uid,
+          email: currentUser.email,
+          phone: currentUser.phoneNumber
+        });
+        if (isPurged) {
+          console.warn(`[PURGED ACCOUNT BLOCKED] Candidate ${currentUser.uid} was permanently removed by administrator.`);
+          try {
+            await deleteUser(currentUser);
+          } catch {}
+          await signOut(auth);
+          if (!isCancelled) {
+            setStudent(null);
+            setLoading(false);
+          }
+          return;
+        }
+
         const studentRef = ref(db, `students/${currentUser.uid}`);
         if (unsubscribeDb) {
           unsubscribeDb();
@@ -164,52 +185,47 @@ export function useStudentAuth() {
             const found = phoneOrEmail ? await findRegistrationInDatabase(phoneOrEmail) : null;
             if (isCancelled) return;
 
-            let initialProfile: StudentProfile;
-            if (found && found.reg) {
-              initialProfile = {
-                uid: currentUser.uid,
-                fullName: found.reg.studentName || currentUser.displayName || 'Candidate',
-                parentName: found.reg.parentName || '',
-                email: (found.reg.email || currentUser.email || '').trim().toLowerCase(),
-                phone: found.reg.phone || currentUser.phoneNumber || '',
-                currentClass: found.reg.currentClass || 'Class X',
-                schoolName: found.reg.schoolName || '',
-                preferredCentreId: found.centreId,
-                createdAt: found.reg.registeredAt || new Date().toISOString(),
-                lastLoginAt: new Date().toISOString(),
-                lastLoginMethod: currentUser.phoneNumber ? 'phone_otp' : 'email',
-                registeredExams: {
-                  big_bang_2026: {
-                    examId: found.reg.examId || 'big_bang_2026',
-                    examName: 'Big Bang Edge Test 2026',
-                    rollNo: found.reg.rollNo,
-                    centreId: found.centreId,
-                    selectedCenter: found.reg.selectedCenter,
-                    testDate: found.reg.testDate,
-                    testMode: found.reg.testMode,
-                    registeredAt: found.reg.registeredAt,
-                    paymentStatus: found.reg.paymentStatus,
-                    paymentAmount: found.reg.paymentAmount,
-                    paymentRef: found.reg.paymentRef,
-                    invoiceNo: found.reg.invoiceNo,
-                    sid: found.reg.sid
-                  }
-                }
-              };
-            } else {
-              initialProfile = {
-                uid: currentUser.uid,
-                fullName: currentUser.displayName || 'Candidate',
-                parentName: '',
-                email: currentUser.email || '',
-                phone: currentUser.phoneNumber || '',
-                currentClass: 'Class X',
-                schoolName: '',
-                createdAt: new Date().toISOString(),
-                lastLoginAt: new Date().toISOString(),
-                lastLoginMethod: currentUser.phoneNumber ? 'phone_otp' : 'email'
-              };
+            // If no registration was found either, do NOT create a ghost profile. Sign out.
+            if (!found || !found.reg) {
+              await signOut(auth);
+              if (!isCancelled) {
+                setStudent(null);
+                setLoading(false);
+              }
+              return;
             }
+
+            const initialProfile: StudentProfile = {
+              uid: currentUser.uid,
+              fullName: found.reg.studentName || currentUser.displayName || 'Candidate',
+              parentName: found.reg.parentName || '',
+              email: (found.reg.email || currentUser.email || '').trim().toLowerCase(),
+              phone: found.reg.phone || currentUser.phoneNumber || '',
+              currentClass: found.reg.currentClass || 'Class X',
+              schoolName: found.reg.schoolName || '',
+              preferredCentreId: found.centreId,
+              createdAt: found.reg.registeredAt || new Date().toISOString(),
+              lastLoginAt: new Date().toISOString(),
+              lastLoginMethod: currentUser.phoneNumber ? 'phone_otp' : 'email',
+              registeredExams: {
+                big_bang_2026: {
+                  examId: found.reg.examId || 'big_bang_2026',
+                  examName: 'Big Bang Edge Test 2026',
+                  rollNo: found.reg.rollNo,
+                  centreId: found.centreId,
+                  selectedCenter: found.reg.selectedCenter,
+                  testDate: found.reg.testDate,
+                  testMode: found.reg.testMode,
+                  registeredAt: found.reg.registeredAt,
+                  paymentStatus: found.reg.paymentStatus,
+                  paymentAmount: found.reg.paymentAmount,
+                  paymentRef: found.reg.paymentRef,
+                  invoiceNo: found.reg.invoiceNo,
+                  sid: found.reg.sid
+                }
+              }
+            };
+
             await set(studentRef, initialProfile);
             if (!isCancelled) {
               setStudent(initialProfile);
@@ -238,6 +254,16 @@ export function useStudentAuth() {
       const cleanInput = identifierOrEmail.trim();
       const isDigitsOnly = !cleanInput.includes('@') && cleanInput.replace(/\D/g, '').length >= 10;
       const cleanPhone = cleanInput.replace(/\D/g, '').slice(-10);
+
+      // Guard against purged accounts
+      const isPurged = await isAccountPurged({
+        email: cleanInput.includes('@') ? cleanInput : undefined,
+        phone: isDigitsOnly ? cleanPhone : undefined,
+        rollNo: (!cleanInput.includes('@') && !isDigitsOnly) ? cleanInput : undefined
+      });
+      if (isPurged) {
+        throw new Error('This candidate account has been permanently removed by the administrator. Access is denied.');
+      }
 
       let authEmail = cleanInput.toLowerCase();
       if (isDigitsOnly) {
@@ -376,6 +402,18 @@ export function useStudentAuth() {
     setLoading(true);
     try {
       const cleanDigits = identifier.replace(/\D/g, '');
+      const cleanInput = identifier.trim();
+
+      // Guard against purged accounts
+      const isPurged = await isAccountPurged({
+        email: cleanInput.includes('@') ? cleanInput : undefined,
+        phone: cleanDigits.length >= 10 ? cleanDigits.slice(-10) : undefined,
+        rollNo: cleanInput
+      });
+      if (isPurged) {
+        throw new Error('This candidate account has been permanently removed by the administrator. Access is denied.');
+      }
+
       const found = await findRegistrationInDatabase(identifier);
       if (!found || !found.reg) {
         if (cleanDigits.length >= 10) {

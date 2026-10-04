@@ -65,8 +65,8 @@ export const DEFAULT_CENTRE_EXAMS: Record<string, CentreExamConfig> = {
     venues: [
       {
         name: 'FIITJEE Bhubaneswar Centre',
-        address: 'Plot No. 123, Saheed Nagar, Bhubaneswar, Odisha 751007',
-        phone: '76820 41257'
+        address: 'MBS PUBLIC SCHOOL, PLOT NO 4 ,UNIT -9, BUDHA MANDIR COMPLEX ,BHUBANESWAR-751022',
+        phone: '7682041257'
       }
     ],
     classFees: {
@@ -103,7 +103,7 @@ export const DEFAULT_CENTRE_EXAMS: Record<string, CentreExamConfig> = {
       {
         name: 'FIITJEE Dwarka Centre',
         address: 'Sector 12, Dwarka, New Delhi 110075',
-        phone: '85272 08022'
+        phone: '8527208022'
       }
     ],
     classFees: {
@@ -140,7 +140,7 @@ export const DEFAULT_CENTRE_EXAMS: Record<string, CentreExamConfig> = {
       {
         name: 'FIITJEE Ranchi Centre',
         address: 'SOPOR, Main Road, Ranchi, Jharkhand 834001',
-        phone: '98351 55509'
+        phone: '9835155509'
       }
     ],
     classFees: {
@@ -177,7 +177,7 @@ export const DEFAULT_CENTRE_EXAMS: Record<string, CentreExamConfig> = {
       {
         name: 'FIITJEE Hyderabad (Madhapur)',
         address: 'Plot No 34, VIP Hills, Silicon Valley, Madhapur, Hyderabad 500081',
-        phone: '92475 51761'
+        phone: '9247551761'
       }
     ],
     classFees: {

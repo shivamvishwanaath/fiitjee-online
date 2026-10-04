@@ -69,19 +69,19 @@ export const AnnouncementCards: React.FC<AnnouncementCardsProps> = ({
           <div className="bg-white/5 border border-white/10 rounded-lg p-2.5 grid grid-cols-2 gap-x-2 gap-y-1.5 text-[9px] font-bold text-slate-300">
             <div>
               <span className="block text-white uppercase text-[8px]">Bhubaneswar</span>
-              <a href="tel:7682041257" className="hover:text-amber-300 transition-colors">76820 41257</a>
+              <a href="tel:7682041257" className="hover:text-amber-300 transition-colors">7682041257</a>
             </div>
             <div>
               <span className="block text-white uppercase text-[8px]">Ranchi</span>
-              <a href="tel:9835155509" className="hover:text-amber-300 transition-colors">98351 55509</a>
+              <a href="tel:9835155509" className="hover:text-amber-300 transition-colors">9835155509</a>
             </div>
             <div>
               <span className="block text-white uppercase text-[8px]">Dwarka</span>
-              <a href="tel:8527208022" className="hover:text-amber-300 transition-colors">85272 08022</a>
+              <a href="tel:8527208022" className="hover:text-amber-300 transition-colors">8527208022</a>
             </div>
             <div>
               <span className="block text-white uppercase text-[8px]">Hyderabad</span>
-              <a href="tel:9247551761" className="hover:text-amber-300 transition-colors">92475 51761</a>
+              <a href="tel:9247551761" className="hover:text-amber-300 transition-colors">9247551761</a>
             </div>
           </div>
         </div>

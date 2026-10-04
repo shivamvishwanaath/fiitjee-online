@@ -12,7 +12,12 @@ import {
   getRegistrationFeeForClass,
   resolveCanonicalCentreId
 } from './centreUtils';
-import { deleteRegistrationAndAuth, DeleteResult } from './deleteRegistrationUtil';
+import { 
+  deleteRegistrationAndAuth, 
+  deleteExamRegistrationOnly, 
+  deleteStudentAccountAndAuth as deleteStudentAuthUtil, 
+  DeleteResult 
+} from './deleteRegistrationUtil';
 import { logActivity } from './logActivity';
 import { ExamRegistration, StudentProfile, CouponProfile, SupportTicket } from '../../types';
 
@@ -649,7 +654,27 @@ export async function seedTestRegistration({
 }
 
 /**
- * Permanently purges a candidate registration and their portal accounts.
+ * BUTTON 1: Delete Exam Registration ONLY (resets exam registration, student account stays intact)
+ */
+export async function deleteExamRegistration({
+  rollNo,
+  centreId,
+  studentUid,
+  examId = 'big_bang_2026',
+  actorEmail
+}: DeregisterExamParams): Promise<DeleteResult> {
+  assertDeveloper(actorEmail);
+  return await deleteExamRegistrationOnly({
+    rollNo,
+    centreId,
+    studentUid,
+    examId,
+    actorEmail: actorEmail || DEVELOPER_EMAIL
+  });
+}
+
+/**
+ * BUTTON 2: Delete EVERYTHING (candidate registration, student profile, results, tickets, and Firebase Auth account)
  */
 export async function purgeCandidateRegistration({
   rollNo,
@@ -660,6 +685,23 @@ export async function purgeCandidateRegistration({
 }): Promise<DeleteResult> {
   assertDeveloper(actorEmail);
   return await deleteRegistrationAndAuth(rollNo, actorEmail || DEVELOPER_EMAIL);
+}
+
+/**
+ * BUTTON 3: Delete Student Profile and Firebase Auth Account by student UID
+ */
+export async function purgeStudentAccount({
+  uid,
+  actorEmail
+}: {
+  uid: string;
+  actorEmail?: string;
+}): Promise<DeleteResult> {
+  assertDeveloper(actorEmail);
+  return await deleteStudentAuthUtil({
+    uid,
+    actorEmail: actorEmail || DEVELOPER_EMAIL
+  });
 }
 
 // ============================================================================

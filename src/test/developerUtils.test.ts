@@ -40,5 +40,8 @@ describe('Developer Utilities & Authorization Guards', () => {
     await expect(fetchAllCoupons(unauthEmail)).rejects.toThrow(/Unauthorized/i);
     await expect(fetchAllSupportTickets(unauthEmail)).rejects.toThrow(/Unauthorized/i);
     await expect(fetchSystemDiagnosticStats(unauthEmail)).rejects.toThrow(/Unauthorized/i);
+    await expect(import('../admin/utils/developerUtils').then(m => m.deleteExamRegistration({ rollNo: '123456', actorEmail: unauthEmail }))).rejects.toThrow(/Unauthorized/i);
+    await expect(import('../admin/utils/developerUtils').then(m => m.purgeCandidateRegistration({ rollNo: '123456', actorEmail: unauthEmail }))).rejects.toThrow(/Unauthorized/i);
+    await expect(import('../admin/utils/developerUtils').then(m => m.purgeStudentAccount({ uid: 'uid123', actorEmail: unauthEmail }))).rejects.toThrow(/Unauthorized/i);
   });
 });

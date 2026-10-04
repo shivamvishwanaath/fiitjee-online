@@ -24,7 +24,7 @@ export const CENTRES_CONFIG: Record<string, CentreProfile> = {
     numericCode: '73',
     testCentreCode: '733',
     testCentres: [
-      { code: '733', name: 'BHUBANESWAR - FIITJEE INFOCITY CENTRE, Near Infocity Square, BHUBANESWAR, 1st Floor, E/3, Near Infocity Square, BHUBANESWAR' }
+      { code: '733', name: 'BHUBANESWAR - FIITJEE CENTRE, MBS PUBLIC SCHOOL, PLOT NO 4 ,UNIT -9, BUDHA MANDIR COMPLEX ,BHUBANESWAR-751022' }
     ],
     studyCentres: [
       { code: '73', name: '73 (Bhubaneswar)' }
@@ -32,11 +32,11 @@ export const CENTRES_CONFIG: Record<string, CentreProfile> = {
     email: 'fiitjee.bhubaneswar@fiitjee.online',
     stateCode: '[S.C-21]',
     stateName: 'Odisha',
-    address: 'Scouts Bhawan, Bharat Scouts & Guides Complex CIX/8, Unit 3, 751022 [S.C-21]',
-    controllingOffice: 'Bhubaneswar - FIITJEE Ltd., 2nd Floor, Scouts Bhawan, Bharat Scouts & Guides Complex, C - IX / 8, Unit - 3, Bhubaneswar-22 Ph: 0674-2392022/2396725/2394925/2394825 [73]',
-    testCentreDisplay: 'BHUBANESWAR - FIITJEE INFOCITY CENTRE, Near Infocity Square, BHUBANESWAR, , 1st Floor, E/3 , Near Infocity Square, BHUBANESWAR [733]',
-    helplinePhone: '76820 41257',
-    phoneNumbers: ['0674-2392022', '0674-2396725', '76820 41257']
+    address: 'MBS PUBLIC SCHOOL, PLOT NO 4 ,UNIT -9, BUDHA MANDIR COMPLEX ,BHUBANESWAR-751022',
+    controllingOffice: 'Bhubaneswar - FIITJEE Ltd., MBS PUBLIC SCHOOL, PLOT NO 4 ,UNIT -9, BUDHA MANDIR COMPLEX ,BHUBANESWAR-751022 Ph: 7682041257 [73]',
+    testCentreDisplay: 'BHUBANESWAR - FIITJEE CENTRE, MBS PUBLIC SCHOOL, PLOT NO 4 ,UNIT -9, BUDHA MANDIR COMPLEX ,BHUBANESWAR-751022 [733]',
+    helplinePhone: '7682041257',
+    phoneNumbers: ['7682041257']
   },
   dwarka: {
     id: 'dwarka',
@@ -54,10 +54,10 @@ export const CENTRES_CONFIG: Record<string, CentreProfile> = {
     stateCode: '[S.C-07]',
     stateName: 'Delhi',
     address: 'Plot No. 6, Sector 12, Dwarka, New Delhi, 110075 [S.C-07]',
-    controllingOffice: 'Dwarka - FIITJEE Ltd., Plot No. 6, Sector 12, Dwarka, New Delhi - 110075 Ph: 011-45634000/45634001/8527208022 [21]',
+    controllingOffice: 'Dwarka - FIITJEE Ltd., Plot No. 6, Sector 12, Dwarka, New Delhi - 110075 Ph: 8527208022 [21]',
     testCentreDisplay: 'DWARKA - FIITJEE DWARKA CENTRE, Institutional Plot No. 6, Sector 12, Dwarka, New Delhi [210]',
-    helplinePhone: '85272 08022',
-    phoneNumbers: ['011-45634000', '011-45634001', '85272 08022']
+    helplinePhone: '8527208022',
+    phoneNumbers: ['8527208022']
   },
   ranchi: {
     id: 'ranchi',
@@ -79,8 +79,8 @@ export const CENTRES_CONFIG: Record<string, CentreProfile> = {
     address: 'Ranchi- FIITJEE, 7th Floor, Hariom Tower, Circular Road, Ranchi - 834001 [S.C-20]',
     controllingOffice: 'Ranchi- FIITJEE, 7th Floor, Hariom Tower, Circular Road, Ranchi - 834001 Ph: 9835155509 [45]',
     testCentreDisplay: 'Ranchi- FIITJEE, 7th Floor, Hariom Tower, Circular Road, Ranchi - 834001 [820]',
-    helplinePhone: '98351 55509',
-    phoneNumbers: ['98351 55509']
+    helplinePhone: '9835155509',
+    phoneNumbers: ['9835155509']
   },
   hyderabad: {
     id: 'hyderabad',
@@ -98,10 +98,10 @@ export const CENTRES_CONFIG: Record<string, CentreProfile> = {
     stateCode: '[S.C-36]',
     stateName: 'Telangana',
     address: 'Plot No. 22 & 23, Vittal Rao Nagar, Madhapur, Hyderabad, 500081 [S.C-36]',
-    controllingOffice: 'Hyderabad - FIITJEE Ltd., Plot No. 22 & 23, Vittal Rao Nagar, Madhapur, Hyderabad-500081 Ph: 040-48550400/9247551761 [92]',
+    controllingOffice: 'Hyderabad - FIITJEE Ltd., Plot No. 22 & 23, Vittal Rao Nagar, Madhapur, Hyderabad-500081 Ph: 9247551761 [92]',
     testCentreDisplay: 'HYDERABAD - FIITJEE MADHAPUR CENTRE, Near Durgam Cheruvu Metro, Madhapur, Hyderabad [920]',
-    helplinePhone: '92475 51761',
-    phoneNumbers: ['040-48550400', '92475 51761']
+    helplinePhone: '9247551761',
+    phoneNumbers: ['9247551761']
   }
 };
 
@@ -205,7 +205,7 @@ export function resolveCanonicalCentreId(input?: any): string {
   if (clean.includes('dwarka') || clean.includes('delhi')) return 'dwarka';
   if (clean.includes('ranchi') || clean.includes('lalpur') || clean.includes('doranda')) return 'ranchi';
   if (clean.includes('hyderabad') || clean.includes('madhapur') || clean.includes('hyd')) return 'hyderabad';
-  if (clean.includes('bhubaneswar') || clean.includes('infocity') || clean.includes('odisha') || clean.includes('bbsr')) return 'bhubaneswar';
+  if (clean.includes('bhubaneswar') || clean.includes('mbs') || clean.includes('budha') || clean.includes('infocity') || clean.includes('odisha') || clean.includes('bbsr')) return 'bhubaneswar';
   return clean;
 }
 

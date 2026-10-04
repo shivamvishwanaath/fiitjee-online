@@ -125,28 +125,28 @@ export const BigBangHeroBanner: React.FC<BigBangHeroBannerProps> = ({
                   <span className="block text-slate-400 font-bold">Bhubaneswar</span>
                   <a href="tel:7682041257" className="font-mono text-white font-black hover:text-amber-300 transition-colors flex items-center gap-1">
                     <PhoneCall className="w-3.5 h-3.5 text-[#ED1C24]" />
-                    76820 41257
+                    7682041257
                   </a>
                 </div>
                 <div className="space-y-1">
                   <span className="block text-slate-400 font-bold">Ranchi</span>
                   <a href="tel:9835155509" className="font-mono text-white font-black hover:text-amber-300 transition-colors flex items-center gap-1">
                     <PhoneCall className="w-3.5 h-3.5 text-[#ED1C24]" />
-                    98351 55509
+                    9835155509
                   </a>
                 </div>
                 <div className="space-y-1">
                   <span className="block text-slate-400 font-bold">Dwarka</span>
                   <a href="tel:8527208022" className="font-mono text-white font-black hover:text-amber-300 transition-colors flex items-center gap-1">
                     <PhoneCall className="w-3.5 h-3.5 text-[#ED1C24]" />
-                    85272 08022
+                    8527208022
                   </a>
                 </div>
                 <div className="space-y-1">
                   <span className="block text-slate-400 font-bold">Hyderabad</span>
                   <a href="tel:9247551761" className="font-mono text-white font-black hover:text-amber-300 transition-colors flex items-center gap-1">
                     <PhoneCall className="w-3.5 h-3.5 text-[#ED1C24]" />
-                    92475 51761
+                    9247551761
                   </a>
                 </div>
               </div>

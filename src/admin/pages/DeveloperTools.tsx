@@ -49,11 +49,13 @@ import { useAdminAuth } from '../hooks/useAdminAuth';
 import { 
   assertDeveloper, 
   isDeveloperEmail, 
-  deregisterCandidateExam, 
+  deregisterCandidateExam,
+  deleteExamRegistration,
+  purgeCandidateRegistration,
+  purgeStudentAccount, 
   updateRegistrationFieldDirect, 
   migrateRegistrationCentre, 
   seedTestRegistration, 
-  purgeCandidateRegistration,
   fetchAllRegistrations,
   createRegistrationDirect,
   updateRegistrationFull,
@@ -527,14 +529,17 @@ export const DeveloperTools: React.FC = () => {
     setNewRegSchool('Delhi Public School');
   };
 
-  const handleDeregisterCandidate = async (candidate: EnrichedRegistration) => {
+  /**
+   * BUTTON 1: Delete Exam Registration ONLY (resets exam registration, student account stays intact)
+   */
+  const handleDeleteExamRegistrationOnly = async (candidate: EnrichedRegistration) => {
     const confirm = window.confirm(
-      `[DE-REGISTER EXAM]\n\nDe-register ${candidate.studentName} (${candidate.rollNo}) from Big Bang Edge Test 2026?\n\nThis removes the registration node and frees the student account link so you or the student can re-register from scratch.`
+      `[BUTTON 1: DELETE EXAM REGISTRATION ONLY]\n\nCandidate: ${candidate.studentName} (${candidate.rollNo})\nCentre: ${candidate.registeredByCentre.toUpperCase()}\n\nThis action will:\n1. Delete this exam registration from registrations/big_bang_2026/${candidate.registeredByCentre}\n2. Remove associated exam results & hall ticket\n3. Unlink this exam from the student's profile\n\nIMPORTANT: The candidate's student portal account and authentication credentials will REMAIN ACTIVE so they can still log in or register for future exams.\n\nProceed with deleting exam registration?`
     );
     if (!confirm) return;
 
     try {
-      const res = await deregisterCandidateExam({
+      const res = await deleteExamRegistration({
         rollNo: candidate.rollNo,
         centreId: candidate.registeredByCentre,
         studentUid: candidate.studentUid,
@@ -544,9 +549,34 @@ export const DeveloperTools: React.FC = () => {
       setFeedback({ type: 'success', message: res.message });
       loadAllRegistrations();
     } catch (err: any) {
-      setFeedback({ type: 'error', message: `De-registration failed: ${err.message}` });
+      setFeedback({ type: 'error', message: `Exam registration deletion failed: ${err.message}` });
     }
   };
+
+  /**
+   * BUTTON 2: Delete EVERYTHING (candidate registration, student profile, results, tickets, and Firebase Auth account)
+   */
+  const handleDeleteCandidateEverything = async (candidate: EnrichedRegistration) => {
+    const confirm = window.confirm(
+      `[BUTTON 2: DELETE EVERYTHING - PERMANENT PURGE]\n\nCandidate: ${candidate.studentName} (${candidate.rollNo})\nCentre: ${candidate.registeredByCentre.toUpperCase()}\nEmail: ${candidate.email || 'N/A'}\nPhone: ${candidate.phone || 'N/A'}\n\nCRITICAL WARNING: This action will permanently DELETE:\n1. All exam registrations and results\n2. The student profile in students/\n3. All support tickets\n4. The Firebase Authentication login account\n5. Add credentials to permanent purge blacklist\n\nThe candidate will be COMPLETELY REMOVED and will NOT be able to log in anymore.\n\nAre you sure you want to permanently delete EVERYTHING?`
+    );
+    if (!confirm) return;
+
+    try {
+      const res = await purgeCandidateRegistration({
+        rollNo: candidate.rollNo,
+        actorEmail
+      });
+      setFeedback({ type: 'success', message: `Purged: ${res.message}` });
+      loadAllRegistrations();
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: `Permanent purge failed: ${err.message}` });
+    }
+  };
+
+  // Backwards-compatible aliases
+  const handleDeregisterCandidate = handleDeleteExamRegistrationOnly;
+  const handlePurgeCandidate = handleDeleteCandidateEverything;
 
   const handleDuplicateCandidate = async (candidate: EnrichedRegistration) => {
     try {
@@ -559,24 +589,6 @@ export const DeveloperTools: React.FC = () => {
       loadAllRegistrations();
     } catch (err: any) {
       setFeedback({ type: 'error', message: `Duplicate failed: ${err.message}` });
-    }
-  };
-
-  const handlePurgeCandidate = async (candidate: EnrichedRegistration) => {
-    const confirm = window.confirm(
-      `[PERMANENT PURGE]\n\nAre you sure you want to permanently delete candidate ${candidate.studentName} (${candidate.rollNo}), their registration, student profile, results, and Firebase Auth credentials?\n\nThis cannot be undone.`
-    );
-    if (!confirm) return;
-
-    try {
-      const res = await purgeCandidateRegistration({
-        rollNo: candidate.rollNo,
-        actorEmail
-      });
-      setFeedback({ type: 'success', message: `Purged: ${res.message}` });
-      loadAllRegistrations();
-    } catch (err: any) {
-      setFeedback({ type: 'error', message: `Purge failed: ${err.message}` });
     }
   };
 
@@ -702,16 +714,30 @@ export const DeveloperTools: React.FC = () => {
     }
   };
 
-  const handleDeleteStudentProfile = async (uid: string, name: string) => {
-    if (!window.confirm(`Delete student profile ${name} (${uid})?`)) return;
+  const handleDeleteStudentProfileOnly = async (uid: string, name: string) => {
+    if (!window.confirm(`[DELETE PROFILE ONLY]\n\nDelete student profile ${name} (${uid}) from RTDB?\n\nNOTE: The Firebase Authentication account and any separate exam registrations remain intact.`)) return;
     try {
       await deleteStudentProfileDirect({ uid, actorEmail });
-      setFeedback({ type: 'success', message: `Student ${name} deleted.` });
+      setFeedback({ type: 'success', message: `Student profile ${name} deleted from RTDB.` });
       loadAllStudentsList();
     } catch (err: any) {
       setFeedback({ type: 'error', message: `Delete failed: ${err.message}` });
     }
   };
+
+  const handleDeleteStudentEverything = async (uid: string, name: string) => {
+    if (!window.confirm(`[DELETE EVERYTHING - STUDENT & AUTH]\n\nAre you sure you want to permanently delete student ${name} (${uid})?\n\nThis will permanently delete:\n1. Student profile in students/\n2. All linked exam registrations and results\n3. Firebase Authentication credentials & login account\n4. Add to purge blacklist\n\nThe student will NOT be able to log in anymore.\n\nProceed?`)) return;
+    try {
+      const res = await purgeStudentAccount({ uid, actorEmail });
+      setFeedback({ type: 'success', message: res.message });
+      loadAllStudentsList();
+      loadAllRegistrations();
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: `Permanent delete failed: ${err.message}` });
+    }
+  };
+
+  const handleDeleteStudentProfile = handleDeleteStudentEverything;
 
   const handleUnlinkStudentExam = async (uid: string, examId: string) => {
     if (!window.confirm(`Unlink exam "${examId}" from student?`)) return;
@@ -1522,13 +1548,22 @@ export const DeveloperTools: React.FC = () => {
                                 <Edit3 className="w-3.5 h-3.5" />
                               </button>
 
-                              {/* De-register (Reset Flow) */}
+                              {/* Button 1: Delete Exam Registration Only */}
                               <button
-                                onClick={() => handleDeregisterCandidate(r)}
-                                className="p-1.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg cursor-pointer transition-all"
-                                title="De-register Exam (Reset flow for testing)"
+                                onClick={() => handleDeleteExamRegistrationOnly(r)}
+                                className="p-1.5 text-amber-700 hover:text-amber-900 hover:bg-amber-100 rounded-lg cursor-pointer transition-all border border-amber-200 bg-amber-50/50"
+                                title="BUTTON 1: Delete Exam Registration ONLY (Student portal login remains active)"
                               >
-                                <RefreshCw className="w-3.5 h-3.5" />
+                                <FileText className="w-3.5 h-3.5" />
+                              </button>
+
+                              {/* Button 2: Delete EVERYTHING (Registration + Profile + Auth) */}
+                              <button
+                                onClick={() => handleDeleteCandidateEverything(r)}
+                                className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg cursor-pointer transition-all border border-red-200 bg-red-50/50"
+                                title="BUTTON 2: Delete EVERYTHING (Candidate Registration + Student Profile + Firebase Auth Account)"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
 
                               {/* Clone / Duplicate */}
@@ -1538,15 +1573,6 @@ export const DeveloperTools: React.FC = () => {
                                 title="Clone candidate to new roll number"
                               >
                                 <Copy className="w-3.5 h-3.5" />
-                              </button>
-
-                              {/* Purge */}
-                              <button
-                                onClick={() => handlePurgeCandidate(r)}
-                                className="p-1.5 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-all"
-                                title="Purge Record, Student Node, & Auth Account"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
 
                               {/* Open Dossier */}
@@ -1689,7 +1715,7 @@ export const DeveloperTools: React.FC = () => {
                     </div>
 
                     {/* Profile Actions */}
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                    <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
                       <button
                         onClick={() => {
                           setEditingStudent(s);
@@ -1701,13 +1727,25 @@ export const DeveloperTools: React.FC = () => {
                         <span>Edit Profile</span>
                       </button>
 
-                      <button
-                        onClick={() => handleDeleteStudentProfile(s.uid, s.fullName)}
-                        className="text-xs font-bold text-red-600 hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Delete</span>
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleDeleteStudentProfileOnly(s.uid, s.fullName)}
+                          className="px-2 py-1 text-[11px] font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg flex items-center gap-1 cursor-pointer"
+                          title="Delete profile node only (keeps Auth active)"
+                        >
+                          <Trash2 className="w-3 h-3 text-amber-600" />
+                          <span>Delete Profile</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleDeleteStudentEverything(s.uid, s.fullName)}
+                          className="px-2 py-1 text-[11px] font-bold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg flex items-center gap-1 cursor-pointer"
+                          title="Delete EVERYTHING: Profile, Linked Exams, and Firebase Auth Account"
+                        >
+                          <Trash2 className="w-3 h-3 text-red-600" />
+                          <span>Delete EVERYTHING (Auth & Profile)</span>
+                        </button>
+                      </div>
                     </div>
 
                   </div>
@@ -2551,14 +2589,48 @@ export const DeveloperTools: React.FC = () => {
 
             </div>
 
-            <div className="flex items-center justify-between border-t border-slate-100 pt-4">
-              <button
-                type="button"
-                onClick={() => setShowEditModal(false)}
-                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold cursor-pointer"
-              >
-                Cancel
-              </button>
+            <div className="flex flex-wrap items-center justify-between border-t border-slate-100 pt-4 gap-2.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold cursor-pointer"
+                >
+                  Cancel
+                </button>
+
+                {editingCandidate && (
+                  <>
+                    {/* Button 1: Delete Exam Registration Only */}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setShowEditModal(false);
+                        await handleDeleteExamRegistrationOnly(editingCandidate);
+                      }}
+                      className="px-3.5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                      title="Deletes this exam registration from RTDB. Student portal login account remains active."
+                    >
+                      <FileText className="w-3.5 h-3.5 text-amber-700" />
+                      <span>Delete Exam Registration</span>
+                    </button>
+
+                    {/* Button 2: Delete EVERYTHING (Registration + Profile + Auth) */}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setShowEditModal(false);
+                        await handleDeleteCandidateEverything(editingCandidate);
+                      }}
+                      className="px-3.5 py-2.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-300 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                      title="Permanently deletes candidate registration, student profile, and Firebase Auth account."
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-red-600" />
+                      <span>Delete EVERYTHING (Auth & Profile)</span>
+                    </button>
+                  </>
+                )}
+              </div>
 
               <button
                 type="button"

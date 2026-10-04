@@ -547,7 +547,7 @@ export const ExamEdit: React.FC<ExamEditProps> = ({ isNew = false }) => {
                       required
                       value={venue.phone}
                       onChange={(e) => handleVenueChange(idx, 'phone', e.target.value)}
-                      placeholder="e.g. 76820 41257"
+                      placeholder="e.g. 7682041257"
                       className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono outline-none focus:ring-2 focus:ring-[#002147]"
                     />
                   </div>
@@ -562,7 +562,7 @@ export const ExamEdit: React.FC<ExamEditProps> = ({ isNew = false }) => {
                     required
                     value={venue.address}
                     onChange={(e) => handleVenueChange(idx, 'address', e.target.value)}
-                    placeholder="e.g. Plot No. 123, Saheed Nagar, Bhubaneswar, Odisha 751007"
+                    placeholder="e.g. MBS PUBLIC SCHOOL, PLOT NO 4 ,UNIT -9, BUDHA MANDIR COMPLEX ,BHUBANESWAR-751022"
                     className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium outline-none focus:ring-2 focus:ring-[#002147]"
                   />
                 </div>

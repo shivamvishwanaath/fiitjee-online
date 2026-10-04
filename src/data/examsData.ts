@@ -98,10 +98,10 @@ export const BIG_BANG_EXAM: AdmissionExam = {
   ],
   modes: ['Offline', 'Proctored Online'],
   offlineCenters: [
-    { city: 'Bhubaneswar', phone: '76820 41257' },
-    { city: 'Ranchi',       phone: '98351 55509' },
-    { city: 'Dwarka',       phone: '85272 08022' },
-    { city: 'Hyderabad (Madhapur)', phone: '92475 51761' }
+    { city: 'Bhubaneswar', phone: '7682041257', address: 'MBS PUBLIC SCHOOL, PLOT NO 4 ,UNIT -9, BUDHA MANDIR COMPLEX ,BHUBANESWAR-751022' },
+    { city: 'Ranchi',       phone: '9835155509' },
+    { city: 'Dwarka',       phone: '8527208022' },
+    { city: 'Hyderabad (Madhapur)', phone: '9247551761' }
   ],
   year: '2026',
   registrationOpen: true,
